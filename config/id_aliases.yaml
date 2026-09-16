@@ -1,0 +1,4 @@
+# Source IDs that still don't match Showdown after to_id(). Add entries only when a
+# resolution check reports a miss. Keys and values are both to_id() form.
+limitless: {}
+cbd: {}

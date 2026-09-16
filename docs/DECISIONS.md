@@ -15,6 +15,10 @@
 | 2026-09-16 | CBD fetched via JSON API, one dated folder, Doubles only | No date param: request days=N and verify the date; archived seasons are JSON-only |
 | 2026-09-16 | CBD usage = rank only (usage_pct, sample_size NULL) | CBD publishes usage rank, not percentages |
 | 2026-09-16 | CBD raw data stays local, attribution if anything is shown publicly | CBD API rules: caching OK, no mirror |
+| 2026-09-16 | Limitless M-C = in M-C window AND (format M-C, or CUSTOM with 'M-C'/'Reg M-C' in the name) | Limitless has no M-C format yet; organizers use CUSTOM. Ambiguous names are skipped |
+| 2026-09-16 | Limitless species key = teamlist `id` slug via to_id + config/id_aliases.yaml | `name` is a display name (e.g. 'Indeedee ♀') |
+| 2026-09-16 | Limitless client honours the RateLimit header (50 requests / 5 min) | No API key for personal use |
+| 2026-09-16 | Limitless teamlists carry no stat points; spreads come from CBD only | Teamlist fields: id, name, item, ability, attacks, nature, tera (always null) |
 | TBD (Phase 2) | Usage weight for CBD in threat/coverage scores (rank-based vs Limitless %) | CBD has no usage % |
 | TBD (Phase 0) | Mega and forme ID rule | Sources disagree on representation |
 | TBD (Phase 0) | Champions stat formula | Must be verified against in-game values |

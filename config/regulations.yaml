@@ -13,8 +13,11 @@ regulations:
     format_ids:
       showdown: gen9championsvgc2026regmc   # confirmed from Dex.formats (c23d2e9)
       smogon: gen9championsvgc2026regmc     # filenames are all lowercase
-      limitless: null                       # TODO(Phase 0, step 3)
+      limitless: null                       # not in Limitless /games as of 2026-09-16
       cbd: Doubles                          # CBD has no VGC label; ranked Doubles is the only doubles data
+    limitless:
+      formats: [M-C]                        # picked up automatically once Limitless adds it
+      custom_name_patterns: ['\bm-c\b', '\breg(ulation)?\s*m-?c\b']   # for format CUSTOM, case-insensitive
 
   M-B:
     start_utc: null                   # TODO: sources disagree; only needed for non-CBD history
@@ -23,5 +26,8 @@ regulations:
     format_ids:
       showdown: gen9championsvgc2026regmb
       smogon: gen9championsvgc2026regmb
-      limitless: null
+      limitless: M-B
       cbd: Doubles
+    limitless:
+      formats: [M-B]
+      custom_name_patterns: ['\bm-b\b', '\breg(ulation)?\s*m-?b\b']
