@@ -14,3 +14,4 @@ Ideas go here, not into code. Review only after v1 is done.
 - ML of any kind
 - Hosting on Streamlit Community Cloud
 - Sprites and visual polish
+- In-app PokePaste URL preview (parse in memory, no warehouse write)
