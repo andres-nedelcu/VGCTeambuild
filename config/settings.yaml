@@ -8,6 +8,7 @@ defaults:
   top_n: 20
   common_move_threshold: 0.20   # moves at or above this usage count as "common"
   scarf_threshold: 0.20         # Choice Scarf usage that triggers the x1.5 marker
+  mega_variant_min_share: 0.10  # drop Mega/base forme variants below this share
 
 limitless:
   base_url: https://play.limitlesstcg.com/api
