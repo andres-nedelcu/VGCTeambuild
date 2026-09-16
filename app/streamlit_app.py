@@ -8,7 +8,7 @@ import streamlit as st
 from components.defense_grid import render_defense_grid
 from vgc import regulations
 from vgc.db import warehouse_path
-from vgc.defense import defense_matrix, flagged_types, summarize
+from vgc.defense import defense_matrix, flagged_types, mega_comparison, summarize
 from vgc.megas import load_dex, mega_options, resolve_team
 from vgc.team import list_pastes, load_team
 
@@ -83,6 +83,13 @@ else:
     st.success("No flagged types")
 
 render_defense_grid(matrix, summary, flags)
+
+comparison = mega_comparison(team, slots)
+if len(comparison) > 1:
+    st.subheader("Mega options compared")
+    st.caption("Totals across the selected Pokémon. Δ is versus No Mega: "
+               "negative Δ Weak and positive Δ Resist/Immune are better.")
+    st.dataframe(comparison, hide_index=True, width="stretch")
 
 with st.expander("Formes and abilities used"):
     st.dataframe(pd.DataFrame([

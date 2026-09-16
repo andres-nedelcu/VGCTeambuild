@@ -63,3 +63,18 @@ def test_subset_selection(team):
 def grid_from(formes):
     m = defense_matrix(formes)
     return m, summarize(m)
+
+
+def test_mega_comparison(team):
+    from vgc.defense import mega_comparison
+
+    df = mega_comparison(team, [1, 2, 3, 4, 5, 6]).set_index("Option")
+    assert list(df.index) == ["No Mega", "1. Golisopod-Mega", "5. Gardevoir-Mega"]
+    assert df.loc["No Mega", "Flagged"] == "Electric"
+    assert df.loc["1. Golisopod-Mega", "Flagged"] == "—"
+    assert df.loc["1. Golisopod-Mega", "Δ Weak"] == -2
+    assert df.loc["1. Golisopod-Mega", "Δ Resist/Immune"] == 4
+    assert df.loc["5. Gardevoir-Mega", ["Δ Weak", "Δ Resist/Immune"]].tolist() == [0, 0]
+
+    # deselected holder drops out
+    assert list(mega_comparison(team, [2, 3, 4, 5, 6])["Option"]) == ["No Mega", "5. Gardevoir-Mega"]
