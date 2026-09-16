@@ -1,0 +1,18 @@
+# Abilities that change type effectiveness when defending.
+# Scope: immunities (0) and resistances (0.5) only. Damage modifiers go to PARKING_LOT.md.
+# Every ability here must exist on a Champions-legal species or Mega (checked by the loader).
+# Loaded into dim_ability_type_modifier by scripts/load_ability_mods.py (full replace).
+
+Levitate:        {Ground: 0}
+Earth Eater:     {Ground: 0}
+Flash Fire:      {Fire: 0}
+Water Absorb:    {Water: 0}
+Dry Skin:        {Water: 0}      # Fire x1.25 parked
+Volt Absorb:     {Electric: 0}
+Lightning Rod:   {Electric: 0}
+Motor Drive:     {Electric: 0}
+Sap Sipper:      {Grass: 0}
+Thick Fat:       {Fire: 0.5, Ice: 0.5}
+Heatproof:       {Fire: 0.5}
+Water Bubble:    {Fire: 0.5}
+Purifying Salt:  {Ghost: 0.5}
