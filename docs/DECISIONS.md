@@ -18,7 +18,7 @@
 | 2026-09-16 | Limitless M-C = in M-C window AND (format M-C, or CUSTOM with 'M-C'/'Reg M-C' in the name) | Limitless has no M-C format yet; organizers use CUSTOM. Ambiguous names are skipped |
 | 2026-09-16 | Limitless species key = teamlist `id` slug via to_id + config/id_aliases.yaml | `name` is a display name (e.g. 'Indeedee ♀') |
 | 2026-09-16 | Limitless client honours the RateLimit header (50 requests / 5 min) | No API key for personal use |
-| 2026-09-16 | Limitless teamlists carry no stat points; spreads come from CBD only | Teamlist fields: id, name, item, ability, attacks, nature, tera (always null) |
+| 2026-09-16 | Limitless teamlists carry no stat points; spreads come from CBD only | Teamlist fields: id, name, item, ability, attacks, nature, tera (ignored: no Tera in Champions, though 17/888 entries in the first event carry a value) |
 | TBD (Phase 2) | Usage weight for CBD in threat/coverage scores (rank-based vs Limitless %) | CBD has no usage % |
 | TBD (Phase 0) | Mega and forme ID rule | Sources disagree on representation |
 | TBD (Phase 0) | Champions stat formula | Must be verified against in-game values |
