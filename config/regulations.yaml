@@ -1,22 +1,27 @@
-# Regulation calendar. Used at ingest time to tag every live row with a regulation,
-# because championsbattledata snapshots don't carry one.
-# TODO(Phase 0): confirm exact start/end dates against the official announcement.
+# Regulation calendar. Used at ingest time to tag every live row with a regulation.
+# CBD rows are tagged by ranked season (cbd_seasons), NOT by date: CBD's last M5
+# snapshot is dated 10_09_2026, after M-C started. Dates are kept for other sources.
+# Sources: pokemon.com M-C announcement; Game8 / Serebii season pages (checked 2026-09-16).
 
 current: M-C
 
 regulations:
   M-C:
-    start_date: 2026-09-01   # TODO verify exact date
-    end_date: 2026-12-31     # TODO verify exact date
+    start_utc: 2026-09-09T02:00:00Z   # Sep 8, 7:00 p.m. PDT
+    end_utc: 2026-12-02T01:59:00Z     # Dec 1, 5:59 p.m. PST
+    cbd_seasons: [M6, M7, M8]         # M7/M8 expected, not yet published
     format_ids:
-      smogon: gen9championsvgc2026regmc   # filenames are all lowercase
-      limitless: null                     # TODO(Phase 0): find the format string the API uses
-      cbd: null                           # TODO(Phase 0): record how CBD labels VGC doubles
+      showdown: gen9championsvgc2026regmc   # confirmed from Dex.formats (c23d2e9)
+      smogon: gen9championsvgc2026regmc     # filenames are all lowercase
+      limitless: null                       # TODO(Phase 0, step 3)
+      cbd: Doubles                          # CBD has no VGC label; ranked Doubles is the only doubles data
 
   M-B:
-    start_date: null         # TODO fill in for historical ingest
-    end_date: null
+    start_utc: null                   # TODO: sources disagree; only needed for non-CBD history
+    end_utc: null
+    cbd_seasons: [M3, M4, M5]
     format_ids:
-      smogon: null
+      showdown: gen9championsvgc2026regmb
+      smogon: gen9championsvgc2026regmb
       limitless: null
-      cbd: null
+      cbd: Doubles

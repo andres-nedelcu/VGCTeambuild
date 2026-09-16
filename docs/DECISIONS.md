@@ -11,6 +11,11 @@
 | 2026-09-15 | Smogon deferred to v1.1 | M-C chaos files not expected until early October 2026 |
 | 2026-09-16 | App uses short-lived read-only connections, not a cached one | An open reader in another process blocks `refresh.py` from writing |
 | 2026-09-16 | `fact_tournament_set.placing` renamed to `placement` | `PLACING` is a reserved keyword in DuckDB |
+| 2026-09-16 | CBD rows tagged by ranked season (M-C = M6–M8), not date | CBD's last M5 snapshot (10_09) is dated after M-C started |
+| 2026-09-16 | CBD fetched via JSON API, one dated folder, Doubles only | No date param: request days=N and verify the date; archived seasons are JSON-only |
+| 2026-09-16 | CBD usage = rank only (usage_pct, sample_size NULL) | CBD publishes usage rank, not percentages |
+| 2026-09-16 | CBD raw data stays local, attribution if anything is shown publicly | CBD API rules: caching OK, no mirror |
+| TBD (Phase 2) | Usage weight for CBD in threat/coverage scores (rank-based vs Limitless %) | CBD has no usage % |
 | TBD (Phase 0) | Mega and forme ID rule | Sources disagree on representation |
 | TBD (Phase 0) | Champions stat formula | Must be verified against in-game values |
 | TBD (Phase 3) | Smogon rating cutoff | Pick one and never mix |

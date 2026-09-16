@@ -17,3 +17,6 @@ showdown:
   mod: champions
   commit: c23d2e942c9c0daadb13a7162a385bf78e3c9353
   raw_dir: data/raw/showdown/champions/c23d2e9
+
+cbd:
+  request_delay_seconds: 1.0
