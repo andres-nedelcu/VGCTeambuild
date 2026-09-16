@@ -26,6 +26,7 @@
 | 2026-09-16 | Showdown format IDs: gen9championsvgc2026regmc / regmb | Confirmed from Dex.formats on the pinned commit |
 | 2026-09-16 | Defensive grid Mega toggle: single choice of "No Mega" or one stone holder; everyone else stays base. A toggled Mega uses the Mega forme's types and ability; base forms use the paste's ability. Stretch: per-option comparison table (weak / resist-immune counts, flagged types) | Only one Mega per battle; Mega typing/ability can flip matchups (Golisopod-Mega Bug/Steel, Garchomp-Mega-Z Levitate) |
 | 2026-09-16 | App lists pastes already in `my_team`; new pastes go through `load_paste.py` (app shows the command). In-memory URL preview parked | App stays read-only; every displayed team has passed the same ID/alias resolution checks |
+| 2026-09-16 | Phase 1 exit criteria met | Real paste grid renders in ~0.1s; Golisopod-Mega / Gardevoir-Mega toggles correct; Garchomp-Mega-Z shows Ground 0 (off: 1x); 46 tests passing |
 | TBD (Phase 2) | Meta marts: split species into forme variants by stone share, or use the dominant forme | Needed for types, speed and threat of Mega users |
 | TBD (Phase 2) | Usage weight for CBD in threat/coverage scores (rank-based vs Limitless %) | CBD has no usage % |
 | TBD (Phase 2) | Champions stat formula | Showdown server mod and client agree: HP = base+SP+75, other = base+SP+20 then nature x1.1/x0.9; SP max 32/stat, 66 total. Confirm with 3 in-game values |
