@@ -19,9 +19,12 @@
 | 2026-09-16 | Limitless species key = teamlist `id` slug via to_id + config/id_aliases.yaml | `name` is a display name (e.g. 'Indeedee ♀') |
 | 2026-09-16 | Limitless client honours the RateLimit header (50 requests / 5 min) | No API key for personal use |
 | 2026-09-16 | Limitless teamlists carry no stat points; spreads come from CBD only | Teamlist fields: id, name, item, ability, attacks, nature, tera (ignored: no Tera in Champions, though 17/888 entries in the first event carry a value) |
+| 2026-09-16 | Phase 0 exit criteria met | CBD top 50: 50/50; Limitless 148 teams: 0 unresolved; paste b58a4fb249fb3cbf: PASS |
+| TBD (Phase 1) | Base vs Mega forme per slot in the defensive grid | Teams can carry several stones but only one Mega per battle |
+| TBD (Phase 2) | Meta marts: split species into forme variants by stone share, or use the dominant forme | Needed for types, speed and threat of Mega users |
 | TBD (Phase 2) | Usage weight for CBD in threat/coverage scores (rank-based vs Limitless %) | CBD has no usage % |
-| TBD (Phase 0) | Mega and forme ID rule | Sources disagree on representation |
-| TBD (Phase 0) | Champions stat formula | Must be verified against in-game values |
+| 2026-09-16 | Megas: pokemon_id = species as listed; Mega forme derived from held stone via dim_item.mega_forme_id (multi-forme stones resolved from holder forme); mega share = stone share. Reverses outline 7.1 proposal | CBD, Limitless and PokePaste all list base species + stone (e.g. Raichu 79.7% Y / 17.4% X in CBD) |
+| TBD (Phase 2) | Champions stat formula | Showdown server mod and client agree: HP = base+SP+75, other = base+SP+20 then nature x1.1/x0.9; SP max 32/stat, 66 total. Confirm with 3 in-game values |
 | TBD (Phase 3) | Smogon rating cutoff | Pick one and never mix |
 | 2026-09-16 | Static data exported from Showdown `champions` mod via Dex, pinned to c23d2e9 | Mod overrides move data; npm release (Jul 28) predates Mega Garchomp Z |
 | 2026-09-16 | Node used only for the static export step | Lets Showdown resolve mod inheritance instead of parsing TypeScript |
