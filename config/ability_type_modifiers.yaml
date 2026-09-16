@@ -4,6 +4,7 @@
 # Loaded into dim_ability_type_modifier by scripts/load_ability_mods.py (full replace).
 
 Levitate:        {Ground: 0}
+Eelevate:        {Ground: 0}      # Champions Mega Eelektross; immunity via grounded check
 Earth Eater:     {Ground: 0}
 Flash Fire:      {Fire: 0}
 Water Absorb:    {Water: 0}

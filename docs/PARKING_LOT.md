@@ -16,3 +16,4 @@ Ideas go here, not into code. Review only after v1 is done.
 - Sprites and visual polish
 - In-app PokePaste URL preview (parse in memory, no warehouse write)
 - Ability damage modifiers in the defensive grid: Dry Skin (Fire x1.25), Fluffy (Fire x2 / contact x0.5), Filter / Solid Rock, Bulletproof, Soundproof, Tera Shell (full-HP resist), Mimicry (terrain typing)
+- Aura Guard (Champions, Mega Lucario Z): contact damage x0.5
