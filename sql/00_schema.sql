@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS dim_pokemon (
     loaded_at        TIMESTAMP
 );
 
+ALTER TABLE dim_pokemon ADD COLUMN IF NOT EXISTS is_nonstandard VARCHAR;  -- 'Past' etc.; NULL = usable in Champions
+
 CREATE TABLE IF NOT EXISTS dim_type_chart (
     atk_type    VARCHAR,
     def_type    VARCHAR,
