@@ -14,3 +14,6 @@
 | TBD (Phase 0) | Mega and forme ID rule | Sources disagree on representation |
 | TBD (Phase 0) | Champions stat formula | Must be verified against in-game values |
 | TBD (Phase 3) | Smogon rating cutoff | Pick one and never mix |
+| 2026-09-16 | Static data exported from Showdown `champions` mod via Dex, pinned to c23d2e9 | Mod overrides move data; npm release (Jul 28) predates Mega Garchomp Z |
+| 2026-09-16 | Node used only for the static export step | Lets Showdown resolve mod inheritance instead of parsing TypeScript |
+| 2026-09-16 | Showdown format IDs: gen9championsvgc2026regmc / regmb | Confirmed from Dex.formats on the pinned commit |

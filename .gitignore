@@ -13,3 +13,4 @@ data/raw/*
 
 # Streamlit secrets, if ever added
 .streamlit/secrets.toml
+vendor/
