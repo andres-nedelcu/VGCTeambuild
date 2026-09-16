@@ -1,0 +1,15 @@
+# Environment
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+
+# Data (raw files are reproducible from sources; warehouse is rebuilt from raw)
+data/raw/*
+!data/raw/.gitkeep
+*.duckdb
+*.duckdb.wal
+
+# Streamlit secrets, if ever added
+.streamlit/secrets.toml

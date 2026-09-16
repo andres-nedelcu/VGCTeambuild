@@ -1,0 +1,14 @@
+warehouse_path: data/warehouse.duckdb
+raw_data_dir: data/raw
+
+smogon:
+  rating_cutoff: null    # TODO(Phase 3): pick one (0 / 1500 / 1630 / 1760) and never mix
+
+defaults:
+  top_n: 20
+  common_move_threshold: 0.20   # moves at or above this usage count as "common"
+  scarf_threshold: 0.20         # Choice Scarf usage that triggers the x1.5 marker
+
+limitless:
+  base_url: https://play.limitlesstcg.com/api
+  request_delay_seconds: 1.0    # be polite until rate limits are confirmed

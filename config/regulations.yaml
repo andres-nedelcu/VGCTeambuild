@@ -1,0 +1,22 @@
+# Regulation calendar. Used at ingest time to tag every live row with a regulation,
+# because championsbattledata snapshots don't carry one.
+# TODO(Phase 0): confirm exact start/end dates against the official announcement.
+
+current: M-C
+
+regulations:
+  M-C:
+    start_date: 2026-09-01   # TODO verify exact date
+    end_date: 2026-12-31     # TODO verify exact date
+    format_ids:
+      smogon: gen9championsvgc2026regmc   # filenames are all lowercase
+      limitless: null                     # TODO(Phase 0): find the format string the API uses
+      cbd: null                           # TODO(Phase 0): record how CBD labels VGC doubles
+
+  M-B:
+    start_date: null         # TODO fill in for historical ingest
+    end_date: null
+    format_ids:
+      smogon: null
+      limitless: null
+      cbd: null
