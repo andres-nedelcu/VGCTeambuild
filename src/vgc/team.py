@@ -16,6 +16,7 @@ class Member:
     nickname: str | None = None
     nature: str | None = None
     investment: str | None = None
+    moves: list[str] | None = None
 
 
 def list_pastes() -> list[tuple[str, str | None, list[str]]]:
@@ -30,7 +31,7 @@ def list_pastes() -> list[tuple[str, str | None, list[str]]]:
 def load_team(paste_id: str) -> list[Member]:
     with session() as con:
         rows = con.execute("""
-            select slot, pokemon_id, item_id, ability_id, nickname, nature, investment
+            select slot, pokemon_id, item_id, ability_id, nickname, nature, investment, moves
             from my_team where paste_id = ? order by slot
         """, [paste_id]).fetchall()
     if not rows:

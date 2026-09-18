@@ -5,12 +5,14 @@ import time
 import pandas as pd
 import streamlit as st
 
+from components.coverage_grid import render_coverage_grid
 from components.defense_grid import render_defense_grid
 from components.speed_view import render_speed_tiers, render_team_speeds
 from vgc import regulations
 from vgc.db import load_settings, warehouse_path
 from vgc.defense import defense_matrix, flagged_types, mega_comparison, summarize
 from vgc.megas import load_dex, mega_options, resolve_team
+from vgc.offense import attackers, coverage_matrix, holes, team_best, threats
 from vgc.speed import meta_speed, team_speeds
 from vgc.team import list_pastes, load_team
 
@@ -76,7 +78,8 @@ matrix = defense_matrix(formes)
 summary = summarize(matrix)
 flags = flagged_types(summary)
 
-tab_defense, tab_speed = st.tabs(["Defensive grid", "Speed tiers"])
+tab_defense, tab_coverage, tab_speed = st.tabs(
+    ["Defensive grid", "Offensive coverage", "Speed tiers"])
 
 with tab_defense:
     st.subheader("Defensive type grid")
@@ -102,6 +105,25 @@ with tab_defense:
              "ability": f.ability_id, "mega": "Yes" if f.is_mega else ""}
             for f in formes
         ]), hide_index=True, width="stretch")
+
+with tab_coverage:
+    st.subheader("Offensive coverage vs the meta")
+    try:
+        top_n = st.slider("Threats shown", 10, 40,
+                          int(load_settings()["defaults"]["top_n"]), step=5,
+                          key=f"cover_top_{paste_id}")
+        meta = threats(reg, top_n)
+        cover = coverage_matrix(attackers(team, formes), meta)
+        gaps = holes(cover)
+        if gaps:
+            st.warning(f"No super effective answer to {len(gaps)} of {top_n}: "
+                       + ", ".join(gaps))
+        else:
+            st.success(f"Something on the team hits all {top_n} threats super effectively")
+        render_coverage_grid(cover, team_best(cover),
+                             {t.display_name: t.usage_pct for t in meta})
+    except LookupError as e:
+        st.warning(str(e))
 
 with tab_speed:
     st.subheader("Your Speed")
