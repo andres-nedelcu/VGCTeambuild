@@ -24,13 +24,19 @@ SUPER_EFFECTIVE = 1.0
 
 @dataclass(frozen=True)
 class Hit:
-    """The best a threat's common moves manage against one of your Pokémon."""
+    """The best a threat's common moves manage against one of your Pokémon.
+
+    effectiveness is the type matchup on its own (0/0.25/0.5/1/2/4) and is what
+    should be shown as a multiplier; value folds STAB in and exists only for
+    scoring. Never display value as an "x" figure: 2x with STAB is not "3x".
+    """
     slot: int
     target: str
     move_name: str
     move_type: str
     effectiveness: float
-    value: float  # effectiveness x STAB, the scored figure
+    stab: bool
+    value: float
 
 
 @dataclass(frozen=True)
@@ -65,8 +71,9 @@ def _best_hit(moves, threat: Threat, target: Forme) -> Hit | None:
         # Aerilate and friends retype the move before it lands, and it gains STAB.
         move_type = attack_type(listed_type, threat.ability_id)
         eff = effectiveness(move_type, target.types, target.ability_id)
-        stab = STAB if move_type in threat.types else 1.0
-        hit = Hit(target.slot, target.display_name, name, move_type, eff, eff * stab)
+        stab = move_type in threat.types
+        hit = Hit(target.slot, target.display_name, name, move_type, eff, stab,
+                  eff * (STAB if stab else 1.0))
         if best is None or hit.value > best.value:
             best = hit
     return best

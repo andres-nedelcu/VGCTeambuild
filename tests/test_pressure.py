@@ -38,12 +38,14 @@ def test_aerilate_hyper_voice_hits_as_flying_with_stab():
     hit = _best_hit([HYPER_VOICE], SALAMENCE_MEGA, GOLISOPOD)
     assert hit.move_type == "Flying"
     assert hit.effectiveness == 2.0            # Flying is 2x into Bug/Water
-    assert hit.value == 2.0 * STAB             # Salamence-Mega is part Flying
+    assert hit.stab is True                    # Salamence-Mega is part Flying
+    assert hit.value == 2.0 * STAB             # scoring only; never shown as "3x"
 
 
 def test_same_move_without_the_ability_stays_normal():
     hit = _best_hit([HYPER_VOICE], PLAIN_DRAGON, GOLISOPOD)
     assert hit.move_type == "Normal"
+    assert hit.stab is False
     assert hit.effectiveness == 1.0 and hit.value == 1.0  # no retype, no STAB
 
 

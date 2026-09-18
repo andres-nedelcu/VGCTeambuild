@@ -15,7 +15,8 @@ def render_threat_list(rows: list[Pressure], team_size: int) -> None:
         "Threat score": p.score,
         "Hits SE": p.super_effective,
         "Driver": (f"{p.top_hit.move_name} as {p.top_hit.move_type} "
-                   f"{p.top_hit.value:g}× vs {p.top_hit.target}") if p.top_hit else "—",
+                   f"{p.top_hit.effectiveness:g}×{' STAB' if p.top_hit.stab else ''} "
+                   f"vs {p.top_hit.target}") if p.top_hit else "—",
     } for p in rows])
 
     st.dataframe(
@@ -31,11 +32,13 @@ def render_threat_list(rows: list[Pressure], team_size: int) -> None:
         },
     )
     st.caption(
-        "Score = usage × the average best hit it gets on your team, so it rewards "
-        "threats that are both common and awkward for you. STAB is included and "
-        "abilities that retype moves are applied (Salamence-Mega's Hyper Voice "
-        "attacks as Flying). Type pressure only — it ignores base power, attacking "
-        "stats, bulk and items, so it measures matchup, not damage."
+        "× is the type matchup on its own (0 / ¼ / ½ / 1 / 2 / 4). STAB is shown as a "
+        "separate tag, not folded into the number — the score behind the bar multiplies "
+        "it in at ×1.5, but a 2× STAB hit is still a 2× matchup. Score = usage × the "
+        "average best hit on your team, so it rewards threats that are both common and "
+        "awkward for you. Abilities that retype moves are applied (Salamence-Mega's "
+        "Hyper Voice attacks as Flying). Type pressure only — it ignores base power, "
+        "attacking stats, bulk and items, so it measures matchup, not damage."
     )
 
     by_name = {p.threat.display_name: p for p in rows}
@@ -46,7 +49,7 @@ def render_threat_list(rows: list[Pressure], team_size: int) -> None:
         "Its best move": h.move_name,
         "Attacks as": h.move_type,
         "Type matchup": f"{h.effectiveness:g}×",
-        "With STAB": f"{h.value:g}×",
+        "STAB": "yes" if h.stab else "—",
     } for h in sorted(picked.hits, key=lambda h: h.value, reverse=True)]),
         hide_index=True, width="stretch")
     if not picked.hits:
