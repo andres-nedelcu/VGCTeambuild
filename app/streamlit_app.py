@@ -14,6 +14,7 @@ from vgc.db import load_settings, warehouse_path
 from vgc.defense import defense_matrix, flagged_types, mega_comparison, summarize
 from vgc.freshness import sources as data_sources
 from vgc.megas import load_dex, mega_options, resolve_team
+from vgc.metafilter import TEAMS, THIN_SAMPLE, WINS, MetaFilter, extent, sample_size
 from vgc.offense import attackers, coverage_matrix, holes, team_best, threats
 from vgc.pressure import rank as rank_threats
 from vgc.speed import meta_speed, team_speeds
@@ -61,6 +62,42 @@ with st.sidebar:
     regs = list(regulations.load()["regulations"])
     reg = st.selectbox("Regulation", regs, index=regs.index(regulations.current()))
 
+    st.header("Meta")
+    st.caption("Which tournament results count as the meta. Applies to all three "
+               "meta tabs at once.")
+    cut = st.selectbox(
+        "Finishers counted", [None, 32, 16, 8],
+        format_func=lambda c: "All finishers" if c is None else f"Top {c}",
+        help="A top-cut view answers 'what did teams that finished well bring'. "
+             "It is the sharpest filter here and the most expensive: the sample "
+             "shrinks fast, so small moves inside a cut are noise.")
+    weight = st.radio(
+        "Weighting", [TEAMS, WINS],
+        format_func=lambda w: "Every team equally" if w == TEAMS else "By match wins",
+        help="Weighting by wins keeps every team but counts each by how much it won, "
+             "so it is much steadier than a cut. Moves that show up under both are "
+             "the ones worth trusting.")
+
+    span = extent(reg)
+    since = min_players = None
+    with st.expander("More meta filters"):
+        if span.events:
+            st.caption(f"{span.events} events · {span.first} to {span.last} "
+                       f"({span.days} days) · {span.smallest}–{span.largest} players")
+        st.caption("Both of these work, but today's events span barely a week and "
+                   "none of them are majors, so neither separates much yet.")
+        if span.first and span.last and span.first < span.last:
+            picked = st.date_input("Events from", value=span.first,
+                                   min_value=span.first, max_value=span.last)
+            since = None if picked == span.first else picked
+        if span.smallest and span.largest and span.smallest < span.largest:
+            picked = st.slider("Minimum event size", span.smallest, span.largest,
+                               span.smallest)
+            min_players = None if picked == span.smallest else picked
+
+    meta_filter = MetaFilter(cut=cut, since=since, min_players=min_players, weight=weight)
+    teams_counted = sample_size(reg, meta_filter)
+
     options = mega_options(team)
     choice = st.radio(
         "Mega Evolution", [NO_MEGA, *options],
@@ -83,6 +120,16 @@ with st.expander("Data freshness"):
          "Loaded": s.loaded_at, "Detail": s.detail} for s in feeds
     ]), hide_index=True, width="stretch")
     st.caption(f"Refresh everything with `{REFRESH_CMD}`")
+
+st.caption(f"Meta: {meta_filter.label()} · {teams_counted:,} teams")
+if teams_counted == 0:
+    st.error("No tournament teams match these meta filters. Widen them in the sidebar.")
+    st.stop()
+if teams_counted < THIN_SAMPLE:
+    st.warning(
+        f"{teams_counted:,} teams is a thin sample — the unfiltered regulation has "
+        f"{sample_size(reg):,}. Treat the order as indicative: which names appear "
+        "matters more than where they sit.")
 
 if not slots:
     st.info("Select at least one Pokémon.")
@@ -127,7 +174,7 @@ with tab_coverage:
         top_n = st.slider("Threats shown", 10, 40,
                           int(load_settings()["defaults"]["top_n"]), step=5,
                           key=f"cover_top_{paste_id}")
-        meta = threats(reg, top_n)
+        meta = threats(reg, top_n, meta_filter)
         cover = coverage_matrix(attackers(team, formes), meta)
         gaps = holes(cover)
         if gaps:
@@ -157,7 +204,7 @@ with tab_speed:
             key=f"speed_ref_{paste_id}_{mega_slot}",  # Mega changes the label, not the slot
         )
         top_n = right.slider("Threats shown", 10, 60, default_top, step=5)
-        render_speed_tiers(meta_speed(reg, top_n), by_slot[ref_slot])
+        render_speed_tiers(meta_speed(reg, top_n, meta_filter), by_slot[ref_slot])
     except LookupError as e:
         st.warning(str(e))
 
@@ -167,7 +214,7 @@ with tab_threats:
         threat_n = st.slider("Threats ranked", 10, 40,
                              int(load_settings()["defaults"]["top_n"]), step=5,
                              key=f"threat_top_{paste_id}")
-        render_threat_list(rank_threats(reg, formes, threat_n), len(formes))
+        render_threat_list(rank_threats(reg, formes, threat_n, meta_filter), len(formes))
     except LookupError as e:
         st.warning(str(e))
 

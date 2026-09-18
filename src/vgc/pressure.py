@@ -15,6 +15,7 @@ from typing import Sequence
 
 from vgc.db import session
 from vgc.megas import Forme
+from vgc.metafilter import MetaFilter
 from vgc.offense import Threat, threats
 from vgc.typechart import attack_type, effectiveness
 
@@ -51,14 +52,16 @@ class Pressure:
         return max(self.hits, key=lambda h: h.value, default=None)
 
 
-def common_moves(regulation: str) -> dict[str, list[tuple[str, str, str, float]]]:
+def common_moves(regulation: str,
+                 filt: MetaFilter | None = None) -> dict[str, list[tuple[str, str, str, float]]]:
     """forme_id -> [(move_id, move_name, move_type, share)] for common damaging moves."""
+    filt = filt or MetaFilter()
     with session() as con:
-        rows = con.execute("""
+        rows = con.execute(f"""
             select forme_id, move_id, move_name, move_type, move_share
-            from mart_meta_common_moves where regulation = ?
+            from {filt.call('meta_common_moves')}
             order by forme_id, move_share desc
-        """, [regulation]).fetchall()
+        """, filt.params(regulation)).fetchall()
     out: dict[str, list[tuple[str, str, str, float]]] = {}
     for forme_id, move_id, name, move_type, share in rows:
         out.setdefault(forme_id, []).append((move_id, name, move_type, share))
@@ -79,11 +82,13 @@ def _best_hit(moves, threat: Threat, target: Forme) -> Hit | None:
     return best
 
 
-def rank(regulation: str, team: Sequence[Forme], top_n: int = 20) -> list[Pressure]:
+def rank(regulation: str, team: Sequence[Forme], top_n: int = 20,
+         filt: MetaFilter | None = None) -> list[Pressure]:
     """Meta threats scored by the pressure they put on this team, worst first."""
-    moves_by_forme = common_moves(regulation)
+    filt = filt or MetaFilter()
+    moves_by_forme = common_moves(regulation, filt)
     out = []
-    for threat in threats(regulation, top_n):
+    for threat in threats(regulation, top_n, filt):
         moves = moves_by_forme.get(threat.forme_id, [])
         hits = tuple(h for h in (_best_hit(moves, threat, t) for t in team) if h)
         mean_hit = sum(h.value for h in hits) / len(hits) if hits else 0.0

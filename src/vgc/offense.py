@@ -15,6 +15,7 @@ import pandas as pd
 
 from vgc.db import session
 from vgc.megas import Forme, load_dex
+from vgc.metafilter import MetaFilter
 from vgc.team import Member
 from vgc.typechart import attack_type, effectiveness
 
@@ -93,16 +94,19 @@ def _threat_ability(regulation: str, species_id: str, forme_id: str) -> str | No
     return forme.abilities[0] if forme.abilities else None
 
 
-def threats(regulation: str, top_n: int = 20) -> list[Threat]:
+def threats(regulation: str, top_n: int = 20,
+            filt: MetaFilter | None = None) -> list[Threat]:
+    """The top_n threats under this meta filter. No filter means the whole regulation."""
+    filt = filt or MetaFilter()
     with session() as con:
         try:
-            rows = con.execute("""
+            rows = con.execute(f"""
                 select species_id, forme_id, display_name, type1, type2, forme_usage_pct
-                from mart_meta_top where regulation = ?
+                from {filt.call('meta_top')}
                 order by forme_usage_pct desc limit ?
-            """, [regulation, top_n]).fetchall()
+            """, filt.params(regulation) + [top_n]).fetchall()
         except Exception as e:  # noqa: BLE001 - surfaced to the user as a build hint
-            raise LookupError(f"mart_meta_top is not built. Run: {BUILD_CMD}") from e
+            raise LookupError(f"The meta marts are not built. Run: {BUILD_CMD}") from e
     return [
         Threat(forme_id, name, tuple(t for t in (t1, t2) if t),
                _threat_ability(regulation, species_id, forme_id), usage)

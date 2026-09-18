@@ -15,6 +15,7 @@ import pandas as pd
 
 from vgc.db import session
 from vgc.megas import Forme
+from vgc.metafilter import MetaFilter
 from vgc.stats import calc_stat, nature_mod, sp_from_investment
 from vgc.team import Member
 
@@ -56,19 +57,21 @@ def team_speeds(team: Sequence[Member], formes: Sequence[Forme]) -> list[TeamSpe
     return out
 
 
-def meta_speed(regulation: str, top_n: int | None = None) -> pd.DataFrame:
+def meta_speed(regulation: str, top_n: int | None = None,
+               filt: MetaFilter | None = None) -> pd.DataFrame:
     """Speed benchmarks for the regulation's threats, most used first, then fastest first."""
+    filt = filt or MetaFilter()
     with session() as con:
         try:
-            df = con.execute("""
+            df = con.execute(f"""
                 select display_name, base_spe, spe_max_plus, spe_max_neutral,
                        spe_uninvested, spe_uninvested_neg, spe_max_plus_scarf,
                        spe_max_neutral_scarf, scarf_share, scarf_flag, forme_usage_pct
-                from mart_meta_speed where regulation = ?
+                from {filt.call('meta_speed')}
                 order by forme_usage_pct desc
-            """, [regulation]).df()
+            """, filt.params(regulation)).df()
         except Exception as e:  # noqa: BLE001 - surfaced to the user as a build hint
-            raise LookupError(f"mart_meta_speed is not built. Run: {BUILD_CMD}") from e
+            raise LookupError(f"The meta marts are not built. Run: {BUILD_CMD}") from e
     if top_n:
         df = df.head(top_n)
     return df.sort_values(["base_spe", "forme_usage_pct"], ascending=False).reset_index(drop=True)

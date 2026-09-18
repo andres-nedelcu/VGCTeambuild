@@ -56,10 +56,17 @@ def test_choice_scarf_matches_reference_table(base, expected):
 
 
 def _macro_connection() -> duckdb.DuckDBPyConnection:
-    """In-memory DB carrying only the macros defined by the Speed mart."""
+    """In-memory DB carrying the scalar stat macros defined by the Speed mart.
+
+    Table macros in the same file are skipped on purpose: they read warehouse tables
+    and carry {{...}} placeholders that build_marts substitutes, so neither belongs
+    in a bare in-memory connection. Only the stat arithmetic is under test here.
+    """
     sql = (REPO_ROOT / "sql" / "marts" / "03_meta_speed.sql").read_text()
-    macros = re.findall(r"CREATE OR REPLACE MACRO[^;]+;", sql)
-    assert macros, "no macros found in 03_meta_speed.sql"
+    macros = [m for m in re.findall(r"CREATE OR REPLACE MACRO[^;]+;", sql)
+              if "AS TABLE" not in m]
+    names = {m.split("MACRO", 1)[1].split("(", 1)[0].strip() for m in macros}
+    assert {"champ_stat", "champ_scarf"} <= names, f"stat macros missing, found {names}"
     con = duckdb.connect()
     for macro in macros:
         con.execute(macro)

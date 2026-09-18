@@ -7,6 +7,13 @@
       "runtimeArgs": ["run", "streamlit", "run", "app/streamlit_app.py",
                       "--server.port", "8502", "--server.headless", "true"],
       "port": 8502
+    },
+    {
+      "name": "dashboard-alt",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": ["run", "streamlit", "run", "app/streamlit_app.py",
+                      "--server.port", "8503", "--server.headless", "true"],
+      "port": 8503
     }
   ]
 }
