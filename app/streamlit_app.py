@@ -6,10 +6,12 @@ import pandas as pd
 import streamlit as st
 
 from components.defense_grid import render_defense_grid
+from components.speed_view import render_speed_tiers, render_team_speeds
 from vgc import regulations
-from vgc.db import warehouse_path
+from vgc.db import load_settings, warehouse_path
 from vgc.defense import defense_matrix, flagged_types, mega_comparison, summarize
 from vgc.megas import load_dex, mega_options, resolve_team
+from vgc.speed import meta_speed, team_speeds
 from vgc.team import list_pastes, load_team
 
 LOAD_CMD = "uv run python scripts/load_paste.py <pokepaste-url>"
@@ -74,28 +76,52 @@ matrix = defense_matrix(formes)
 summary = summarize(matrix)
 flags = flagged_types(summary)
 
-st.subheader("Defensive type grid")
-st.caption("Type chart plus type-changing abilities (immunities and resistances only). "
-           "Static data, so the grid is the same across regulations.")
-if flags:
-    st.warning("Flagged: " + ", ".join(flags) + " (3+ weak, nothing resists)")
-else:
-    st.success("No flagged types")
+tab_defense, tab_speed = st.tabs(["Defensive grid", "Speed tiers"])
 
-render_defense_grid(matrix, summary, flags)
+with tab_defense:
+    st.subheader("Defensive type grid")
+    st.caption("Type chart plus type-changing abilities (immunities and resistances only). "
+               "Static data, so the grid is the same across regulations.")
+    if flags:
+        st.warning("Flagged: " + ", ".join(flags) + " (3+ weak, nothing resists)")
+    else:
+        st.success("No flagged types")
 
-comparison = mega_comparison(team, slots)
-if len(comparison) > 1:
-    st.subheader("Mega options compared")
-    st.caption("Totals across the selected Pokémon. Δ is versus No Mega: "
-               "negative Δ Weak and positive Δ Resist/Immune are better.")
-    st.dataframe(comparison, hide_index=True, width="stretch")
+    render_defense_grid(matrix, summary, flags)
 
-with st.expander("Formes and abilities used"):
-    st.dataframe(pd.DataFrame([
-        {"slot": f.slot, "forme": f.display_name, "types": " / ".join(f.types),
-         "ability": f.ability_id, "mega": "Yes" if f.is_mega else ""}
-        for f in formes
-    ]), hide_index=True, width="stretch")
+    comparison = mega_comparison(team, slots)
+    if len(comparison) > 1:
+        st.subheader("Mega options compared")
+        st.caption("Totals across the selected Pokémon. Δ is versus No Mega: "
+                   "negative Δ Weak and positive Δ Resist/Immune are better.")
+        st.dataframe(comparison, hide_index=True, width="stretch")
+
+    with st.expander("Formes and abilities used"):
+        st.dataframe(pd.DataFrame([
+            {"slot": f.slot, "forme": f.display_name, "types": " / ".join(f.types),
+             "ability": f.ability_id, "mega": "Yes" if f.is_mega else ""}
+            for f in formes
+        ]), hide_index=True, width="stretch")
+
+with tab_speed:
+    st.subheader("Your Speed")
+    speeds = team_speeds(team, formes)
+    render_team_speeds(speeds)
+
+    st.subheader("Meta Speed tiers")
+    try:
+        default_top = int(load_settings()["defaults"]["top_n"])
+        left, right = st.columns([2, 1])
+        by_slot = {s.slot: s for s in speeds}
+        fastest = max(speeds, key=lambda s: s.speed).slot
+        ref_slot = left.selectbox(
+            "Compare against", list(by_slot), index=list(by_slot).index(fastest),
+            format_func=lambda s: f"{by_slot[s].display_name} ({by_slot[s].speed})",
+            key=f"speed_ref_{paste_id}_{mega_slot}",  # Mega changes the label, not the slot
+        )
+        top_n = right.slider("Threats shown", 10, 60, default_top, step=5)
+        render_speed_tiers(meta_speed(reg, top_n), by_slot[ref_slot])
+    except LookupError as e:
+        st.warning(str(e))
 
 st.caption(f"Rendered in {time.perf_counter() - t0:.2f}s")
