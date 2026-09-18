@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Weekly warehouse refresh. Install with:
+    cp ops/local.vgc.refresh.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/local.vgc.refresh.plist
+  Remove with:
+    launchctl unload ~/Library/LaunchAgents/local.vgc.refresh.plist
+
+  Runs Sunday 09:00. If the Mac is asleep then, launchd runs it once on wake.
+  RunAtLoad is false so installing it does not immediately hit the network.
+  Logs land in logs/, which is gitignored.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>local.vgc.refresh</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/anedelcu/.local/bin/uv</string>
+    <string>run</string>
+    <string>python</string>
+    <string>scripts/refresh.py</string>
+    <string>--max</string>
+    <string>25</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/anedelcu/Projects/vgc-teambuilding</string>
+
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Weekday</key><integer>0</integer>
+    <key>Hour</key><integer>9</integer>
+    <key>Minute</key><integer>0</integer>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <false/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/anedelcu/Projects/vgc-teambuilding/logs/refresh.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/anedelcu/Projects/vgc-teambuilding/logs/refresh.err.log</string>
+</dict>
+</plist>

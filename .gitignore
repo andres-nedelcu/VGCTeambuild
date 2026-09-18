@@ -11,6 +11,9 @@ data/raw/*
 *.duckdb
 *.duckdb.wal
 
+# Scheduled refresh output (see ops/local.vgc.refresh.plist)
+logs/
+
 # Streamlit secrets, if ever added
 .streamlit/secrets.toml
 vendor/

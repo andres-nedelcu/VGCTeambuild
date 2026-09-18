@@ -12,6 +12,7 @@ from components.threat_list import render_threat_list
 from vgc import regulations
 from vgc.db import load_settings, warehouse_path
 from vgc.defense import defense_matrix, flagged_types, mega_comparison, summarize
+from vgc.freshness import sources as data_sources
 from vgc.megas import load_dex, mega_options, resolve_team
 from vgc.offense import attackers, coverage_matrix, holes, team_best, threats
 from vgc.pressure import rank as rank_threats
@@ -19,6 +20,7 @@ from vgc.speed import meta_speed, team_speeds
 from vgc.team import list_pastes, load_team
 
 LOAD_CMD = "uv run python scripts/load_paste.py <pokepaste-url>"
+REFRESH_CMD = "uv run python scripts/refresh.py"
 NO_MEGA = 0  # radio sentinel; Streamlit treats None as 'no selection'
 
 st.set_page_config(page_title="VGC Teambuilding", page_icon="⚔️", layout="wide")
@@ -70,6 +72,17 @@ with st.sidebar:
 
 st.title("VGC Teambuilding Dashboard")
 st.caption(f"Pokémon Champions VGC Doubles · Regulation {reg} · `{warehouse_path().name}`")
+
+feeds = data_sources(reg)
+st.caption("Data: " + " · ".join(
+    f"{s.name} {s.as_of} ({s.age_label()})" if s.as_of else s.name
+    for s in feeds))
+with st.expander("Data freshness"):
+    st.dataframe(pd.DataFrame([
+        {"Source": s.name, "As of": s.as_of, "Age": s.age_label(),
+         "Loaded": s.loaded_at, "Detail": s.detail} for s in feeds
+    ]), hide_index=True, width="stretch")
+    st.caption(f"Refresh everything with `{REFRESH_CMD}`")
 
 if not slots:
     st.info("Select at least one Pokémon.")
