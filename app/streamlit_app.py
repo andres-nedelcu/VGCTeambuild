@@ -17,7 +17,7 @@ from vgc.megas import load_dex, mega_options, resolve_team
 from vgc.metafilter import TEAMS, THIN_SAMPLE, WINS, MetaFilter, extent, sample_size
 from vgc.offense import attackers, coverage_matrix, holes, team_best, threats
 from vgc.pressure import rank as rank_threats
-from vgc.speed import meta_speed, team_speeds
+from vgc.speed import TAILWIND_OPTIONS, Field, meta_speed, team_speeds
 from vgc.team import list_pastes, load_team
 
 LOAD_CMD = "uv run python scripts/load_paste.py <pokepaste-url>"
@@ -195,7 +195,7 @@ with tab_speed:
     st.subheader("Meta Speed tiers")
     try:
         default_top = int(load_settings()["defaults"]["top_n"])
-        left, right = st.columns([2, 1])
+        left, tw_col, tr_col, right = st.columns([2, 1, 1, 1])
         by_slot = {s.slot: s for s in speeds}
         fastest = max(speeds, key=lambda s: s.speed).slot
         ref_slot = left.selectbox(
@@ -203,8 +203,13 @@ with tab_speed:
             format_func=lambda s: f"{by_slot[s].display_name} ({by_slot[s].speed})",
             key=f"speed_ref_{paste_id}_{mega_slot}",  # Mega changes the label, not the slot
         )
+        tailwind = tw_col.selectbox(
+            "Tailwind", TAILWIND_OPTIONS, format_func=str.title, key=f"speed_tw_{paste_id}",
+        )
+        trick_room = tr_col.checkbox("Trick Room", key=f"speed_tr_{paste_id}")
         top_n = right.slider("Threats shown", 10, 60, default_top, step=5)
-        render_speed_tiers(meta_speed(reg, top_n, meta_filter), by_slot[ref_slot])
+        field = Field(tailwind=tailwind, trick_room=trick_room)
+        render_speed_tiers(meta_speed(reg, top_n, meta_filter), by_slot[ref_slot], field)
     except LookupError as e:
         st.warning(str(e))
 

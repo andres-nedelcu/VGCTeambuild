@@ -20,7 +20,34 @@ from vgc.stats import calc_stat, nature_mod, sp_from_investment
 from vgc.team import Member
 
 OUTSPEED, DEPENDS, OUTSPED = "You outspeed", "Depends", "Outsped"
+MOVE_FIRST, MOVE_LAST = "You move first", "They move first"
 BUILD_CMD = "uv run python scripts/build_marts.py"
+
+TAILWIND_NONE, TAILWIND_YOURS, TAILWIND_THEIRS, TAILWIND_BOTH = "none", "yours", "theirs", "both"
+TAILWIND_OPTIONS = (TAILWIND_NONE, TAILWIND_YOURS, TAILWIND_THEIRS, TAILWIND_BOTH)
+
+
+@dataclass(frozen=True)
+class Field:
+    """Field-effect state for a Speed comparison. Defaults to no effects."""
+    tailwind: str = TAILWIND_NONE
+    trick_room: bool = False
+
+    def __post_init__(self) -> None:
+        if self.tailwind not in TAILWIND_OPTIONS:
+            raise ValueError(f"tailwind must be one of {TAILWIND_OPTIONS}, got {self.tailwind!r}")
+
+    @property
+    def your_tailwind(self) -> bool:
+        return self.tailwind in (TAILWIND_YOURS, TAILWIND_BOTH)
+
+    @property
+    def their_tailwind(self) -> bool:
+        return self.tailwind in (TAILWIND_THEIRS, TAILWIND_BOTH)
+
+
+def _scale(value: int, doubled: bool) -> int:
+    return value * 2 if doubled else value
 
 
 @dataclass(frozen=True)
@@ -77,24 +104,55 @@ def meta_speed(regulation: str, top_n: int | None = None,
     return df.sort_values(["base_spe", "forme_usage_pct"], ascending=False).reset_index(drop=True)
 
 
-def ceiling(row) -> int:
-    """Fastest Speed this threat realistically reaches, Scarf included only when common."""
-    return int(row.spe_max_plus_scarf if row.scarf_flag else row.spe_max_plus)
+def ceiling(row, field: Field | None = None) -> int:
+    """Fastest Speed this threat realistically reaches, Scarf included only when common.
+
+    Modifiers chain Scarf first, then Tailwind, each floored in turn: the mart already
+    floors the Scarf multiply, and doubling an integer for Tailwind needs no further
+    floor. Reordering them is a real bug, not a cosmetic one — see test_speed.py.
+    """
+    field = field or Field()
+    base = row.spe_max_plus_scarf if row.scarf_flag else row.spe_max_plus
+    return _scale(int(base), field.their_tailwind)
 
 
-def benchmarks(row) -> tuple[int, ...]:
+def floor_speed(row, field: Field | None = None) -> int:
+    """Slowest Speed this threat realistically has — the bound Trick Room wins against."""
+    field = field or Field()
+    return _scale(int(row.spe_uninvested_neg), field.their_tailwind)
+
+
+def benchmarks(row, field: Field | None = None) -> tuple[int, ...]:
+    field = field or Field()
     values = [row.spe_max_plus, row.spe_max_neutral, row.spe_uninvested, row.spe_uninvested_neg]
     if row.scarf_flag:
         values += [row.spe_max_plus_scarf, row.spe_max_neutral_scarf]
-    return tuple(int(v) for v in values)
+    return tuple(_scale(int(v), field.their_tailwind) for v in values)
 
 
-def matchup(my_speed: int, row) -> str:
-    """Verdict for one of your Pokémon against one threat, flagging exact speed ties."""
-    if my_speed > ceiling(row):
-        result = OUTSPEED
-    elif my_speed < int(row.spe_uninvested_neg):
-        result = OUTSPED
+def matchup(my_speed: int, row, field: Field | None = None) -> str:
+    """Verdict for one of your Pokémon against one threat, flagging exact speed ties.
+
+    Tailwind doubles a side's Speed before the comparison. Trick Room inverts the
+    comparison, not the numbers: slower moves first, so winning means being slower
+    than the threat's slowest realistic spread, and losing means being faster than
+    its fastest.
+    """
+    field = field or Field()
+    my_eff = _scale(my_speed, field.your_tailwind)
+    top, bottom = ceiling(row, field), floor_speed(row, field)
+    if field.trick_room:
+        if my_eff < bottom:
+            result = MOVE_FIRST
+        elif my_eff > top:
+            result = MOVE_LAST
+        else:
+            result = DEPENDS
     else:
-        result = DEPENDS
-    return f"{result} · tie" if my_speed in benchmarks(row) else result
+        if my_eff > top:
+            result = OUTSPEED
+        elif my_eff < bottom:
+            result = OUTSPED
+        else:
+            result = DEPENDS
+    return f"{result} · tie" if my_eff in benchmarks(row, field) else result
