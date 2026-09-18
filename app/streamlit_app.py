@@ -8,11 +8,13 @@ import streamlit as st
 from components.coverage_grid import render_coverage_grid
 from components.defense_grid import render_defense_grid
 from components.speed_view import render_speed_tiers, render_team_speeds
+from components.threat_list import render_threat_list
 from vgc import regulations
 from vgc.db import load_settings, warehouse_path
 from vgc.defense import defense_matrix, flagged_types, mega_comparison, summarize
 from vgc.megas import load_dex, mega_options, resolve_team
 from vgc.offense import attackers, coverage_matrix, holes, team_best, threats
+from vgc.pressure import rank as rank_threats
 from vgc.speed import meta_speed, team_speeds
 from vgc.team import list_pastes, load_team
 
@@ -78,8 +80,8 @@ matrix = defense_matrix(formes)
 summary = summarize(matrix)
 flags = flagged_types(summary)
 
-tab_defense, tab_coverage, tab_speed = st.tabs(
-    ["Defensive grid", "Offensive coverage", "Speed tiers"])
+tab_defense, tab_coverage, tab_speed, tab_threats = st.tabs(
+    ["Defensive grid", "Offensive coverage", "Speed tiers", "Threat list"])
 
 with tab_defense:
     st.subheader("Defensive type grid")
@@ -143,6 +145,16 @@ with tab_speed:
         )
         top_n = right.slider("Threats shown", 10, 60, default_top, step=5)
         render_speed_tiers(meta_speed(reg, top_n), by_slot[ref_slot])
+    except LookupError as e:
+        st.warning(str(e))
+
+with tab_threats:
+    st.subheader("What threatens this team")
+    try:
+        threat_n = st.slider("Threats ranked", 10, 40,
+                             int(load_settings()["defaults"]["top_n"]), step=5,
+                             key=f"threat_top_{paste_id}")
+        render_threat_list(rank_threats(reg, formes, threat_n), len(formes))
     except LookupError as e:
         st.warning(str(e))
 

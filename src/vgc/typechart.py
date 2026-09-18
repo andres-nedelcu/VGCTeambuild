@@ -22,6 +22,18 @@ TYPES: tuple[str, ...] = (
 Chart = Mapping[tuple[str, str], float]
 AbilityMods = Mapping[tuple[str, str], float]
 
+# Abilities that retype the attacker's Normal moves. The effect lives in Showdown's
+# onModifyType handlers, which are code rather than data, so it can't come from the
+# static export. Matters in practice: Salamence-Mega's Hyper Voice (92% of its builds)
+# attacks as Flying, with STAB. Not covered: Liquid Voice (needs a sound-move flag
+# dim_move doesn't carry) and Normalize (2 unused species).
+MOVE_TYPE_ABILITIES: dict[str, str] = {
+    "aerilate": "Flying",
+    "pixilate": "Fairy",
+    "refrigerate": "Ice",
+    "galvanize": "Electric",
+}
+
 _TYPE_LOOKUP = {t.lower(): t for t in TYPES}
 
 
@@ -31,6 +43,14 @@ def normalize_type(name: str) -> str:
         return _TYPE_LOOKUP[name.strip().lower()]
     except (KeyError, AttributeError):
         raise ValueError(f"Unknown type: {name!r}") from None
+
+
+def attack_type(move_type: str, ability: str | None = None) -> str:
+    """The type a move actually attacks as, once the attacker's ability is applied."""
+    attacking = normalize_type(move_type)
+    if ability and attacking == "Normal":
+        return MOVE_TYPE_ABILITIES.get(to_id(ability), attacking)
+    return attacking
 
 
 @lru_cache(maxsize=1)

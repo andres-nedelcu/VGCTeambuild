@@ -16,7 +16,7 @@ import pandas as pd
 from vgc.db import session
 from vgc.megas import Forme, load_dex
 from vgc.team import Member
-from vgc.typechart import effectiveness
+from vgc.typechart import attack_type, effectiveness
 
 BEST_ROW = "Team best"
 BUILD_CMD = "uv run python scripts/build_marts.py"
@@ -74,7 +74,9 @@ def attackers(team: Sequence[Member], formes: Sequence[Forme]) -> list[Attacker]
     out = []
     for f in formes:
         moves = by_slot[f.slot].moves or []
-        seen = dict.fromkeys(types[m] for m in moves if m in types)
+        # The type it attacks as, not the type it is listed as: a Pixilate holder's
+        # Normal moves land as Fairy.
+        seen = dict.fromkeys(attack_type(types[m], f.ability_id) for m in moves if m in types)
         out.append(Attacker(f.slot, f.display_name, tuple(seen)))
     return out
 
