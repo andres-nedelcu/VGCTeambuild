@@ -1,4 +1,8 @@
 # Source IDs that still don't match Showdown after to_id(). Add entries only when a
 # resolution check reports a miss. Keys and values are both to_id() form.
+# This file is for systematic source-level ID differences, NOT for typos in
+# individual teamlists: the loader drops and reports those instead. Checked
+# 2026-09-18: misspellings like 'Golisopodite' (3 uses vs 173 correct) are one-off
+# player errors, so aliasing them would bake a mistake in permanently.
 limitless: {}
 cbd: {}

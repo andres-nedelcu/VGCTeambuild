@@ -41,6 +41,24 @@ def main() -> None:
             "SELECT DISTINCT unnest(abilities) FROM dim_pokemon").fetchall()}
 
         now = datetime.now()
+        dropped = Counter()
+
+        def keep(raw, valid, kind):
+            """Resolve a descriptive field, dropping values the dims don't know.
+
+            Teamlists are third-party data and occasionally carry junk (a Mega stone
+            typed into the ability box, 'No Item'). Species is the join key and still
+            fails the load; these fields are descriptive, so one typo in 6000 entries
+            should not block the other 5999. Everything dropped is reported.
+            """
+            if not raw:
+                return None
+            value = resolve("limitless", raw)
+            if value in valid:
+                return value
+            dropped[f"{kind} {raw!r}"] += 1
+            return None
+
         tournaments, sets = [], []
         species_teams = Counter()
         detail_teams = defaultdict(Counter)  # (pokemon_id, detail_type) -> Counter(value)
@@ -62,18 +80,12 @@ def main() -> None:
                 seen = set()
                 for slot, mon in enumerate(team, 1):
                     sid = resolve("limitless", mon.get("id"))
-                    iid, aid = to_id(mon.get("item")), to_id(mon.get("ability"))
-                    mids = [to_id(m) for m in mon.get("attacks") or []]
-                    label = f"{tid} {pid} slot {slot}"
                     if sid not in pokemon:
-                        sys.exit(f"{label}: unresolved species {mon.get('id')!r}")
-                    if iid and iid not in items:
-                        sys.exit(f"{label}: unresolved item {mon.get('item')!r}")
-                    if aid and aid not in abilities:
-                        sys.exit(f"{label}: unresolved ability {mon.get('ability')!r}")
-                    for mv, mid in zip(mon.get("attacks") or [], mids):
-                        if mid not in moves:
-                            sys.exit(f"{label}: unresolved move {mv!r}")
+                        sys.exit(f"{tid} {pid} slot {slot}: unresolved species {mon.get('id')!r}")
+                    iid = keep(mon.get("item"), items, "item")
+                    aid = keep(mon.get("ability"), abilities, "ability")
+                    mids = [m for m in (keep(mv, moves, "move")
+                                        for mv in mon.get("attacks") or []) if m]
                     sets.append((tid, pid, p.get("placing"), record.get("wins"), record.get("losses"),
                                  record.get("ties"), slot, sid, iid, aid, mids))
                     if sid not in seen:
@@ -111,6 +123,7 @@ def main() -> None:
                            [reg]).fetchone()[0]
         print(f"regulation={reg} tournaments={n_t} teams={total_teams} species={n_u} "
               f"detail_rows={len(detail_rows)}")
+        print(f"dropped {sum(dropped.values())} unknown values: {dict(dropped) or 'none'}")
         print("Top 10:", ", ".join(f"{sid} {100*n/total_teams:.0f}%" for sid, n in ranked[:10]))
     finally:
         con.close()

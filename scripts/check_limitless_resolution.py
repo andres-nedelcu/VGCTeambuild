@@ -63,16 +63,16 @@ def main() -> None:
                     seen.add(sid)
                 item = mon.get("item")
                 if item:
-                    iid = to_id(item)
+                    iid = resolve("limitless", item)
                     if iid not in items:
                         miss["item"][item] += 1
                     elif items[iid][0] and items[iid][1] and sid in pokemon \
                             and pokemon.get(items[iid][1]) != pokemon[sid]:
                         stone_mismatch[f"{mon.get('id')} holding {item}"] += 1
-                if mon.get("ability") and to_id(mon["ability"]) not in abilities:
+                if mon.get("ability") and resolve("limitless", mon["ability"]) not in abilities:
                     miss["ability"][mon["ability"]] += 1
                 for mv in mon.get("attacks") or []:
-                    if to_id(mv) not in moves:
+                    if resolve("limitless", mv) not in moves:
                         miss["move"][mv] += 1
             species_teams.update(seen)
 
