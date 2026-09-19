@@ -15,6 +15,12 @@ COLORS = ATTACKING  # you are landing the hit, so 4x is the good end
 SUMMARY_COLORS = [BAD_STRONG, PALE_GOOD]  # 0 = nothing super effective, 1 = covered
 SPRITE_PX = 44   # sprite edge in pixels; converted to a paper fraction per figure,
                  # because a fixed fraction would shrink as the team adds rows
+LABEL_GAP = 8    # clear air between the sprite row and the usage numbers above it
+# Tick labels and layout images both anchor to the top of the plot area, so they land
+# in the same band and the numbers get clipped. Pushing the labels out with a
+# transparent outside tick is what reserves the sprite row underneath them.
+LABEL_PUSH = SPRITE_PX + LABEL_GAP
+TRANSPARENT = "rgba(0,0,0,0)"
 
 
 def render_coverage_grid(matrix: pd.DataFrame, best: pd.Series, usage: dict[str, float],
@@ -68,9 +74,13 @@ def render_coverage_grid(matrix: pd.DataFrame, best: pd.Series, usage: dict[str,
                      tickangle=0 if have_sprites else -55,
                      tickmode="array", tickvals=columns, ticktext=ticktext,
                      tickfont=dict(size=10) if have_sprites else None,
+                     ticks="outside" if have_sprites else "",
+                     ticklen=LABEL_PUSH if have_sprites else 0,
+                     tickcolor=TRANSPARENT,
                      row=1, col=1)
     fig.update_xaxes(showticklabels=False, row=2, col=1)  # threat names are long; once is enough
-    top_margin = (SPRITE_PX + 34) if have_sprites else 160
+    # Room for the sprite row, the gap, and the number sitting above both.
+    top_margin = (LABEL_PUSH + 34) if have_sprites else 160
     height = 44 * (n + 2) + top_margin + 40
     fig.update_layout(height=height, margin=dict(l=10, r=10, t=top_margin, b=40))
 
