@@ -61,6 +61,22 @@ TERRAIN_TYPE = {GRASSY: "Grass", PSYCHIC_T: "Psychic", ELECTRIC_T: "Electric"}
 GRASSY_WEAKENED = ("earthquake", "bulldoze", "magnitude")
 
 
+# Moves with their own terrain clause, applied ON TOP of the generic type boost —
+# both are onBasePower handlers so they chain. Expanding Force in Psychic Terrain
+# measures at 1.939x against 5325/4096 x 1.5 = 1.950 predicted, which is the rounding.
+TERRAIN_MOVE_EXTRA = {(PSYCHIC_T, "expandingforce"): 1.5}
+
+# Moves that also change target in terrain. Expanding Force becomes allAdjacentFoes
+# under Psychic Terrain (data/moves.ts:4959), so it picks up the spread modifier —
+# which matters more than the power boost when reading a psyspam matchup, because
+# 1.95 x 0.75 nets to about 1.46 against a single target but hits both.
+TERRAIN_MAKES_SPREAD = {(PSYCHIC_T, "expandingforce")}
+
+
+def spreads_in_terrain(terrain: str | None, move_id: str) -> bool:
+    return (terrain, move_id) in TERRAIN_MAKES_SPREAD
+
+
 def terrain_multiplier(terrain: str | None, move_type: str,
                        move_id: str = "") -> float:
     """Base-power multiplier from terrain. Assumes both sides are grounded, which is
@@ -70,7 +86,8 @@ def terrain_multiplier(terrain: str | None, move_type: str,
         return 1.0
     if terrain == GRASSY and move_id in GRASSY_WEAKENED:
         return 0.5
-    return TERRAIN_BOOST if move_type == TERRAIN_TYPE.get(terrain) else 1.0
+    mult = TERRAIN_BOOST if move_type == TERRAIN_TYPE.get(terrain) else 1.0
+    return mult * TERRAIN_MOVE_EXTRA.get((terrain, move_id), 1.0)
 
 
 def trunc(value: float) -> int:

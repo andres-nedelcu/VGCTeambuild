@@ -180,3 +180,31 @@ def test_terrain_and_type_items_are_covered(reference):
     names = " ".join(c["name"] for c in reference)
     assert "Grassy Terrain" in names and "Miracle Seed" in names
     assert "together" in names, "no case combines a terrain and a type item"
+
+
+def test_expanding_force_gets_both_boosts_in_psychic_terrain(reference, dex):
+    """Its own 1.5 chains with the generic Psychic Terrain boost, so roughly 1.95x —
+    the number that decides psyspam prep."""
+    dry = next(c for c in reference if c["name"] == "Expanding Force, no terrain")
+    wet = next(c for c in reference if c["name"] == "Expanding Force in Psychic Terrain")
+    ratio = wet["rolls"][-1] / dry["rolls"][-1]
+    assert 1.85 < ratio < 2.05, f"expected about 1.95x, got {ratio:.3f}"
+    # And it must beat a plain Psychic move, which only gets the generic boost.
+    plain = next(c for c in reference
+                 if c["name"] == "plain Psychic move in Psychic Terrain")
+    assert wet["rolls"][-1] > plain["rolls"][-1]
+    assert damage_rolls(**_inputs(wet, dex)) == tuple(wet["rolls"])
+
+
+def test_expanding_force_becomes_a_spread_move_in_terrain():
+    from vgc.damage import PSYCHIC_T, spreads_in_terrain
+    assert spreads_in_terrain(PSYCHIC_T, "expandingforce")
+    assert not spreads_in_terrain(None, "expandingforce")
+    assert not spreads_in_terrain("grassy", "expandingforce")
+    assert not spreads_in_terrain(PSYCHIC_T, "psychic")
+
+
+def test_a_plain_psychic_move_gets_only_the_generic_boost(reference, dex):
+    plain = next(c for c in reference
+                 if c["name"] == "plain Psychic move in Psychic Terrain")
+    assert damage_rolls(**_inputs(plain, dex)) == tuple(plain["rolls"])

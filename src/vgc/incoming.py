@@ -28,7 +28,7 @@ from typing import Sequence
 
 from vgc.damage import (Result, attack_after_item, base_power_multiplier, boosted,
                         damage_rolls, defence_after_item, final_multiplier,
-                        weather_multiplier)
+                        spreads_in_terrain, weather_multiplier)
 from vgc.db import session
 from vgc.megas import Forme
 from vgc.metafilter import MetaFilter
@@ -183,7 +183,7 @@ def incoming(regulation: str, team: Sequence[Member], formes: Sequence[Forme],
             def roll(attack: int) -> Result:
                 return Result(move_name, move_type, damage_rolls(
                     base_power=int(base_power), attack=attack, defense=defence,
-                    type_mult=mult, stab=move_type in threat.types, spread=bool(spread),
+                    type_mult=mult, stab=move_type in threat.types, spread=bool(spread) or spreads_in_terrain(terrain, move_id),
                     weather_mult=weather_multiplier(weather, move_type),
                     final_mult=final_multiplier(item, mult),
                     base_power_mult=base_power_multiplier(

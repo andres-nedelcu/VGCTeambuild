@@ -461,5 +461,82 @@
   "move": "Energy Ball",
   "spread": false,
   "terrain": "grassyterrain"
+ },
+ {
+  "name": "Expanding Force, no terrain",
+  "attacker": {
+   "species": "Gardevoir",
+   "ability": "Synchronize",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "moves": [
+    "Expanding Force"
+   ]
+  },
+  "defender": {
+   "species": "Rillaboom",
+   "ability": "Overgrow",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Expanding Force",
+  "spread": false
+ },
+ {
+  "name": "Expanding Force in Psychic Terrain",
+  "attacker": {
+   "species": "Gardevoir",
+   "ability": "Synchronize",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "moves": [
+    "Expanding Force"
+   ]
+  },
+  "defender": {
+   "species": "Rillaboom",
+   "ability": "Overgrow",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Expanding Force",
+  "spread": false,
+  "terrain": "psychicterrain"
+ },
+ {
+  "name": "plain Psychic move in Psychic Terrain",
+  "attacker": {
+   "species": "Gardevoir",
+   "ability": "Synchronize",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "moves": [
+    "Psychic"
+   ]
+  },
+  "defender": {
+   "species": "Rillaboom",
+   "ability": "Overgrow",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Psychic",
+  "spread": false,
+  "terrain": "psychicterrain"
  }
 ]
