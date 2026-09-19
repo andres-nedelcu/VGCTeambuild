@@ -40,25 +40,6 @@ complexity, with technical notes. Added 2026-09-18:
 - Wire `check_meta_stability.py` to accept a `MetaFilter`, so a cut view can report
   its own confidence instead of relying on the flat 400-team warning.
 
-### Known bug: two species, one Mega forme (found 2026-09-18)
-
-`mart_meta_top` can hold two rows for the same `forme_id`, because two species map to
-one Mega forme via their stone: `floette` (share 1.000) and `floetteeternal` (0.986)
-both become `floettemega`. It is the only such pair in M-C today.
-
-Effect: Floette-Mega's usage is split across two rows, 11.9% and 1.9%, so the tool
-shows 11.9% where the true figure is about 13.8% — roughly one rank low. The second
-row sits near rank 41, so it stays outside the Offensive-coverage and Threat-list
-sliders (max 40) and no duplicate is visible there; the Speed tab's slider reaches
-60, so it can show Floette-Mega twice.
-
-Predates the meta-filter work — the old `fact_usage`-based view had the same shape.
-
-The fix is to sum usage per `(regulation, forme_id)`, but `species_id`,
-`forme_share`, `species_usage_pct` and `species_rank` are species-level columns that
-then need a rule (carry the largest contributor? null them?). Worth settling
-deliberately rather than inside another change.
-
 ### Other Speed-modifying items (added 2026-09-18)
 
 `team_speeds` applies Choice Scarf only. `dim_item` also carries **Iron Ball** and

@@ -34,12 +34,18 @@ def test_data_uri_none_for_unknown_id():
     assert data_uri("not-a-real-pokemon-id") is None
 
 
+def colours(img: Image.Image) -> set:
+    """Distinct RGBA pixels. getcolors() rather than the deprecated getdata():
+    it is a histogram, so it allocates one entry per colour instead of per pixel."""
+    rgba = img.convert("RGBA")
+    return {pixel for _count, pixel in rgba.getcolors(maxcolors=rgba.width * rgba.height)}
+
+
 def test_fallback_sprites_carry_the_gold_badge():
     """Every one of Phase A's 10 misses got a composited stand-in, not a blank."""
     for pokemon_id in COVERAGE["missing"]:
-        img = Image.open(SPRITE_DIR / f"{pokemon_id}.png").convert("RGBA")
-        pixels = set(img.getdata())
-        assert BADGE_COLOR in pixels, f"{pokemon_id} fallback has no badge"
+        img = Image.open(SPRITE_DIR / f"{pokemon_id}.png")
+        assert BADGE_COLOR in colours(img), f"{pokemon_id} fallback has no badge"
 
 
 def test_fallback_ring_only_when_typing_differs_from_base():
@@ -47,8 +53,8 @@ def test_fallback_ring_only_when_typing_differs_from_base():
     from the base species the fallback art borrows from; only they get the ring.
     """
     for pokemon_id in COVERAGE["missing"]:
-        img = Image.open(SPRITE_DIR / f"{pokemon_id}.png").convert("RGBA")
-        has_ring = MISMATCH_RING in set(img.getdata())
+        img = Image.open(SPRITE_DIR / f"{pokemon_id}.png")
+        has_ring = MISMATCH_RING in colours(img)
         expected = pokemon_id in {"staraptormega", "barbaraclemega"}
         assert has_ring == expected, f"{pokemon_id}: ring={has_ring}, expected={expected}"
 
@@ -63,6 +69,6 @@ def test_build_fallback_is_deterministic(tmp_path):
     build_fallback(base, out_b, mismatched=True)
 
     assert out_a.read_bytes() != out_b.read_bytes()
-    assert BADGE_COLOR in set(Image.open(out_a).convert("RGBA").getdata())
-    assert MISMATCH_RING in set(Image.open(out_b).convert("RGBA").getdata())
-    assert MISMATCH_RING not in set(Image.open(out_a).convert("RGBA").getdata())
+    assert BADGE_COLOR in colours(Image.open(out_a))
+    assert MISMATCH_RING in colours(Image.open(out_b))
+    assert MISMATCH_RING not in colours(Image.open(out_a))

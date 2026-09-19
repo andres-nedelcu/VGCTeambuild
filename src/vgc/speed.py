@@ -19,6 +19,11 @@ from vgc.metafilter import MetaFilter
 from vgc.stats import CHOICE_SCARF, calc_stat, nature_mod, scarf, sp_from_investment
 from vgc.team import Member
 
+# Below this share, the "likely" Speed is too split to plan around and is shown muted.
+# It is the weaker of two INDEPENDENT marginals: CBD publishes nature and spread
+# distributions separately and never pairs them, so this is not a joint probability.
+LOW_CONFIDENCE = 0.5
+
 OUTSPEED, DEPENDS, OUTSPED = "You outspeed", "Depends", "Outsped"
 MOVE_FIRST, MOVE_LAST = "You move first", "They move first"
 BUILD_CMD = "uv run python scripts/build_marts.py"
@@ -104,7 +109,10 @@ def meta_speed(regulation: str, top_n: int | None = None,
             df = con.execute(f"""
                 select display_name, base_spe, spe_max_plus, spe_max_neutral,
                        spe_uninvested, spe_uninvested_neg, spe_max_plus_scarf,
-                       spe_max_neutral_scarf, scarf_share, scarf_flag, forme_usage_pct
+                       spe_max_neutral_scarf, scarf_share, scarf_flag,
+                       likely_spe, likely_spe_sp, likely_spe_sp_share,
+                       likely_nature_dir, likely_nature_share, likely_confidence,
+                       forme_usage_pct
                 from {filt.call('meta_speed')}
                 order by forme_usage_pct desc
             """, filt.params(regulation)).df()
