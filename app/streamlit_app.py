@@ -9,6 +9,7 @@ from components.cores_view import (render_cores, render_item_cores, render_partn
                                   render_suggestions, render_swaps, render_uniques)
 from components.damage_grid import (render_damage_grid, render_focus,
                                     render_incoming_table)
+from components.spread_editor import render_editor, render_export, stored_spreads
 from components.coverage_grid import render_coverage_grid
 from components.defense_grid import render_defense_grid
 from components.speed_view import render_speed_tiers, render_team_speeds
@@ -25,6 +26,8 @@ from vgc.offense import attackers, coverage_matrix, holes, team_best, threats
 from vgc.pressure import rank as rank_threats
 from vgc.speed import TAILWIND_OPTIONS, Field, meta_speed, team_speeds
 from vgc.damage import RAIN, SUN
+from vgc.edit import apply as apply_spreads
+from vgc.edit import read_spread, to_paste
 from vgc.incoming import TIERS, against, incoming
 from vgc.suggest import suggestions
 from vgc.swap import sole_coverage, swaps
@@ -62,7 +65,15 @@ with st.sidebar:
         st.code(LOAD_CMD, language="bash")
         st.caption("Then refresh this page.")
 
-    team = load_team(paste_id)
+    loaded = load_team(paste_id)
+    # Spread edits live in session state and are read here, before any visual is
+    # built — see components/spread_editor for why the ordering matters.
+    spread_edits = stored_spreads(paste_id, loaded)
+    team = apply_spreads(loaded, spread_edits)
+    # Compare parsed spreads: apply() turns the stored JSON string into a dict, so
+    # comparing `investment` directly reports every member as edited on first load.
+    _before = {m.slot: read_spread(m) for m in loaded}
+    edited = [m.slot for m in team if read_spread(m) != _before[m.slot]]
     names = {m.slot: dex[m.pokemon_id].display_name for m in team}
     all_slots = [m.slot for m in team]
     slots = st.multiselect(
@@ -132,6 +143,9 @@ with st.expander("Data freshness"):
     ]), hide_index=True, width="stretch")
     st.caption(f"Refresh everything with `{REFRESH_CMD}`")
 
+if edited:
+    st.info(f"Showing edited spreads for {len(edited)} Pokémon — session only, not "
+            "saved. The Spreads tab has an export you can copy.")
 st.caption(f"Meta: {meta_filter.label()} · {teams_counted:,} teams")
 if teams_counted == 0:
     st.error("No tournament teams match these meta filters. Widen them in the sidebar.")
@@ -151,9 +165,14 @@ matrix = defense_matrix(formes)
 summary = summarize(matrix)
 flags = flagged_types(summary)
 
-(tab_defense, tab_coverage, tab_speed, tab_threats, tab_damage,
- tab_cores) = st.tabs(["Defensive grid", "Offensive coverage", "Speed tiers",
-                       "Threat list", "Damage", "What to add"])
+(tab_spreads, tab_defense, tab_coverage, tab_speed, tab_threats, tab_damage,
+ tab_cores) = st.tabs(["Spreads", "Defensive grid", "Offensive coverage",
+                       "Speed tiers", "Threat list", "Damage", "What to add"])
+
+with tab_spreads:
+    st.subheader("Set SP and natures")
+    render_editor(paste_id, loaded, resolve_team(team, mega_slot), spread_edits)
+    render_export(to_paste(team))
 
 with tab_defense:
     st.subheader("Defensive type grid")
