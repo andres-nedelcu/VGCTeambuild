@@ -174,6 +174,23 @@ EXPERT_BELT = 1.2   # only against a super effective hit
 
 PHYSICAL, SPECIAL = "Physical", "Special"
 
+# sim/pokemon.ts:583. Stages are applied to the STAT, before any item modifier —
+# `modifyStat` boosts first and calls battle.modify() afterwards — so the order here
+# is base stat -> boost -> item, and reversing it is wrong by a point or two.
+#
+# One generic control covers most of what would otherwise need an ability model:
+# Intimidate is -1 Atk, Stamina is +N Def, Swords Dance +2, Nasty Plot +2 SpA.
+BOOST_TABLE = (1, 1.5, 2, 2.5, 3, 3.5, 4)
+MAX_STAGE = 6
+
+
+def boosted(stat: int, stage: int) -> int:
+    """A stat at a given stage, clamped to +/-6."""
+    stage = max(-MAX_STAGE, min(MAX_STAGE, stage))
+    if stage >= 0:
+        return trunc(stat * BOOST_TABLE[stage])
+    return trunc(stat / BOOST_TABLE[-stage])
+
 
 def attack_after_item(stat: int, item_id: str | None, category: str) -> int:
     """Choice Band / Specs scale the attacking stat, and only the matching one."""

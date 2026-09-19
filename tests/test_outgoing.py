@@ -1,0 +1,109 @@
+"""Outgoing damage: what your team does to the meta.
+
+The distinction this module exists for is `always_kos` — a KO that lands even against
+the bulkiest legal build. It is the only damage claim in the tool that survives not
+knowing what the opponent invested, so it has to be exactly right: too loose and it
+promises a KO that whiffs, too tight and it is indistinguishable from `likely_kos`.
+"""
+
+import pytest
+
+from vgc.megas import resolve_team
+from vgc.metafilter import MetaFilter
+from vgc.outgoing import ALWAYS, LIKELY, NEVER, outgoing
+from vgc.team import list_pastes, load_team
+
+REG = "M-C"
+
+
+@pytest.fixture(scope="module")
+def ctx():
+    full = [p for p in list_pastes() if len(p[2]) > 1]
+    if not full:
+        pytest.skip("no multi-Pokémon paste loaded")
+    team = load_team(full[0][0])
+    formes = resolve_team(team, None)
+    try:
+        rows = outgoing(REG, team, formes, MetaFilter(), 20)
+    except LookupError:
+        pytest.skip("marts not built")
+    if not rows:
+        pytest.skip("no meta rows")
+    return team, formes, rows
+
+
+def test_there_is_something_to_report(ctx):
+    *_, rows = ctx
+    assert rows
+
+
+def test_a_bulkier_target_never_takes_more(ctx):
+    """bulkiest is the maximum legal investment, so it cannot take more damage."""
+    *_, rows = ctx
+    for h in rows:
+        assert h.bulkiest.low <= h.likely.low, f"{h.attacker_name} -> {h.threat.display_name}"
+        assert h.bulkiest.defender_hp >= h.likely.defender_hp
+
+
+def test_always_kos_implies_likely_kos(ctx):
+    """Killing through max bulk must also kill the common build. If this ever fails
+    the two calculations have diverged."""
+    *_, rows = ctx
+    for h in rows:
+        if h.always_kos:
+            assert h.likely_kos, f"{h.attacker_name} -> {h.threat.display_name}"
+
+
+def test_certainty_is_the_three_stated_states(ctx):
+    *_, rows = ctx
+    for h in rows:
+        assert h.certainty in (ALWAYS, LIKELY, NEVER)
+        assert (h.certainty == ALWAYS) == h.always_kos
+        assert (h.certainty == NEVER) == (not h.likely_kos)
+
+
+def test_both_certainty_levels_actually_occur(ctx):
+    """Guards the whole feature: if everything is one bucket the distinction is
+    invisible and the colour on the grid means nothing."""
+    *_, rows = ctx
+    seen = {h.certainty for h in rows}
+    assert len(seen) >= 2, f"only one certainty level present: {seen}"
+
+
+def test_hits_to_ko_agrees_with_the_result(ctx):
+    *_, rows = ctx
+    for h in rows:
+        if h.hits_to_ko is not None:
+            assert h.hits_to_ko * h.likely.low >= h.likely.defender_hp
+            assert h.hits_to_ko == 1 or (h.hits_to_ko - 1) * h.likely.low < h.likely.defender_hp
+
+
+def test_one_row_per_attacker_and_threat(ctx):
+    *_, rows = ctx
+    keys = [(h.attacker_slot, h.threat.forme_id) for h in rows]
+    assert len(keys) == len(set(keys))
+
+
+def test_rows_are_ordered_by_damage_through_bulk(ctx):
+    *_, rows = ctx
+    pcts = [h.bulkiest.low_pct for h in rows]
+    assert pcts == sorted(pcts, reverse=True)
+
+
+def test_a_boost_makes_your_hits_harder(ctx):
+    team, formes, rows = ctx
+    plain = {(h.attacker_slot, h.threat.forme_id): h for h in rows}
+    boosted_rows = {(h.attacker_slot, h.threat.forme_id): h for h in
+                    outgoing(REG, team, formes, MetaFilter(), 20, atk_stage=2)}
+    moved = 0
+    for key, hit in plain.items():
+        if hit.likely.low == 0:
+            continue
+        assert boosted_rows[key].likely.low >= hit.likely.low
+        moved += boosted_rows[key].likely.low > hit.likely.low
+    assert moved, "a +2 attack stage changed nothing"
+
+
+def test_an_impossible_filter_yields_nothing(ctx):
+    team, formes, _rows = ctx
+    assert outgoing(REG, team, formes, MetaFilter(min_players=10_000), 20) == []

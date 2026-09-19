@@ -243,3 +243,34 @@ def render_swaps(rows, baseline_holes: list[str], baseline_flags: list[str]) -> 
         "Pokémon are judged on the moves in your paste; a candidate on the meta's "
         "commonly-run moves, so this compares your actual build to a typical one."
     )
+
+
+def render_combos(df: pd.DataFrame) -> None:
+    """The trios people actually bring, for planning against a field."""
+    if df.empty:
+        st.info("No combination clears the sample at this filter.")
+        return
+    view = pd.DataFrame({
+        "": _sprite_col(df["a_id"]),
+        " ": _sprite_col(df["b_id"]),
+        "  ": _sprite_col(df["c_id"]),
+        "Combination": [f"{a} + {b} + {c}" for a, b, c in
+                        zip(df["a_name"], df["b_name"], df["c_name"])],
+        "Teams": df["together"],
+        "Share": 100 * df["share"],
+    })
+    st.dataframe(
+        view, hide_index=True, width="stretch",
+        column_config={
+            "": st.column_config.ImageColumn(), " ": st.column_config.ImageColumn(),
+            "  ": st.column_config.ImageColumn(),
+            "Teams": st.column_config.NumberColumn(format="%.0f"),
+            "Share": st.column_config.NumberColumn(
+                format="%.1f%%", help="Share of all teams in scope running all three"),
+        },
+    )
+    st.caption(
+        "Ranked by how often they turn up, not by lift. Lift asks whether two "
+        "Pokémon are picked *for* each other; this asks what you will actually face "
+        "as a unit, which is the question worth planning against."
+    )

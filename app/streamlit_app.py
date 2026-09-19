@@ -5,10 +5,12 @@ import time
 import pandas as pd
 import streamlit as st
 
-from components.cores_view import (render_cores, render_item_cores, render_partners,
-                                  render_suggestions, render_swaps, render_uniques)
+from components.cores_view import (render_combos, render_cores, render_item_cores,
+                                  render_partners, render_suggestions, render_swaps,
+                                  render_uniques)
 from components.damage_grid import (render_damage_grid, render_focus,
                                     render_incoming_table)
+from components.outgoing_grid import render_outgoing_grid, render_outgoing_table
 from components.spread_editor import render_editor, render_export, stored_spreads
 from components.coverage_grid import render_coverage_grid
 from components.defense_grid import render_defense_grid
@@ -16,7 +18,7 @@ from components.speed_view import render_speed_tiers, render_team_speeds
 from components.threat_list import render_threat_list
 from vgc import regulations
 from vgc.cores import cores as meta_cores
-from vgc.cores import item_cores, min_support, partners
+from vgc.cores import combos, item_cores, min_support, partners
 from vgc.db import load_settings, warehouse_path
 from vgc.defense import defense_matrix, flagged_types, mega_comparison, summarize
 from vgc.freshness import sources as data_sources
@@ -29,6 +31,7 @@ from vgc.damage import RAIN, SUN
 from vgc.edit import apply as apply_spreads
 from vgc.edit import read_spread, to_paste
 from vgc.incoming import TIERS, against, incoming
+from vgc.outgoing import outgoing
 from vgc.suggest import suggestions
 from vgc.swap import sole_coverage, swaps
 from vgc.sprites import data_uri as sprite_data_uri
@@ -276,8 +279,44 @@ with tab_damage:
         dmg_n = right.slider("Threats shown", 10, 30,
                              int(load_settings()["defaults"]["top_n"]), step=5,
                              key=f"dmg_top_{paste_id}")
-        hits = incoming(reg, team, formes, meta_filter, dmg_n, weather)
-        if not hits:
+        acol, dcol = st.columns(2)
+        atk_stage = acol.slider(
+            "Their attack stage", -6, 6, 0, key=f"dmg_atk_{paste_id}",
+            help="How this models abilities instead of hardcoding them: Intimidate "
+                 "is -1, Swords Dance or Nasty Plot is +2.")
+        def_stage = dcol.slider(
+            "Your defence stage", -6, 6, 0, key=f"dmg_def_{paste_id}",
+            help="Stamina is +1 per hit taken; screens are not modelled, so this is "
+                 "also the honest way to approximate one.")
+        direction = st.radio(
+            "Direction", ["What hits me", "What I hit"], horizontal=True,
+            key=f"dmg_dir_{paste_id}",
+            help="The stage sliders read from the attacker's side either way: on "
+                 "'What I hit' they are your boosts and their defence.")
+
+        if direction == "What I hit":
+            out = outgoing(reg, team, formes, meta_filter, dmg_n, weather,
+                           atk_stage, def_stage)
+            if not out:
+                st.warning("No threats at this filter.")
+            else:
+                render_outgoing_grid(out, [(f.display_name, f.forme_id) for f in formes])
+                certain = [h for h in out if h.always_kos]
+                if certain:
+                    st.success(f"{len(certain)} of {len(out)} matchups KO in one hit "
+                               "no matter what they invested.")
+                names = {f.slot: f.display_name for f in formes}
+                pick = st.selectbox(
+                    "Break down one of yours", [f.slot for f in formes],
+                    format_func=lambda s: names[s], key=f"out_focus_{paste_id}")
+                render_outgoing_table(
+                    sorted([h for h in out if h.attacker_slot == pick],
+                           key=lambda h: h.bulkiest.low_pct, reverse=True))
+
+        # st.stop() would end the whole script run, not this tab, and the tabs below
+        # would never be built — so the incoming path is an else, not a fallthrough.
+        elif not (hits := incoming(reg, team, formes, meta_filter, dmg_n, weather,
+                                   atk_stage, def_stage)):
             st.warning("No threats at this filter.")
         else:
             order = [(f.display_name, f.forme_id) for f in formes]
@@ -359,6 +398,15 @@ with tab_cores:
 
         st.markdown("**The meta's strongest cores**")
         render_cores(meta_cores(reg, meta_filter).head(25))
+
+        st.markdown("**What you will face together**")
+        st.caption("The three-Pokémon combinations people actually bring. Good for "
+                   "drafting a plan against a field rather than a single threat.")
+        only_mine = st.checkbox(
+            "Only combinations involving my team", key=f"combo_mine_{paste_id}",
+            help="Shows what the meta pairs your own picks with.")
+        render_combos(combos(reg, meta_filter, 20,
+                             [m.pokemon_id for m in team] if only_mine else None))
 
         st.markdown("**Builds that choose their own partner**")
         st.caption("Where the item a Pokémon holds decides who it is brought with. "

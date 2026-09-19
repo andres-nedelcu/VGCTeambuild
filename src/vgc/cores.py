@@ -192,3 +192,28 @@ def synergy_map(regulation: str, members: Sequence[tuple[str, str | None]],
     Shared by the add and swap views so they cannot disagree about what synergy means.
     """
     return best_synergy(synergy_sources(regulation, members, filt))
+
+
+def combos(regulation: str, filt: MetaFilter | None = None,
+           limit: int = 20, contains: Sequence[str] | None = None) -> pd.DataFrame:
+    """The most common three-Pokémon combinations, most frequent first.
+
+    Ranked by plain frequency rather than lift. Lift answers "are these two chosen
+    for each other"; frequency answers "what will I actually run into", and for
+    planning against a field the second question is the one being asked.
+    """
+    filt = filt or MetaFilter()
+    with session() as con:
+        try:
+            df = con.execute(f"""
+                select a_id, b_id, c_id, a_name, b_name, c_name, together, share
+                from {filt.call('meta_combos')}
+            """, filt.params(regulation)).df()
+        except Exception as e:  # noqa: BLE001
+            raise LookupError(f"The meta marts are not built. Run: {BUILD_CMD}") from e
+    if contains:
+        want = set(contains)
+        keep = [bool(want & {a, b, c})
+                for a, b, c in zip(df["a_id"], df["b_id"], df["c_id"])]
+        df = df[keep]
+    return df.sort_values("together", ascending=False).head(limit).reset_index(drop=True)

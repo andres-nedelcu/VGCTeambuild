@@ -26,8 +26,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Sequence
 
-from vgc.damage import (Result, attack_after_item, damage_rolls, defence_after_item,
-                        final_multiplier, weather_multiplier)
+from vgc.damage import (Result, attack_after_item, boosted, damage_rolls,
+                        defence_after_item, final_multiplier, weather_multiplier)
 from vgc.db import session
 from vgc.megas import Forme
 from vgc.metafilter import MetaFilter
@@ -131,8 +131,15 @@ def _threat_builds(regulation: str, filt: MetaFilter) -> dict:
 
 def incoming(regulation: str, team: Sequence[Member], formes: Sequence[Forme],
              filt: MetaFilter | None = None, top_n: int = 20,
-             weather: str | None = None) -> list[Incoming]:
-    """The hardest hit each meta threat has on each of your Pokémon, worst first."""
+             weather: str | None = None, atk_stage: int = 0,
+             def_stage: int = 0) -> list[Incoming]:
+    """The hardest hit each meta threat has on each of your Pokémon, worst first.
+
+    `atk_stage` and `def_stage` are ordinary stat stages, which is how this models
+    the abilities it deliberately does not hardcode: Intimidate is the attacker at
+    -1, Stamina is the defender at +1 per hit taken, Swords Dance is +2. One control
+    instead of an ability graph.
+    """
     filt = filt or MetaFilter()
     meta = threats(regulation, top_n, filt)
     if not meta:
@@ -161,14 +168,16 @@ def incoming(regulation: str, team: Sequence[Member], formes: Sequence[Forme],
         # held at the modal one in both: widening two axes at once turns a worst case
         # into speculation.
         worst_raw = calc_stat(base_stat, MAX_SP, BOOSTING, stat=key)
-        likely_attack = attack_after_item(likely_raw, item, category)
-        worst_attack = attack_after_item(worst_raw, item, category)
+        # Stage first, item second: sim/pokemon.ts:583 boosts before battle.modify().
+        likely_attack = attack_after_item(boosted(likely_raw, atk_stage), item, category)
+        worst_attack = attack_after_item(boosted(worst_raw, atk_stage), item, category)
 
         for slot, mine in bulk.items():
             target = by_slot[slot]
             mult = effectiveness(move_type, target.types, target.ability_id)
             defence = defence_after_item(
-                mine["def"] if category == "Physical" else mine["spd"],
+                boosted(mine["def"] if category == "Physical" else mine["spd"],
+                        def_stage),
                 mine["item"], category)
             def roll(attack: int) -> Result:
                 return Result(move_name, move_type, damage_rolls(

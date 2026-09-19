@@ -55,6 +55,10 @@ function rollsFor(c) {
     const target = battle.p2.active[0];
     // setWeather refuses without a source; the attacker stands in for the setter.
     if (c.weather) battle.field.setWeather(c.weather, source);
+    // Stat stages, so Intimidate / Stamina / Swords Dance can be checked without
+    // modelling any of them individually.
+    if (c.attacker.boosts) source.boosts = Object.assign(source.boosts, c.attacker.boosts);
+    if (c.defender.boosts) target.boosts = Object.assign(target.boosts, c.defender.boosts);
     // randomizer() asks for random(16); pin it so each roll is reproducible.
     battle.random = (m) => (m === ROLLS ? roll : 0);
 
@@ -73,6 +77,8 @@ function main() {
     const rolls = rollsFor(c);
     const probe = start(c);
     const d = probe.p2.active[0];
+    if (c.attacker.boosts) probe.p1.active[0].boosts = Object.assign(probe.p1.active[0].boosts, c.attacker.boosts);
+    if (c.defender.boosts) d.boosts = Object.assign(d.boosts, c.defender.boosts);
     return Object.assign({}, c, {
       rolls: rolls.slice().sort((x, y) => x - y),
       defender_hp: d.maxhp,

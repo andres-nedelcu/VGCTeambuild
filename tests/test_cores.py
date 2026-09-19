@@ -118,3 +118,30 @@ def test_support_floor_scales_with_the_sample(built):
     assert cut < full
     assert cut >= 5
     assert sample_size(REG, MetaFilter(cut=8)) < sample_size(REG)
+
+
+def test_combos_are_canonically_ordered_and_distinct(built):
+    """a < b < c, so each combination is stored once rather than six times."""
+    from vgc.db import session
+    with session() as con:
+        bad = con.execute("""
+            select count(*) from mart_meta_combos
+            where not (a_id < b_id and b_id < c_id)
+        """).fetchone()[0]
+    assert bad == 0
+
+
+def test_combos_rank_by_frequency(built):
+    from vgc.cores import combos
+    df = combos(REG, limit=10)
+    assert not df.empty
+    assert df["together"].is_monotonic_decreasing
+    assert (df["share"] > 0).all() and (df["share"] <= 1).all()
+
+
+def test_combos_can_be_filtered_to_your_own_picks(built, mine):
+    from vgc.cores import combos
+    df = combos(REG, limit=50, contains=mine)
+    assert not df.empty
+    for a, b, c in zip(df["a_id"], df["b_id"], df["c_id"]):
+        assert {a, b, c} & set(mine), "a combination with none of my Pokémon slipped through"

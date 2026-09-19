@@ -19,7 +19,7 @@ import json
 import pytest
 
 from vgc import REPO_ROOT
-from vgc.damage import (attack_after_item, damage_rolls, defence_after_item,
+from vgc.damage import (attack_after_item, boosted, damage_rolls, defence_after_item,
                         final_multiplier, weather_multiplier)
 from vgc.db import session
 from vgc.ids import to_id
@@ -66,10 +66,16 @@ def _inputs(case, dex):
     atk_item = to_id(case["attacker"].get("item") or "") or None
     def_item = to_id(case["defender"].get("item") or "") or None
 
+    # Stage first, item second — sim/pokemon.ts:583 boosts before battle.modify().
+    atk_stage = (case["attacker"].get("boosts") or {}).get(
+        "atk" if category == "Physical" else "spa", 0)
+    def_stage = (case["defender"].get("boosts") or {}).get(
+        "def" if category == "Physical" else "spd", 0)
+
     return dict(
         base_power=base_power,
-        attack=attack_after_item(raw_atk, atk_item, category),
-        defense=defence_after_item(raw_def, def_item, category),
+        attack=attack_after_item(boosted(raw_atk, atk_stage), atk_item, category),
+        defense=defence_after_item(boosted(raw_def, def_stage), def_item, category),
         type_mult=type_mult,
         stab=move_type in atk_types,
         spread=bool(case.get("spread")),
@@ -124,9 +130,42 @@ def test_item_stat_modifiers_match_showdowns_rounding(reference):
         item = to_id(case["attacker"].get("item") or "") or None
         if item not in ("choiceband", "choicespecs"):
             continue
+        if case["attacker"].get("boosts"):
+            continue   # isolates item rounding; the combined case is covered above
         stat = "atk" if item == "choiceband" else "spa"
         category = "Physical" if stat == "atk" else "Special"
         raw = case["attacker_stats_raw"][stat]
         assert attack_after_item(raw, item, category) == case["attacker_stats"][stat]
         checked += 1
     assert checked, "no Choice-item case in the fixture to check"
+
+
+def test_stat_stages_match_the_simulator(reference):
+    """The stage table and the clamp, checked against what getStat actually reports."""
+    checked = 0
+    for case in reference:
+        boosts = case["attacker"].get("boosts") or {}
+        stage = boosts.get("atk")
+        if stage is None or case["attacker"].get("item"):
+            continue   # item cases are covered separately; this isolates the boost
+        raw = case["attacker_stats_raw"]["atk"]
+        assert boosted(raw, stage) == case["attacker_stats"]["atk"], case["name"]
+        checked += 1
+    assert checked >= 2, "not enough boost-only cases to exercise the table"
+
+
+def test_the_stage_table_covers_intimidate_and_a_setup_move(reference):
+    names = " ".join(c["name"] for c in reference)
+    assert "Intimidate" in names and "Swords Dance" in names and "Stamina" in names
+
+
+@pytest.mark.parametrize("stage,expect", [
+    (0, 200), (1, 300), (2, 400), (6, 800), (-1, 133), (-2, 100), (-6, 50),
+])
+def test_boost_table_endpoints(stage, expect):
+    assert boosted(200, stage) == expect
+
+
+def test_stages_clamp_beyond_six():
+    assert boosted(200, 99) == boosted(200, 6)
+    assert boosted(200, -99) == boosted(200, -6)

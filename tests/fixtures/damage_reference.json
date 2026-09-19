@@ -582,5 +582,250 @@
       "atk": 108,
       "spa": 180
     }
+  },
+  {
+    "name": "Intimidate: attacker at -1 Atk",
+    "attacker": {
+      "species": "Garchomp",
+      "evs": {
+        "atk": 32
+      },
+      "nature": "Adamant",
+      "moves": [
+        "Earthquake"
+      ],
+      "boosts": {
+        "atk": -1
+      }
+    },
+    "defender": {
+      "species": "Incineroar",
+      "evs": {
+        "hp": 32,
+        "def": 32
+      },
+      "nature": "Impish"
+    },
+    "move": "Earthquake",
+    "spread": false,
+    "rolls": [
+      98,
+      98,
+      98,
+      102,
+      102,
+      104,
+      104,
+      104,
+      108,
+      108,
+      110,
+      110,
+      110,
+      114,
+      114,
+      116
+    ],
+    "defender_hp": 202,
+    "defender_stats": {
+      "def": 156,
+      "spd": 110
+    },
+    "defender_stats_raw": {
+      "def": 156,
+      "spd": 110
+    },
+    "attacker_stats": {
+      "atk": 133,
+      "spa": 90
+    },
+    "attacker_stats_raw": {
+      "atk": 200,
+      "spa": 90
+    }
+  },
+  {
+    "name": "Stamina: defender at +2 Def",
+    "attacker": {
+      "species": "Garchomp",
+      "evs": {
+        "atk": 32
+      },
+      "nature": "Adamant",
+      "moves": [
+        "Earthquake"
+      ]
+    },
+    "defender": {
+      "species": "Incineroar",
+      "evs": {
+        "hp": 32,
+        "def": 32
+      },
+      "nature": "Impish",
+      "boosts": {
+        "def": 2
+      }
+    },
+    "move": "Earthquake",
+    "spread": false,
+    "rolls": [
+      74,
+      74,
+      78,
+      78,
+      78,
+      80,
+      80,
+      80,
+      80,
+      84,
+      84,
+      84,
+      86,
+      86,
+      86,
+      90
+    ],
+    "defender_hp": 202,
+    "defender_stats": {
+      "def": 312,
+      "spd": 110
+    },
+    "defender_stats_raw": {
+      "def": 156,
+      "spd": 110
+    },
+    "attacker_stats": {
+      "atk": 200,
+      "spa": 90
+    },
+    "attacker_stats_raw": {
+      "atk": 200,
+      "spa": 90
+    }
+  },
+  {
+    "name": "Swords Dance: attacker at +2 Atk",
+    "attacker": {
+      "species": "Garchomp",
+      "evs": {
+        "atk": 32
+      },
+      "nature": "Adamant",
+      "moves": [
+        "Earthquake"
+      ],
+      "boosts": {
+        "atk": 2
+      }
+    },
+    "defender": {
+      "species": "Incineroar",
+      "evs": {
+        "hp": 32,
+        "def": 32
+      },
+      "nature": "Impish"
+    },
+    "move": "Earthquake",
+    "spread": false,
+    "rolls": [
+      288,
+      294,
+      296,
+      300,
+      302,
+      306,
+      308,
+      312,
+      318,
+      320,
+      324,
+      326,
+      330,
+      332,
+      336,
+      342
+    ],
+    "defender_hp": 202,
+    "defender_stats": {
+      "def": 156,
+      "spd": 110
+    },
+    "defender_stats_raw": {
+      "def": 156,
+      "spd": 110
+    },
+    "attacker_stats": {
+      "atk": 400,
+      "spa": 90
+    },
+    "attacker_stats_raw": {
+      "atk": 200,
+      "spa": 90
+    }
+  },
+  {
+    "name": "boost and item together: +1 Atk with Choice Band",
+    "attacker": {
+      "species": "Garchomp",
+      "evs": {
+        "atk": 32
+      },
+      "nature": "Adamant",
+      "moves": [
+        "Earthquake"
+      ],
+      "item": "Choice Band",
+      "boosts": {
+        "atk": 1
+      }
+    },
+    "defender": {
+      "species": "Incineroar",
+      "evs": {
+        "hp": 32,
+        "def": 32
+      },
+      "nature": "Impish"
+    },
+    "move": "Earthquake",
+    "spread": false,
+    "rolls": [
+      324,
+      330,
+      332,
+      336,
+      338,
+      344,
+      348,
+      350,
+      356,
+      360,
+      362,
+      366,
+      372,
+      374,
+      378,
+      384
+    ],
+    "defender_hp": 202,
+    "defender_stats": {
+      "def": 156,
+      "spd": 110
+    },
+    "defender_stats_raw": {
+      "def": 156,
+      "spd": 110
+    },
+    "attacker_stats": {
+      "atk": 450,
+      "spa": 90
+    },
+    "attacker_stats_raw": {
+      "atk": 200,
+      "spa": 90
+    }
   }
 ]

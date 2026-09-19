@@ -155,3 +155,26 @@ def test_each_bucket_is_ordered_hardest_first(ctx):
     for bucket in against(rows, rows[0].target_slot).values():
         pcts = [h.worst.low_pct for h in bucket]
         assert pcts == sorted(pcts, reverse=True)
+
+
+def test_stat_stages_move_damage_the_right_way(ctx):
+    """Intimidate should soften every hit; a defence drop should harden every one."""
+    team, formes, _rows = ctx
+    plain = {(h.threat.forme_id, h.target_slot): h
+             for h in incoming(REG, team, formes, MetaFilter(), 20)}
+    weakened = {(h.threat.forme_id, h.target_slot): h
+                for h in incoming(REG, team, formes, MetaFilter(), 20, atk_stage=-1)}
+    tanky = {(h.threat.forme_id, h.target_slot): h
+             for h in incoming(REG, team, formes, MetaFilter(), 20, def_stage=2)}
+    assert plain
+    for key, hit in plain.items():
+        if hit.worst.low == 0:
+            continue
+        assert weakened[key].worst.low < hit.worst.low, "Intimidate did not soften it"
+        assert tanky[key].worst.low < hit.worst.low, "a Defence boost did not help"
+
+
+def test_stage_zero_is_the_default_behaviour(ctx):
+    team, formes, rows = ctx
+    explicit = incoming(REG, team, formes, MetaFilter(), 20, None, 0, 0)
+    assert [h.worst.rolls for h in explicit] == [h.worst.rolls for h in rows]

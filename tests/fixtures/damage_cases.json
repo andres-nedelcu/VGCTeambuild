@@ -232,5 +232,110 @@
   },
   "move": "Zap Cannon",
   "spread": false
+ },
+ {
+  "name": "Intimidate: attacker at -1 Atk",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Earthquake"
+   ],
+   "boosts": {
+    "atk": -1
+   }
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Earthquake",
+  "spread": false
+ },
+ {
+  "name": "Stamina: defender at +2 Def",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Earthquake"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish",
+   "boosts": {
+    "def": 2
+   }
+  },
+  "move": "Earthquake",
+  "spread": false
+ },
+ {
+  "name": "Swords Dance: attacker at +2 Atk",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Earthquake"
+   ],
+   "boosts": {
+    "atk": 2
+   }
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Earthquake",
+  "spread": false
+ },
+ {
+  "name": "boost and item together: +1 Atk with Choice Band",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Earthquake"
+   ],
+   "item": "Choice Band",
+   "boosts": {
+    "atk": 1
+   }
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Earthquake",
+  "spread": false
  }
 ]
