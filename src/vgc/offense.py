@@ -119,7 +119,7 @@ def coverage_matrix(attacking: Sequence[Attacker], meta: Sequence[Threat]) -> pd
     columns = [t.display_name for t in meta]
     data = {}
     for a in attacking:
-        data[f"{a.slot}. {a.display_name}"] = [
+        data[a.display_name] = [
             max((effectiveness(mt, t.types, t.ability_id) for mt in a.move_types), default=0.0)
             for t in meta
         ]

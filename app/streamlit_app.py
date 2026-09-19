@@ -57,7 +57,7 @@ with st.sidebar:
     all_slots = [m.slot for m in team]
     slots = st.multiselect(
         "Pokémon", all_slots, default=all_slots,
-        format_func=lambda s: f"{s}. {names[s]}", key=f"slots_{paste_id}",
+        format_func=lambda s: names[s], key=f"slots_{paste_id}",
     )
 
     regs = list(regulations.load()["regulations"])
@@ -153,7 +153,8 @@ with tab_defense:
     else:
         st.success("No flagged types")
 
-    render_defense_grid(matrix, summary, flags)
+    render_defense_grid(matrix, summary, flags,
+                        {f.display_name: sprite_data_uri(f.forme_id) for f in formes})
 
     comparison = mega_comparison(team, slots)
     if len(comparison) > 1:
@@ -164,7 +165,7 @@ with tab_defense:
 
     with st.expander("Formes and abilities used"):
         st.dataframe(pd.DataFrame([
-            {"sprite": sprite_data_uri(f.forme_id), "slot": f.slot,
+            {"sprite": sprite_data_uri(f.forme_id),
              "forme": f.display_name, "types": " / ".join(f.types),
              "ability": f.ability_id, "mega": "Yes" if f.is_mega else ""}
             for f in formes
@@ -187,7 +188,8 @@ with tab_coverage:
             st.success(f"Something on the team hits all {top_n} threats super effectively")
         render_coverage_grid(cover, team_best(cover),
                              {t.display_name: t.usage_pct for t in meta},
-                             {t.display_name: sprite_data_uri(t.forme_id) for t in meta})
+                             {t.display_name: sprite_data_uri(t.forme_id) for t in meta},
+                             {f.display_name: sprite_data_uri(f.forme_id) for f in formes})
     except LookupError as e:
         st.warning(str(e))
 
@@ -223,7 +225,8 @@ with tab_threats:
         threat_n = st.slider("Threats ranked", 10, 40,
                              int(load_settings()["defaults"]["top_n"]), step=5,
                              key=f"threat_top_{paste_id}")
-        render_threat_list(rank_threats(reg, formes, threat_n, meta_filter), len(formes))
+        render_threat_list(rank_threats(reg, formes, threat_n, meta_filter), len(formes),
+                           {f.display_name: sprite_data_uri(f.forme_id) for f in formes})
     except LookupError as e:
         st.warning(str(e))
 

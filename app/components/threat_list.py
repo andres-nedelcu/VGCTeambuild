@@ -9,7 +9,9 @@ from vgc.pressure import Pressure
 from vgc.sprites import data_uri
 
 
-def render_threat_list(rows: list[Pressure], team_size: int) -> None:
+def render_threat_list(rows: list[Pressure], team_size: int,
+                       sprites: dict[str, str | None] | None = None) -> None:
+    sprites = sprites or {}
     table = pd.DataFrame([{
         "Sprite": data_uri(p.threat.forme_id),
         "Threat": p.threat.display_name,
@@ -48,12 +50,14 @@ def render_threat_list(rows: list[Pressure], team_size: int) -> None:
     chosen = st.selectbox("Break down a threat", list(by_name))
     picked = by_name[chosen]
     st.dataframe(pd.DataFrame([{
+        "": sprites.get(h.target),
         "Your Pokémon": h.target,
         "Its best move": h.move_name,
         "Attacks as": h.move_type,
         "Type matchup": f"{h.effectiveness:g}×",
         "STAB": "yes" if h.stab else "—",
     } for h in sorted(picked.hits, key=lambda h: h.value, reverse=True)]),
-        hide_index=True, width="stretch")
+        hide_index=True, width="stretch",
+        column_config={"": st.column_config.ImageColumn()})
     if not picked.hits:
         st.info(f"{chosen} has no damaging move above the common-move threshold.")

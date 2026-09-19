@@ -6,6 +6,7 @@ import pandas as pd
 import streamlit as st
 
 from components.palette import FILL_BAD, FILL_CAUTION, FILL_GOOD, MUTED
+from vgc.sprites import data_uri
 from vgc.speed import (DEPENDS, LOW_CONFIDENCE, MOVE_FIRST, MOVE_LAST, OUTSPED, OUTSPEED,
                         TAILWIND_BOTH, TAILWIND_NONE, TAILWIND_THEIRS, TAILWIND_YOURS,
                         Field, TeamSpeed, matchup)
@@ -28,11 +29,12 @@ UNSURE = MUTED
 
 def render_team_speeds(speeds: list[TeamSpeed]) -> None:
     st.dataframe(pd.DataFrame([
-        {"Slot": s.slot, "Pokémon": s.display_name, "Base": s.base_spe,
+        {"": data_uri(s.forme_id), "Pokémon": s.display_name, "Base": s.base_spe,
          "Nature": (s.nature or "-").title(), "Spe SP": s.sp,
          "⚡": "Scarf" if s.scarfed else "", "Speed": s.speed}
         for s in sorted(speeds, key=lambda s: s.speed, reverse=True)
-    ]), hide_index=True, width="stretch")
+    ]), hide_index=True, width="stretch",
+        column_config={"": st.column_config.ImageColumn()})
 
 
 def render_speed_tiers(meta: pd.DataFrame, reference: TeamSpeed | None,

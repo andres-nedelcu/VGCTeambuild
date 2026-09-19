@@ -64,6 +64,7 @@ class TeamSpeed:
     nature: str | None
     speed: int          # after the item, so this is the number to compare with
     scarfed: bool = False
+    forme_id: str = ""  # for the sprite; the Mega forme when one is toggled on
 
 
 @lru_cache(maxsize=1)
@@ -96,7 +97,7 @@ def team_speeds(team: Sequence[Member], formes: Sequence[Forme]) -> list[TeamSpe
         raw = calc_stat(base, sp, nature_mod(member.nature, "spe"))
         scarfed = member.item_id == CHOICE_SCARF
         out.append(TeamSpeed(f.slot, f.display_name, base, sp, member.nature,
-                             scarf(raw) if scarfed else raw, scarfed))
+                             scarf(raw) if scarfed else raw, scarfed, f.forme_id))
     return out
 
 

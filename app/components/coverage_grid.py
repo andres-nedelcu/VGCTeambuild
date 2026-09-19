@@ -13,18 +13,13 @@ from vgc.offense import BEST_ROW
 
 COLORS = ATTACKING  # you are landing the hit, so 4x is the good end
 SUMMARY_COLORS = [BAD_STRONG, PALE_GOOD]  # 0 = nothing super effective, 1 = covered
-SPRITE_PX = 44   # sprite edge in pixels; converted to a paper fraction per figure,
-                 # because a fixed fraction would shrink as the team adds rows
-LABEL_GAP = 8    # clear air between the sprite row and the usage numbers above it
-# Tick labels and layout images both anchor to the top of the plot area, so they land
-# in the same band and the numbers get clipped. Pushing the labels out with a
-# transparent outside tick is what reserves the sprite row underneath them.
-LABEL_PUSH = SPRITE_PX + LABEL_GAP
-TRANSPARENT = "rgba(0,0,0,0)"
+from components.sprite_axis import (LABEL_PUSH, add_column_sprites, add_row_sprites,
+                                    tick_push)
 
 
 def render_coverage_grid(matrix: pd.DataFrame, best: pd.Series, usage: dict[str, float],
-                         sprites: dict[str, str | None] | None = None) -> None:
+                         sprites: dict[str, str | None] | None = None,
+                         team_sprites: dict[str, str | None] | None = None) -> None:
     """Sprites identify the columns; without them the names have to be angled to fit.
 
     At 20+ threats a name like "Salamence-Mega" cannot sit horizontally in a column
@@ -34,15 +29,14 @@ def render_coverage_grid(matrix: pd.DataFrame, best: pd.Series, usage: dict[str,
     falls back to an angled name if it is missing.
     """
     sprites = sprites or {}
+    team_sprites = team_sprites or {}
     names = list(matrix.columns)
     have_sprites = any(sprites.get(n) for n in names)
     # x stays the display names, which are unique. Rounding usage to whole percents
     # is not: three of the top 20 sit at 10%, and duplicate category values make
     # Plotly fold those columns into one. Only the tick TEXT carries the short label.
     columns = names
-    # No "%" suffix in the sprite layout: three characters per tick collide at 20+
-    # columns. The caption says the number is a usage percentage.
-    ticktext = ([f"{100 * usage.get(c, 0):.0f}" for c in names] if have_sprites
+    ticktext = ([f"{100 * usage.get(c, 0):.0f}%" for c in names] if have_sprites
                 else [f"{c} {100 * usage.get(c, 0):.0f}%" for c in names])
     idx = matrix.map(LEVELS.index)
     text = matrix.map(lambda v: LABELS[LEVELS.index(v)])
@@ -74,29 +68,23 @@ def render_coverage_grid(matrix: pd.DataFrame, best: pd.Series, usage: dict[str,
                      tickangle=0 if have_sprites else -55,
                      tickmode="array", tickvals=columns, ticktext=ticktext,
                      tickfont=dict(size=10) if have_sprites else None,
-                     ticks="outside" if have_sprites else "",
-                     ticklen=LABEL_PUSH if have_sprites else 0,
-                     tickcolor=TRANSPARENT,
-                     row=1, col=1)
+                     **tick_push(have_sprites), row=1, col=1)
     fig.update_xaxes(showticklabels=False, row=2, col=1)  # threat names are long; once is enough
     # Room for the sprite row, the gap, and the number sitting above both.
     top_margin = (LABEL_PUSH + 34) if have_sprites else 160
     height = 44 * (n + 2) + top_margin + 40
     fig.update_layout(height=height, margin=dict(l=10, r=10, t=top_margin, b=40))
 
-    for i, name in enumerate(names):
-        uri = sprites.get(name)
-        if not uri:
-            continue
-        fig.add_layout_image(
-            source=uri, xref="x", yref="paper", x=i, y=1.0,
-            sizex=1.0, sizey=SPRITE_PX / height, xanchor="center", yanchor="bottom",
-            sizing="contain", layer="above",
-        )
+    add_column_sprites(fig, [sprites.get(n) for n in names], height)
+    if team_sprites:
+        fig.update_yaxes(**tick_push(True), automargin=True, row=1, col=1)
+        add_row_sprites(fig, [team_sprites.get(r) for r in matrix.index])
 
-    st.plotly_chart(fig, width="stretch")
+    # The floating modebar overlaps the top-right tick labels, and neither grid
+    # is usefully pannable or zoomable, so it only ever covered data.
+    st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
     st.caption(
-        ("Sprites label the columns; the number above each is that threat's usage %. "
+        ("Sprites label the columns, with each threat's share of teams above it. "
          if have_sprites else "") +
         "Best multiplier each Pokémon has against that threat, from the types of its "
         "damaging moves — type matchup only, not a damage calc. Threat typing uses the "

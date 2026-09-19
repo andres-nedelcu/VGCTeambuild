@@ -9,6 +9,7 @@ from plotly.subplots import make_subplots
 
 from components.palette import (BAD_STRONG, DEFENDING, LABELS, LEVELS, NEUTRAL,
                                 PALE_CAUTION, PALE_GOOD, discrete_scale)
+from components.sprite_axis import add_row_sprites, tick_push
 from vgc.defense import RESIST_ROW, WEAK_ROW
 
 COLORS = DEFENDING  # you are taking the hit, so 4x is the bad end
@@ -16,7 +17,10 @@ COLORS = DEFENDING  # you are taking the hit, so 4x is the bad end
 SUMMARY_COLORS = [NEUTRAL, PALE_CAUTION, BAD_STRONG, PALE_GOOD]
 
 
-def render_defense_grid(matrix: pd.DataFrame, summary: pd.DataFrame, flags: list[str]) -> None:
+def render_defense_grid(matrix: pd.DataFrame, summary: pd.DataFrame, flags: list[str],
+                        sprites: dict[str, str | None] | None = None) -> None:
+    sprites = sprites or {}
+    have_sprites = any(sprites.get(r) for r in matrix.index)
     types = list(matrix.columns)
     idx = matrix.map(LEVELS.index)
     text = matrix.map(lambda v: LABELS[LEVELS.index(v)])
@@ -47,9 +51,14 @@ def render_defense_grid(matrix: pd.DataFrame, summary: pd.DataFrame, flags: list
         xgap=2, ygap=2,
     ), row=2, col=1)
     fig.update_yaxes(autorange="reversed")
+    fig.update_yaxes(**tick_push(have_sprites), automargin=True, row=1, col=1)
     fig.update_xaxes(showticklabels=True, side="top", row=1, col=1)
     fig.update_layout(height=44 * (n + 2) + 120, margin=dict(l=10, r=10, t=40, b=40))
 
-    st.plotly_chart(fig, width="stretch")
+    add_row_sprites(fig, [sprites.get(r) for r in matrix.index])
+
+    # The floating modebar overlaps the top-right tick labels, and neither grid
+    # is usefully pannable or zoomable, so it only ever covered data.
+    st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
     st.caption("0 immune · ¼ / ½ resist · blank neutral · 2 / 4 weak. "
                "Red summary cell = flagged (3+ weak, nothing resists).")

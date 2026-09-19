@@ -15,7 +15,9 @@ FLAG_MIN_WEAK = 3
 
 
 def row_label(f: Forme) -> str:
-    return f"{f.slot}. {f.display_name}"
+    """The forme's name alone. Slot is its position in the paste, which says nothing
+    about the matchup, and Species Clause keeps these unique."""
+    return f.display_name
 
 
 def defense_matrix(formes: Sequence[Forme]) -> pd.DataFrame:
