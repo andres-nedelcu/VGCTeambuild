@@ -6,7 +6,7 @@ import pandas as pd
 import streamlit as st
 
 from components.cores_view import (render_cores, render_item_cores, render_partners,
-                                  render_suggestions)
+                                  render_suggestions, render_swaps, render_uniques)
 from components.coverage_grid import render_coverage_grid
 from components.defense_grid import render_defense_grid
 from components.speed_view import render_speed_tiers, render_team_speeds
@@ -23,6 +23,7 @@ from vgc.offense import attackers, coverage_matrix, holes, team_best, threats
 from vgc.pressure import rank as rank_threats
 from vgc.speed import TAILWIND_OPTIONS, Field, meta_speed, team_speeds
 from vgc.suggest import suggestions
+from vgc.swap import sole_coverage, swaps
 from vgc.sprites import data_uri as sprite_data_uri
 from vgc.team import list_pastes, load_team
 
@@ -242,12 +243,34 @@ with tab_cores:
                           key=f"add_top_{paste_id}",
                           help="Both the candidate pool and the holes being fixed come "
                                "from this many threats.")
-        picks = suggestions(reg, team, formes, meta_filter, add_n)
         meta_for_gaps = threats(reg, add_n, meta_filter)
         gaps = holes(coverage_matrix(attackers(team, formes), meta_for_gaps))
 
-        st.subheader("Candidates for this team")
-        render_suggestions(picks, gaps, flags)
+        ADD_ONLY, ANY_SLOT = "add", "any"
+        slot_names = {f.slot: f.display_name for f in formes}
+        mode = st.selectbox(
+            "Replace", [ANY_SLOT, ADD_ONLY, *sorted(slot_names)],
+            format_func=lambda m: {ANY_SLOT: "Best swap — consider every slot",
+                                   ADD_ONLY: "Nothing — show additions for a free slot"
+                                   }.get(m, f"Swap out {slot_names.get(m, m)}"),
+            key=f"swap_mode_{paste_id}",
+            help="A full team has no free slot, so an addition is really a swap — and "
+                 "whoever leaves takes their coverage with them.")
+
+        if mode == ADD_ONLY:
+            st.subheader("Candidates for a free slot")
+            render_suggestions(suggestions(reg, team, formes, meta_filter, add_n),
+                               gaps, flags)
+        else:
+            st.subheader("What you would lose by removing each Pokémon")
+            sole = sole_coverage(reg, team, formes, meta_filter, add_n)
+            render_uniques([(f.forme_id, f.display_name, sole.get(f.slot, ()))
+                            for f in formes])
+
+            st.subheader("Swaps")
+            picked = None if mode == ANY_SLOT else int(mode)
+            render_swaps(swaps(reg, team, formes, meta_filter, add_n, picked),
+                         gaps, flags)
 
         floor = min_support(reg, meta_filter)
         st.subheader("What the meta pairs together")

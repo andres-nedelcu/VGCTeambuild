@@ -27,7 +27,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Sequence
 
-from vgc.cores import item_cores, partners
+from vgc.cores import synergy_map
 from vgc.defense import defense_matrix, flagged_types, summarize
 from vgc.megas import Forme
 from vgc.metafilter import MetaFilter
@@ -79,22 +79,7 @@ def suggestions(regulation: str, team: Sequence[Member], formes: Sequence[Forme]
     moves_by_forme = common_moves(regulation, filt)
 
     mine = {m.pokemon_id for m in team}
-    synergy: dict[str, tuple[str, float]] = {}
-    for row in partners(regulation, sorted(mine), filt).itertuples():
-        # partners() is already sorted by lift, so the first hit per candidate wins.
-        synergy.setdefault(row.partner_id, (row.yours, float(row.lift)))
-
-    # Species-level synergy averages a species' builds together, which can cancel a
-    # real partnership out entirely — Sneasler's two terrain seeds want opposite
-    # partners. The paste says which item this team actually runs, so where that is
-    # known the build-specific association is used instead when it is stronger.
-    held = [(m.pokemon_id, m.item_id) for m in team if m.item_id]
-    if held:
-        for row in item_cores(regulation, filt, min_delta=0.0, items=held).itertuples():
-            label = f"{row.holder_name} @ {row.item_name or row.item_id}"
-            best = synergy.get(row.partner_id)
-            if best is None or float(row.lift) > best[1]:
-                synergy[row.partner_id] = (label, float(row.lift))
+    synergy = synergy_map(regulation, [(m.pokemon_id, m.item_id) for m in team], filt)
 
     out = []
     for c in meta:

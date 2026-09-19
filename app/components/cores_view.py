@@ -168,3 +168,78 @@ def render_item_cores(df: pd.DataFrame) -> None:
         "terrain and Unburden then doubles its Speed. Those two builds want different "
         "partners, so averaged together they cancel out and the pair looks like chance."
     )
+
+
+def render_uniques(rows: list[tuple[str, str, tuple[str, ...]]]) -> None:
+    """What each of your Pokémon is the only answer to — the cost of removing it."""
+    view = pd.DataFrame({
+        "": [data_uri(fid) for fid, _n, _c in rows],
+        "Pokémon": [n for _f, n, _c in rows],
+        "Only answer to": [_listing(c) for _f, _n, c in rows],
+    })
+    st.dataframe(view, hide_index=True, width="stretch",
+                 column_config={"": st.column_config.ImageColumn()})
+    st.caption("Threats that become coverage holes the moment this Pokémon leaves. "
+               "A Pokémon answering nothing uniquely is the cheapest to replace — "
+               "though it may still be carrying the team defensively or on Speed.")
+
+
+def render_swaps(rows, baseline_holes: list[str], baseline_flags: list[str]) -> None:
+    state = []
+    if baseline_holes:
+        state.append(f"**{len(baseline_holes)} hole{'s' if len(baseline_holes) > 1 else ''}**: "
+                     + ", ".join(baseline_holes))
+    if baseline_flags:
+        state.append("**flagged**: " + ", ".join(baseline_flags))
+    st.caption(("Now: " + " · ".join(state)) if state
+               else "No coverage holes and no flagged weaknesses right now.")
+
+    if not rows:
+        st.info("No swap in the meta improves on this team at the current filter.")
+        return
+
+    def defence(s) -> str:
+        bits = [f"−{t}" for t in s.flags_cleared] + [f"+{t}" for t in s.flags_raised]
+        return ", ".join(bits) or "—"
+
+    def speed(s) -> str:
+        if s.out_speed is None or s.in_likely_speed is None:
+            return "—"
+        return f"{s.out_speed} → {s.in_likely_speed}"
+
+    view = pd.DataFrame({
+        "": [data_uri(s.in_forme_id) for s in rows],
+        "In": [s.in_name for s in rows],
+        "Out": [s.out_name for s in rows],
+        "Closes": [_listing(s.holes_closed) for s in rows],
+        "Opens": [_listing(s.holes_opened) for s in rows],
+        "Net": [s.net_holes for s in rows],
+        "Defence": [defence(s) for s in rows],
+        "Speed": [speed(s) for s in rows],
+        "Pairs with": [s.partner or "—" for s in rows],
+        "Lift": [s.lift for s in rows],
+    })
+    st.dataframe(
+        view, hide_index=True, width="stretch",
+        column_config={
+            "": st.column_config.ImageColumn(),
+            "Closes": st.column_config.TextColumn(
+                help="Holes the incoming Pokémon answers"),
+            "Opens": st.column_config.TextColumn(
+                help="Threats the outgoing Pokémon was the only answer to, that the "
+                     "incoming does not cover"),
+            "Net": st.column_config.NumberColumn(format="%d", help="Closed minus opened"),
+            "Defence": st.column_config.TextColumn(
+                help="− is a flagged weakness resolved, + is one created"),
+            "Speed": st.column_config.TextColumn(
+                help="Your actual Speed for the outgoing, the meta's likely Speed for "
+                     "the incoming"),
+            "Lift": st.column_config.NumberColumn(format="%.1f", help=LIFT_HELP),
+        },
+    )
+    st.caption(
+        "Sorted by net holes, then flagged types, then synergy — no combined score, "
+        "so forsaking one matchup for a more important one stays your call. Your "
+        "Pokémon are judged on the moves in your paste; a candidate on the meta's "
+        "commonly-run moves, so this compares your actual build to a typical one."
+    )
