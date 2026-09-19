@@ -64,7 +64,17 @@ GRASSY_WEAKENED = ("earthquake", "bulldoze", "magnitude")
 # Moves with their own terrain clause, applied ON TOP of the generic type boost —
 # both are onBasePower handlers so they chain. Expanding Force in Psychic Terrain
 # measures at 1.939x against 5325/4096 x 1.5 = 1.950 predicted, which is the rounding.
-TERRAIN_MOVE_EXTRA = {(PSYCHIC_T, "expandingforce"): 1.5}
+# Each verified against the simulator, measured ratio against predicted:
+#   Expanding Force  psychic   1.939 / 1.950  (generic boost x its own 1.5)
+#   Psyblade         electric  1.472 / 1.500  (Psychic-typed, so no generic boost)
+#   Rising Voltage   electric  2.562 / 2.600  (Electric-typed, so generic x its own 2)
+# Rising Voltage doubles via basePowerCallback rather than chainModify, which lands
+# at the same value here because the callback runs before the BasePower event.
+TERRAIN_MOVE_EXTRA = {
+    (PSYCHIC_T, "expandingforce"): 1.5,
+    (ELECTRIC_T, "psyblade"): 1.5,
+    (ELECTRIC_T, "risingvoltage"): 2.0,
+}
 
 # Moves that also change target in terrain. Expanding Force becomes allAdjacentFoes
 # under Psychic Terrain (data/moves.ts:4959), so it picks up the spread modifier —

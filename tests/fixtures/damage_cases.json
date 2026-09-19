@@ -538,5 +538,105 @@
   "move": "Psychic",
   "spread": false,
   "terrain": "psychicterrain"
+ },
+ {
+  "name": "Psyblade, no terrain",
+  "attacker": {
+   "species": "Metagross",
+   "ability": "Clear Body",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Psyblade"
+   ]
+  },
+  "defender": {
+   "species": "Rillaboom",
+   "ability": "Overgrow",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Psyblade",
+  "spread": false
+ },
+ {
+  "name": "Psyblade in Electric Terrain",
+  "attacker": {
+   "species": "Metagross",
+   "ability": "Clear Body",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Psyblade"
+   ]
+  },
+  "defender": {
+   "species": "Rillaboom",
+   "ability": "Overgrow",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Psyblade",
+  "spread": false,
+  "terrain": "electricterrain"
+ },
+ {
+  "name": "Rising Voltage, no terrain",
+  "attacker": {
+   "species": "Raichu",
+   "ability": "Static",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "moves": [
+    "Rising Voltage"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "spd": 32
+   },
+   "nature": "Careful"
+  },
+  "move": "Rising Voltage",
+  "spread": false
+ },
+ {
+  "name": "Rising Voltage in Electric Terrain",
+  "attacker": {
+   "species": "Raichu",
+   "ability": "Static",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "moves": [
+    "Rising Voltage"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "spd": 32
+   },
+   "nature": "Careful"
+  },
+  "move": "Rising Voltage",
+  "spread": false,
+  "terrain": "electricterrain"
  }
 ]

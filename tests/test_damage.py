@@ -208,3 +208,26 @@ def test_a_plain_psychic_move_gets_only_the_generic_boost(reference, dex):
     plain = next(c for c in reference
                  if c["name"] == "plain Psychic move in Psychic Terrain")
     assert damage_rolls(**_inputs(plain, dex)) == tuple(plain["rolls"])
+
+
+@pytest.mark.parametrize("dry_name,wet_name,low,high", [
+    ("Psyblade, no terrain", "Psyblade in Electric Terrain", 1.40, 1.55),
+    ("Rising Voltage, no terrain", "Rising Voltage in Electric Terrain", 2.45, 2.65),
+])
+def test_electric_terrain_move_clauses(reference, dex, dry_name, wet_name, low, high):
+    """Psyblade is Psychic-typed so it gets only its own 1.5; Rising Voltage is
+    Electric-typed so it takes the generic boost on top of doubling."""
+    dry = next(c for c in reference if c["name"] == dry_name)
+    wet = next(c for c in reference if c["name"] == wet_name)
+    ratio = wet["rolls"][-1] / dry["rolls"][-1]
+    assert low < ratio < high, f"{wet_name}: got {ratio:.3f}"
+    assert damage_rolls(**_inputs(wet, dex)) == tuple(wet["rolls"])
+
+
+def test_every_terrain_clause_is_pinned_by_a_case(reference):
+    """A multiplier in TERRAIN_MOVE_EXTRA with no fixture case behind it is exactly
+    the unverified guess this harness exists to prevent."""
+    from vgc.damage import TERRAIN_MOVE_EXTRA
+    covered = {to_id(c["move"]) for c in reference if c.get("terrain")}
+    missing = {mid for (_terrain, mid) in TERRAIN_MOVE_EXTRA} - covered
+    assert not missing, f"unverified terrain clauses: {sorted(missing)}"

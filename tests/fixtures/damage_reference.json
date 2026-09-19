@@ -1308,5 +1308,245 @@
       "atk": 76,
       "spa": 194
     }
+  },
+  {
+    "name": "Psyblade, no terrain",
+    "attacker": {
+      "species": "Metagross",
+      "ability": "Clear Body",
+      "evs": {
+        "atk": 32
+      },
+      "nature": "Adamant",
+      "moves": [
+        "Psyblade"
+      ]
+    },
+    "defender": {
+      "species": "Rillaboom",
+      "ability": "Overgrow",
+      "evs": {
+        "hp": 32,
+        "def": 32
+      },
+      "nature": "Impish"
+    },
+    "move": "Psyblade",
+    "spread": false,
+    "rolls": [
+      60,
+      61,
+      61,
+      63,
+      63,
+      64,
+      64,
+      66,
+      66,
+      67,
+      67,
+      69,
+      69,
+      70,
+      70,
+      72
+    ],
+    "defender_hp": 207,
+    "defender_stats": {
+      "def": 156,
+      "spd": 90
+    },
+    "defender_stats_raw": {
+      "def": 156,
+      "spd": 90
+    },
+    "attacker_stats": {
+      "atk": 205,
+      "spa": 103
+    },
+    "attacker_stats_raw": {
+      "atk": 205,
+      "spa": 103
+    }
+  },
+  {
+    "name": "Psyblade in Electric Terrain",
+    "attacker": {
+      "species": "Metagross",
+      "ability": "Clear Body",
+      "evs": {
+        "atk": 32
+      },
+      "nature": "Adamant",
+      "moves": [
+        "Psyblade"
+      ]
+    },
+    "defender": {
+      "species": "Rillaboom",
+      "ability": "Overgrow",
+      "evs": {
+        "hp": 32,
+        "def": 32
+      },
+      "nature": "Impish"
+    },
+    "move": "Psyblade",
+    "spread": false,
+    "terrain": "electricterrain",
+    "rolls": [
+      90,
+      91,
+      91,
+      93,
+      94,
+      94,
+      96,
+      97,
+      99,
+      99,
+      100,
+      102,
+      102,
+      103,
+      105,
+      106
+    ],
+    "defender_hp": 207,
+    "defender_stats": {
+      "def": 156,
+      "spd": 90
+    },
+    "defender_stats_raw": {
+      "def": 156,
+      "spd": 90
+    },
+    "attacker_stats": {
+      "atk": 205,
+      "spa": 103
+    },
+    "attacker_stats_raw": {
+      "atk": 205,
+      "spa": 103
+    }
+  },
+  {
+    "name": "Rising Voltage, no terrain",
+    "attacker": {
+      "species": "Raichu",
+      "ability": "Static",
+      "evs": {
+        "spa": 32
+      },
+      "nature": "Modest",
+      "moves": [
+        "Rising Voltage"
+      ]
+    },
+    "defender": {
+      "species": "Incineroar",
+      "evs": {
+        "hp": 32,
+        "spd": 32
+      },
+      "nature": "Careful"
+    },
+    "move": "Rising Voltage",
+    "spread": false,
+    "rolls": [
+      40,
+      40,
+      40,
+      42,
+      42,
+      42,
+      43,
+      43,
+      43,
+      45,
+      45,
+      45,
+      46,
+      46,
+      46,
+      48
+    ],
+    "defender_hp": 202,
+    "defender_stats": {
+      "def": 110,
+      "spd": 156
+    },
+    "defender_stats_raw": {
+      "def": 110,
+      "spd": 156
+    },
+    "attacker_stats": {
+      "atk": 99,
+      "spa": 156
+    },
+    "attacker_stats_raw": {
+      "atk": 99,
+      "spa": 156
+    }
+  },
+  {
+    "name": "Rising Voltage in Electric Terrain",
+    "attacker": {
+      "species": "Raichu",
+      "ability": "Static",
+      "evs": {
+        "spa": 32
+      },
+      "nature": "Modest",
+      "moves": [
+        "Rising Voltage"
+      ]
+    },
+    "defender": {
+      "species": "Incineroar",
+      "evs": {
+        "hp": 32,
+        "spd": 32
+      },
+      "nature": "Careful"
+    },
+    "move": "Rising Voltage",
+    "spread": false,
+    "terrain": "electricterrain",
+    "rolls": [
+      103,
+      105,
+      106,
+      108,
+      108,
+      109,
+      111,
+      112,
+      114,
+      115,
+      115,
+      117,
+      118,
+      120,
+      121,
+      123
+    ],
+    "defender_hp": 202,
+    "defender_stats": {
+      "def": 110,
+      "spd": 156
+    },
+    "defender_stats_raw": {
+      "def": 110,
+      "spd": 156
+    },
+    "attacker_stats": {
+      "atk": 99,
+      "spa": 156
+    },
+    "attacker_stats_raw": {
+      "atk": 99,
+      "spa": 156
+    }
   }
 ]
