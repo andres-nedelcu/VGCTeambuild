@@ -827,5 +827,304 @@
       "atk": 200,
       "spa": 90
     }
+  },
+  {
+    "name": "Grass move, no terrain",
+    "attacker": {
+      "species": "Whimsicott",
+      "evs": {
+        "spa": 32
+      },
+      "nature": "Modest",
+      "ability": "Chlorophyll",
+      "moves": [
+        "Energy Ball"
+      ]
+    },
+    "defender": {
+      "species": "Incineroar",
+      "evs": {
+        "hp": 32,
+        "def": 32
+      },
+      "nature": "Impish"
+    },
+    "move": "Energy Ball",
+    "spread": false,
+    "rolls": [
+      33,
+      33,
+      33,
+      33,
+      34,
+      34,
+      35,
+      35,
+      36,
+      36,
+      36,
+      36,
+      37,
+      37,
+      38,
+      39
+    ],
+    "defender_hp": 202,
+    "defender_stats": {
+      "def": 156,
+      "spd": 110
+    },
+    "defender_stats_raw": {
+      "def": 156,
+      "spd": 110
+    },
+    "attacker_stats": {
+      "atk": 78,
+      "spa": 141
+    },
+    "attacker_stats_raw": {
+      "atk": 78,
+      "spa": 141
+    }
+  },
+  {
+    "name": "Grass move in Grassy Terrain",
+    "attacker": {
+      "species": "Whimsicott",
+      "ability": "Chlorophyll",
+      "evs": {
+        "spa": 32
+      },
+      "nature": "Modest",
+      "moves": [
+        "Energy Ball"
+      ]
+    },
+    "defender": {
+      "species": "Incineroar",
+      "evs": {
+        "hp": 32,
+        "def": 32
+      },
+      "nature": "Impish"
+    },
+    "move": "Energy Ball",
+    "spread": false,
+    "terrain": "grassyterrain",
+    "rolls": [
+      42,
+      42,
+      43,
+      43,
+      44,
+      45,
+      45,
+      45,
+      46,
+      46,
+      47,
+      48,
+      48,
+      48,
+      49,
+      50
+    ],
+    "defender_hp": 202,
+    "defender_stats": {
+      "def": 156,
+      "spd": 110
+    },
+    "defender_stats_raw": {
+      "def": 156,
+      "spd": 110
+    },
+    "attacker_stats": {
+      "atk": 78,
+      "spa": 141
+    },
+    "attacker_stats_raw": {
+      "atk": 78,
+      "spa": 141
+    }
+  },
+  {
+    "name": "Grassy Terrain halves Earthquake",
+    "attacker": {
+      "species": "Garchomp",
+      "evs": {
+        "atk": 32
+      },
+      "nature": "Adamant",
+      "moves": [
+        "Earthquake"
+      ]
+    },
+    "defender": {
+      "species": "Incineroar",
+      "evs": {
+        "hp": 32,
+        "def": 32
+      },
+      "nature": "Impish"
+    },
+    "move": "Earthquake",
+    "spread": false,
+    "terrain": "grassyterrain",
+    "rolls": [
+      74,
+      74,
+      78,
+      78,
+      78,
+      80,
+      80,
+      80,
+      80,
+      84,
+      84,
+      84,
+      86,
+      86,
+      86,
+      90
+    ],
+    "defender_hp": 202,
+    "defender_stats": {
+      "def": 156,
+      "spd": 110
+    },
+    "defender_stats_raw": {
+      "def": 156,
+      "spd": 110
+    },
+    "attacker_stats": {
+      "atk": 200,
+      "spa": 90
+    },
+    "attacker_stats_raw": {
+      "atk": 200,
+      "spa": 90
+    }
+  },
+  {
+    "name": "Miracle Seed on a Grass move",
+    "attacker": {
+      "species": "Whimsicott",
+      "evs": {
+        "spa": 32
+      },
+      "nature": "Modest",
+      "ability": "Chlorophyll",
+      "moves": [
+        "Energy Ball"
+      ],
+      "item": "Miracle Seed"
+    },
+    "defender": {
+      "species": "Incineroar",
+      "evs": {
+        "hp": 32,
+        "def": 32
+      },
+      "nature": "Impish"
+    },
+    "move": "Energy Ball",
+    "spread": false,
+    "rolls": [
+      39,
+      39,
+      39,
+      40,
+      41,
+      41,
+      42,
+      42,
+      42,
+      43,
+      43,
+      44,
+      45,
+      45,
+      45,
+      46
+    ],
+    "defender_hp": 202,
+    "defender_stats": {
+      "def": 156,
+      "spd": 110
+    },
+    "defender_stats_raw": {
+      "def": 156,
+      "spd": 110
+    },
+    "attacker_stats": {
+      "atk": 78,
+      "spa": 141
+    },
+    "attacker_stats_raw": {
+      "atk": 78,
+      "spa": 141
+    }
+  },
+  {
+    "name": "Miracle Seed AND Grassy Terrain together",
+    "attacker": {
+      "species": "Whimsicott",
+      "ability": "Chlorophyll",
+      "item": "Miracle Seed",
+      "evs": {
+        "spa": 32
+      },
+      "nature": "Modest",
+      "moves": [
+        "Energy Ball"
+      ]
+    },
+    "defender": {
+      "species": "Incineroar",
+      "evs": {
+        "hp": 32,
+        "def": 32
+      },
+      "nature": "Impish"
+    },
+    "move": "Energy Ball",
+    "spread": false,
+    "terrain": "grassyterrain",
+    "rolls": [
+      51,
+      51,
+      51,
+      52,
+      53,
+      54,
+      54,
+      54,
+      55,
+      56,
+      57,
+      57,
+      57,
+      58,
+      59,
+      60
+    ],
+    "defender_hp": 202,
+    "defender_stats": {
+      "def": 156,
+      "spd": 110
+    },
+    "defender_stats_raw": {
+      "def": 156,
+      "spd": 110
+    },
+    "attacker_stats": {
+      "atk": 78,
+      "spa": 141
+    },
+    "attacker_stats_raw": {
+      "atk": 78,
+      "spa": 141
+    }
   }
 ]

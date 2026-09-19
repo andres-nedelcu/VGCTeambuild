@@ -55,6 +55,7 @@ function rollsFor(c) {
     const target = battle.p2.active[0];
     // setWeather refuses without a source; the attacker stands in for the setter.
     if (c.weather) battle.field.setWeather(c.weather, source);
+    if (c.terrain) battle.field.setTerrain(c.terrain, source);
     // Stat stages, so Intimidate / Stamina / Swords Dance can be checked without
     // modelling any of them individually.
     if (c.attacker.boosts) source.boosts = Object.assign(source.boosts, c.attacker.boosts);

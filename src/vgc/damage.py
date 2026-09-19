@@ -50,6 +50,28 @@ SUN_FIRE, SUN_WATER = 1.5, 0.5       # data/conditions.ts:562-568
 
 RAIN, SUN = "rain", "sun"
 
+# Terrain modifies BASE POWER, not damage — battle-actions.ts:1650 runs the BasePower
+# event before the formula, where weather is applied afterwards at :1746. Different
+# insertion points, so they are separate arguments here and must not be merged.
+# The multiplier is chainModify([5325, 4096]), i.e. 5325/4096, not a clean 1.3.
+GRASSY, PSYCHIC_T, ELECTRIC_T = "grassy", "psychic", "electric"
+TERRAIN_BOOST = 5325 / 4096
+TERRAIN_TYPE = {GRASSY: "Grass", PSYCHIC_T: "Psychic", ELECTRIC_T: "Electric"}
+# Grassy Terrain also halves these against a grounded target (data/moves.ts:7695).
+GRASSY_WEAKENED = ("earthquake", "bulldoze", "magnitude")
+
+
+def terrain_multiplier(terrain: str | None, move_type: str,
+                       move_id: str = "") -> float:
+    """Base-power multiplier from terrain. Assumes both sides are grounded, which is
+    the common case and is stated in the app; a Flying or Levitating attacker gets no
+    boost and is not modelled here."""
+    if not terrain:
+        return 1.0
+    if terrain == GRASSY and move_id in GRASSY_WEAKENED:
+        return 0.5
+    return TERRAIN_BOOST if move_type == TERRAIN_TYPE.get(terrain) else 1.0
+
 
 def trunc(value: float) -> int:
     """Showdown's integer truncation. Every value here is non-negative."""
@@ -89,10 +111,18 @@ def weather_multiplier(weather: str | None, move_type: str) -> float:
 
 def damage_rolls(*, base_power: int, attack: int, defense: int, type_mult: float,
                  stab: bool = False, spread: bool = True, weather_mult: float = 1.0,
-                 final_mult: float = 1.0, level: int = LEVEL) -> tuple[int, ...]:
-    """The sixteen possible damage values, lowest first."""
+                 final_mult: float = 1.0, base_power_mult: float = 1.0,
+                 level: int = LEVEL) -> tuple[int, ...]:
+    """The sixteen possible damage values, lowest first.
+
+    `base_power_mult` covers everything applied by the BasePower event — terrain and
+    type-boosting items — and lands before the formula, unlike weather.
+    """
     if base_power <= 0 or type_mult == 0 or attack <= 0 or defense <= 0:
         return (0,) * ROLLS
+
+    if base_power_mult != 1.0:
+        base_power = max(1, modify(base_power, base_power_mult))
 
     base = trunc(trunc(trunc(trunc(2 * level / 5 + 2) * base_power * attack) / defense) / 50)
     base += 2
@@ -171,6 +201,31 @@ DEFENCE_ITEMS = {"assaultvest": ("spd", 1.5), "eviolite": ("both", 1.5)}
 # Items applied at the very end of the chain (battle-actions.ts:1826, ModifyDamage).
 FINAL_ITEMS = {"lifeorb": 1.3, "muscleband": 1.1, "wiseglasses": 1.1}
 EXPERT_BELT = 1.2   # only against a super effective hit
+
+# Type-boosting held items, x1.2 on the matching type, applied to BASE POWER.
+TYPE_ITEMS = {
+    "miracleseed": "Grass", "charcoal": "Fire", "mysticwater": "Water",
+    "magnet": "Electric", "nevermeltice": "Ice", "blackbelt": "Fighting",
+    "poisonbarb": "Poison", "softsand": "Ground", "sharpbeak": "Flying",
+    "twistedspoon": "Psychic", "silverpowder": "Bug", "hardstone": "Rock",
+    "spelltag": "Ghost", "dragonfang": "Dragon", "blackglasses": "Dark",
+    "metalcoat": "Steel", "fairyfeather": "Fairy", "silkscarf": "Normal",
+}
+TYPE_ITEM_BOOST = 1.2
+
+
+def base_power_multiplier(item_id: str | None, move_type: str,
+                          terrain: str | None = None, move_id: str = "") -> float:
+    """Everything the BasePower event applies, combined.
+
+    Showdown's chainModify accumulates the modifiers and applies them **once**, so
+    these are multiplied together here and handed to a single modify() rather than
+    applied one at a time — two sequential modify() calls round differently.
+    """
+    mult = terrain_multiplier(terrain, move_type, move_id)
+    if TYPE_ITEMS.get(item_id or "") == move_type:
+        mult *= TYPE_ITEM_BOOST
+    return mult
 
 PHYSICAL, SPECIAL = "Physical", "Special"
 

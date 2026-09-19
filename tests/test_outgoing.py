@@ -107,3 +107,36 @@ def test_a_boost_makes_your_hits_harder(ctx):
 def test_an_impossible_filter_yields_nothing(ctx):
     team, formes, _rows = ctx
     assert outgoing(REG, team, formes, MetaFilter(min_players=10_000), 20) == []
+
+
+def test_per_move_keeps_every_move_not_just_the_best(ctx):
+    team, formes, rows = ctx
+    every = outgoing(REG, team, formes, MetaFilter(), 20, per_move=True)
+    assert len(every) > len(rows), "per_move collapsed to one row per matchup"
+    keys = {(h.attacker_slot, h.move_id, h.threat.forme_id) for h in every}
+    assert len(keys) == len(every), "duplicate (attacker, move, threat) rows"
+    # The collapsed view must be a subset of the full one, by damage.
+    best = {(h.attacker_slot, h.threat.forme_id): h.bulkiest.low for h in rows}
+    for h in every:
+        key = (h.attacker_slot, h.threat.forme_id)
+        assert h.bulkiest.low <= best[key], "a per-move hit beat the chosen best move"
+
+
+def test_grassy_terrain_boosts_grass_and_halves_earthquake(ctx):
+    from vgc.damage import GRASSY
+    team, formes, _rows = ctx
+    plain = {(h.attacker_slot, h.move_id, h.threat.forme_id): h
+             for h in outgoing(REG, team, formes, MetaFilter(), 20, per_move=True)}
+    grassy = {(h.attacker_slot, h.move_id, h.threat.forme_id): h
+              for h in outgoing(REG, team, formes, MetaFilter(), 20,
+                                terrain=GRASSY, per_move=True)}
+    grass_moves = [k for k, h in plain.items() if h.likely.move_type == "Grass"]
+    quakes = [k for k in plain if k[1] in ("earthquake", "bulldoze", "magnitude")]
+    if not grass_moves and not quakes:
+        pytest.skip("team has no Grass move and no Earthquake")
+    for key in grass_moves:
+        if plain[key].likely.low:
+            assert grassy[key].likely.low > plain[key].likely.low
+    for key in quakes:
+        if plain[key].likely.low:
+            assert grassy[key].likely.low < plain[key].likely.low

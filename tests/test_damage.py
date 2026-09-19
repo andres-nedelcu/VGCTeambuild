@@ -19,14 +19,17 @@ import json
 import pytest
 
 from vgc import REPO_ROOT
-from vgc.damage import (attack_after_item, boosted, damage_rolls, defence_after_item,
-                        final_multiplier, weather_multiplier)
+from vgc.damage import (attack_after_item, base_power_multiplier, boosted,
+                        damage_rolls, defence_after_item, final_multiplier,
+                        weather_multiplier)
 from vgc.db import session
 from vgc.ids import to_id
 from vgc.typechart import effectiveness
 
 FIXTURE = REPO_ROOT / "tests" / "fixtures" / "damage_reference.json"
 WEATHER = {"raindance": "rain", "sunnyday": "sun"}
+TERRAIN = {"grassyterrain": "grassy", "psychicterrain": "psychic",
+           "electricterrain": "electric"}
 
 
 @pytest.fixture(scope="module")
@@ -81,6 +84,8 @@ def _inputs(case, dex):
         spread=bool(case.get("spread")),
         weather_mult=weather_multiplier(WEATHER.get(case.get("weather")), move_type),
         final_mult=final_multiplier(atk_item, type_mult),
+        base_power_mult=base_power_multiplier(
+            atk_item, move_type, TERRAIN.get(case.get("terrain")), move_id),
     )
 
 
@@ -169,3 +174,9 @@ def test_boost_table_endpoints(stage, expect):
 def test_stages_clamp_beyond_six():
     assert boosted(200, 99) == boosted(200, 6)
     assert boosted(200, -99) == boosted(200, -6)
+
+
+def test_terrain_and_type_items_are_covered(reference):
+    names = " ".join(c["name"] for c in reference)
+    assert "Grassy Terrain" in names and "Miracle Seed" in names
+    assert "together" in names, "no case combines a terrain and a type item"

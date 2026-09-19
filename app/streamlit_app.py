@@ -27,7 +27,7 @@ from vgc.metafilter import TEAMS, THIN_SAMPLE, WINS, MetaFilter, extent, sample_
 from vgc.offense import attackers, coverage_matrix, holes, team_best, threats
 from vgc.pressure import rank as rank_threats
 from vgc.speed import TAILWIND_OPTIONS, Field, meta_speed, team_speeds
-from vgc.damage import RAIN, SUN
+from vgc.damage import ELECTRIC_T, GRASSY, PSYCHIC_T, RAIN, SUN
 from vgc.edit import apply as apply_spreads
 from vgc.edit import read_spread, to_paste
 from vgc.incoming import TIERS, against, incoming
@@ -269,13 +269,20 @@ with tab_damage:
                "power, stats, bulk and items. This answers what that leaves open: "
                "whether the hit actually kills.")
     try:
-        left, right = st.columns([1, 2])
+        left, mid, right = st.columns([1, 1, 2])
         weather = left.selectbox(
             "Weather", [None, RAIN, SUN],
             format_func=lambda w: {None: "None", RAIN: "Rain", SUN: "Sun"}[w],
             key=f"dmg_weather_{paste_id}",
             help="Rain halves Fire damage and boosts Water; Sun is the mirror. It is "
                  "often the whole story — rain turns a 4x Fire hit into 2x.")
+        terrain = mid.selectbox(
+            "Terrain", [None, GRASSY, PSYCHIC_T, ELECTRIC_T],
+            format_func=lambda t: {None: "None", GRASSY: "Grassy",
+                                   PSYCHIC_T: "Psychic", ELECTRIC_T: "Electric"}[t],
+            key=f"dmg_terrain_{paste_id}",
+            help="Boosts the matching type by 5325/4096 for a grounded attacker, and "
+                 "Grassy halves Earthquake. Assumes both sides are grounded.")
         dmg_n = right.slider("Threats shown", 10, 30,
                              int(load_settings()["defaults"]["top_n"]), step=5,
                              key=f"dmg_top_{paste_id}")
@@ -296,7 +303,7 @@ with tab_damage:
 
         if direction == "What I hit":
             out = outgoing(reg, team, formes, meta_filter, dmg_n, weather,
-                           atk_stage, def_stage)
+                           atk_stage, def_stage, terrain)
             if not out:
                 st.warning("No threats at this filter.")
             else:
@@ -306,17 +313,29 @@ with tab_damage:
                     st.success(f"{len(certain)} of {len(out)} matchups KO in one hit "
                                "no matter what they invested.")
                 names = {f.slot: f.display_name for f in formes}
-                pick = st.selectbox(
-                    "Break down one of yours", [f.slot for f in formes],
+                st.subheader("One attacker, one move")
+                pcol, mcol = st.columns([1, 1])
+                pick = pcol.selectbox(
+                    "Attacker", [f.slot for f in formes],
                     format_func=lambda s: names[s], key=f"out_focus_{paste_id}")
-                render_outgoing_table(
-                    sorted([h for h in out if h.attacker_slot == pick],
-                           key=lambda h: h.bulkiest.low_pct, reverse=True))
+
+                every = outgoing(reg, team, formes, meta_filter, dmg_n, weather,
+                                 atk_stage, def_stage, terrain, per_move=True)
+                mine = [h for h in every if h.attacker_slot == pick]
+                move_names = list(dict.fromkeys(h.likely.move_name for h in mine))
+                if not move_names:
+                    st.info(f"{names[pick]} has no damaging move.")
+                else:
+                    move = mcol.selectbox("Move", move_names,
+                                          key=f"out_move_{paste_id}_{pick}")
+                    render_outgoing_table(
+                        sorted([h for h in mine if h.likely.move_name == move],
+                               key=lambda h: h.bulkiest.low_pct, reverse=True))
 
         # st.stop() would end the whole script run, not this tab, and the tabs below
         # would never be built — so the incoming path is an else, not a fallthrough.
         elif not (hits := incoming(reg, team, formes, meta_filter, dmg_n, weather,
-                                   atk_stage, def_stage)):
+                                   atk_stage, def_stage, terrain)):
             st.warning("No threats at this filter.")
         else:
             order = [(f.display_name, f.forme_id) for f in formes]

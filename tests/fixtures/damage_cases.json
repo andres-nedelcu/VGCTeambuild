@@ -337,5 +337,129 @@
   },
   "move": "Earthquake",
   "spread": false
+ },
+ {
+  "name": "Grass move, no terrain",
+  "attacker": {
+   "species": "Whimsicott",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "ability": "Chlorophyll",
+   "moves": [
+    "Energy Ball"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Energy Ball",
+  "spread": false
+ },
+ {
+  "name": "Grass move in Grassy Terrain",
+  "attacker": {
+   "species": "Whimsicott",
+   "ability": "Chlorophyll",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "moves": [
+    "Energy Ball"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Energy Ball",
+  "spread": false,
+  "terrain": "grassyterrain"
+ },
+ {
+  "name": "Grassy Terrain halves Earthquake",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Earthquake"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Earthquake",
+  "spread": false,
+  "terrain": "grassyterrain"
+ },
+ {
+  "name": "Miracle Seed on a Grass move",
+  "attacker": {
+   "species": "Whimsicott",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "ability": "Chlorophyll",
+   "moves": [
+    "Energy Ball"
+   ],
+   "item": "Miracle Seed"
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Energy Ball",
+  "spread": false
+ },
+ {
+  "name": "Miracle Seed AND Grassy Terrain together",
+  "attacker": {
+   "species": "Whimsicott",
+   "ability": "Chlorophyll",
+   "item": "Miracle Seed",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "moves": [
+    "Energy Ball"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Energy Ball",
+  "spread": false,
+  "terrain": "grassyterrain"
  }
 ]

@@ -27,8 +27,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Sequence
 
-from vgc.damage import (PHYSICAL, Result, attack_after_item, boosted, damage_rolls,
-                        defence_after_item, final_multiplier, weather_multiplier)
+from vgc.damage import (PHYSICAL, Result, attack_after_item, base_power_multiplier,
+                        boosted, damage_rolls, defence_after_item, final_multiplier,
+                        weather_multiplier)
 from vgc.db import session
 from vgc.megas import Forme
 from vgc.metafilter import MetaFilter
@@ -46,6 +47,7 @@ ALWAYS, LIKELY, NEVER = "Always", "Usually", "No KO"
 
 @dataclass(frozen=True)
 class Outgoing:
+    move_id: str
     attacker_slot: int
     attacker_name: str
     attacker_forme_id: str
@@ -118,13 +120,13 @@ def _my_moves(team: Sequence[Member]) -> dict[int, list[tuple]]:
             select move_id, display_name, type, category, base_power, is_spread
             from dim_move
         """).fetchall()
-    by_id = {r[0]: r[1:] for r in rows}
+    by_id = {r[0]: (r[0], *r[1:]) for r in rows}
     out: dict[int, list[tuple]] = {}
     for member in team:
         picked = []
         for move_id in (member.moves or []):
             info = by_id.get(move_id)
-            if info and info[3] and int(info[3]) > 0:
+            if info and info[4] and int(info[4]) > 0:
                 picked.append(info)
         out[member.slot] = picked
     return out
@@ -132,8 +134,8 @@ def _my_moves(team: Sequence[Member]) -> dict[int, list[tuple]]:
 
 def outgoing(regulation: str, team: Sequence[Member], formes: Sequence[Forme],
              filt: MetaFilter | None = None, top_n: int = 20,
-             weather: str | None = None, atk_stage: int = 0,
-             def_stage: int = 0) -> list[Outgoing]:
+             weather: str | None = None, atk_stage: int = 0, def_stage: int = 0,
+             terrain: str | None = None, per_move: bool = False) -> list[Outgoing]:
     """Your best hit on each meta threat, from each of your Pokémon."""
     filt = filt or MetaFilter()
     meta = threats(regulation, top_n, filt)
@@ -153,7 +155,7 @@ def outgoing(regulation: str, team: Sequence[Member], formes: Sequence[Forme],
         sp = sp_from_investment(member.investment)
         atk_b, spa_b = my_base[forme.forme_id]
 
-        for name, move_type_raw, category, base_power, spread in moves[forme.slot]:
+        for move_id, name, move_type_raw, category, base_power, spread in moves[forme.slot]:
             move_type = attack_type(move_type_raw, forme.ability_id)
             key = "atk" if category == PHYSICAL else "spa"
             raw = calc_stat(atk_b if category == PHYSICAL else spa_b,
@@ -188,14 +190,20 @@ def outgoing(regulation: str, team: Sequence[Member], formes: Sequence[Forme],
                                                    their_item, category),
                         type_mult=mult, stab=stab, spread=bool(spread),
                         weather_mult=weather_multiplier(weather, move_type),
-                        final_mult=final_multiplier(member.item_id, mult)),
+                        final_mult=final_multiplier(member.item_id, mult),
+                        base_power_mult=base_power_multiplier(
+                            member.item_id, move_type, terrain, move_id)),
                         hp, mult, stab)
 
                 out.append(Outgoing(
-                    attacker_slot=forme.slot, attacker_name=forme.display_name,
+                    move_id=move_id, attacker_slot=forme.slot, attacker_name=forme.display_name,
                     attacker_forme_id=forme.forme_id, threat=threat,
                     likely=roll(likely_def, likely_hp),
                     bulkiest=roll(bulk_def, bulk_hp)))
+
+    if per_move:
+        # Every move against every threat, for "pick one attacker and one move".
+        return sorted(out, key=lambda h: h.bulkiest.low_pct, reverse=True)
 
     # One row per (your Pokemon, threat): the move that kills fastest through bulk.
     best: dict[tuple[int, str], Outgoing] = {}
