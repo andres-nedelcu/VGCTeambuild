@@ -5,28 +5,25 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
+from components.palette import FILL_BAD, FILL_CAUTION, FILL_GOOD, MUTED
 from vgc.speed import (DEPENDS, LOW_CONFIDENCE, MOVE_FIRST, MOVE_LAST, OUTSPED, OUTSPEED,
                         TAILWIND_BOTH, TAILWIND_NONE, TAILWIND_THEIRS, TAILWIND_YOURS,
                         Field, TeamSpeed, matchup)
 
-# Explicit text colour: these light fills also have to read on the dark theme.
-SCARF_BG = "background-color: #bbf7d0; color: #14532d"  # Choice Scarf is common here
-GOOD_BG = "background-color: #bbf7d0; color: #14532d"
-DEPENDS_BG = "background-color: #fed7aa; color: #7c2d12"
-BAD_BG = "background-color: #fecaca; color: #7f1d1d"
+SCARF_BG = FILL_GOOD   # Choice Scarf is common enough on this threat to plan around
 VERDICT_BG = {
     # Green always means good for you, in both Speed order and Trick Room (HANDOFF §6.3).
-    OUTSPEED: GOOD_BG,
-    MOVE_FIRST: GOOD_BG,
-    DEPENDS: DEPENDS_BG,
-    OUTSPED: BAD_BG,
-    MOVE_LAST: BAD_BG,
+    OUTSPEED: FILL_GOOD,
+    MOVE_FIRST: FILL_GOOD,
+    DEPENDS: FILL_CAUTION,
+    OUTSPED: FILL_BAD,
+    MOVE_LAST: FILL_BAD,
 }
 SCARF_COLS = ["Max ⚡", "Neu ⚡"]
 LIKELY_COL = "Likely"
 # Muted rather than coloured: a split spread is not good or bad news, and the fills in
 # this table already mean "good for you", which must keep meaning only that.
-UNSURE = "color: #9ca3af"
+UNSURE = MUTED
 
 
 def render_team_speeds(speeds: list[TeamSpeed]) -> None:

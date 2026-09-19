@@ -7,21 +7,13 @@ import plotly.graph_objects as go
 import streamlit as st
 from plotly.subplots import make_subplots
 
+from components.palette import (BAD_STRONG, DEFENDING, LABELS, LEVELS, NEUTRAL,
+                                PALE_CAUTION, PALE_GOOD, discrete_scale)
 from vgc.defense import RESIST_ROW, WEAK_ROW
 
-LEVELS = [0.0, 0.25, 0.5, 1.0, 2.0, 4.0]
-LABELS = ["0", "¼", "½", "", "2", "4"]
-COLORS = ["#4b5563", "#15803d", "#86efac", "#f3f4f6", "#fb923c", "#dc2626"]
+COLORS = DEFENDING  # you are taking the hit, so 4x is the bad end
 # summary codes: 0 none, 1 some weak, 2 flagged, 3 some resist
-SUMMARY_COLORS = ["#f3f4f6", "#fed7aa", "#dc2626", "#bbf7d0"]
-
-
-def _discrete_scale(colors: list[str]) -> list[list]:
-    n = len(colors)
-    scale = []
-    for i, c in enumerate(colors):
-        scale += [[i / n, c], [(i + 1) / n, c]]
-    return scale
+SUMMARY_COLORS = [NEUTRAL, PALE_CAUTION, BAD_STRONG, PALE_GOOD]
 
 
 def render_defense_grid(matrix: pd.DataFrame, summary: pd.DataFrame, flags: list[str]) -> None:
@@ -40,7 +32,7 @@ def render_defense_grid(matrix: pd.DataFrame, summary: pd.DataFrame, flags: list
                         row_heights=[n, 2], vertical_spacing=0.04)
     fig.add_trace(go.Heatmap(
         z=idx.values, x=types, y=list(matrix.index),
-        zmin=-0.5, zmax=len(LEVELS) - 0.5, colorscale=_discrete_scale(COLORS),
+        zmin=-0.5, zmax=len(LEVELS) - 0.5, colorscale=discrete_scale(COLORS),
         showscale=False, text=text.values, texttemplate="%{text}",
         customdata=matrix.values,
         hovertemplate="%{y} vs %{x}: %{customdata}×<extra></extra>",
@@ -49,7 +41,7 @@ def render_defense_grid(matrix: pd.DataFrame, summary: pd.DataFrame, flags: list
     fig.add_trace(go.Heatmap(
         z=codes.values, x=types, y=list(summary.index),
         zmin=-0.5, zmax=len(SUMMARY_COLORS) - 0.5,
-        colorscale=_discrete_scale(SUMMARY_COLORS), showscale=False,
+        colorscale=discrete_scale(SUMMARY_COLORS), showscale=False,
         text=summary.values, texttemplate="%{text}",
         hovertemplate="%{x} · %{y}: %{text}<extra></extra>",
         xgap=2, ygap=2,

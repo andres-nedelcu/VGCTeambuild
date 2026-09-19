@@ -186,7 +186,8 @@ with tab_coverage:
         else:
             st.success(f"Something on the team hits all {top_n} threats super effectively")
         render_coverage_grid(cover, team_best(cover),
-                             {t.display_name: t.usage_pct for t in meta})
+                             {t.display_name: t.usage_pct for t in meta},
+                             {t.display_name: sprite_data_uri(t.forme_id) for t in meta})
     except LookupError as e:
         st.warning(str(e))
 
