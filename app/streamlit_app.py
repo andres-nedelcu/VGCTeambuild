@@ -7,6 +7,8 @@ import streamlit as st
 
 from components.cores_view import (render_cores, render_item_cores, render_partners,
                                   render_suggestions, render_swaps, render_uniques)
+from components.damage_grid import (render_damage_grid, render_focus,
+                                    render_incoming_table)
 from components.coverage_grid import render_coverage_grid
 from components.defense_grid import render_defense_grid
 from components.speed_view import render_speed_tiers, render_team_speeds
@@ -22,6 +24,8 @@ from vgc.metafilter import TEAMS, THIN_SAMPLE, WINS, MetaFilter, extent, sample_
 from vgc.offense import attackers, coverage_matrix, holes, team_best, threats
 from vgc.pressure import rank as rank_threats
 from vgc.speed import TAILWIND_OPTIONS, Field, meta_speed, team_speeds
+from vgc.damage import RAIN, SUN
+from vgc.incoming import TIERS, against, incoming
 from vgc.suggest import suggestions
 from vgc.swap import sole_coverage, swaps
 from vgc.sprites import data_uri as sprite_data_uri
@@ -147,8 +151,9 @@ matrix = defense_matrix(formes)
 summary = summarize(matrix)
 flags = flagged_types(summary)
 
-tab_defense, tab_coverage, tab_speed, tab_threats, tab_cores = st.tabs(
-    ["Defensive grid", "Offensive coverage", "Speed tiers", "Threat list", "What to add"])
+(tab_defense, tab_coverage, tab_speed, tab_threats, tab_damage,
+ tab_cores) = st.tabs(["Defensive grid", "Offensive coverage", "Speed tiers",
+                       "Threat list", "Damage", "What to add"])
 
 with tab_defense:
     st.subheader("Defensive type grid")
@@ -233,6 +238,55 @@ with tab_threats:
                              key=f"threat_top_{paste_id}")
         render_threat_list(rank_threats(reg, formes, threat_n, meta_filter), len(formes),
                            {f.display_name: sprite_data_uri(f.forme_id) for f in formes})
+    except LookupError as e:
+        st.warning(str(e))
+
+with tab_damage:
+    st.subheader("What actually KOs you")
+    st.caption("The threat list ranks by type pressure and says so — it ignores base "
+               "power, stats, bulk and items. This answers what that leaves open: "
+               "whether the hit actually kills.")
+    try:
+        left, right = st.columns([1, 2])
+        weather = left.selectbox(
+            "Weather", [None, RAIN, SUN],
+            format_func=lambda w: {None: "None", RAIN: "Rain", SUN: "Sun"}[w],
+            key=f"dmg_weather_{paste_id}",
+            help="Rain halves Fire damage and boosts Water; Sun is the mirror. It is "
+                 "often the whole story — rain turns a 4x Fire hit into 2x.")
+        dmg_n = right.slider("Threats shown", 10, 30,
+                             int(load_settings()["defaults"]["top_n"]), step=5,
+                             key=f"dmg_top_{paste_id}")
+        hits = incoming(reg, team, formes, meta_filter, dmg_n, weather)
+        if not hits:
+            st.warning("No threats at this filter.")
+        else:
+            order = [(f.display_name, f.forme_id) for f in formes]
+            render_damage_grid(hits, order)
+
+            killers = [h for h in hits if h.kos]
+            if killers:
+                st.warning(f"{len(killers)} of {len(hits)} matchups are a guaranteed "
+                           "KO at the worst case.")
+            st.subheader("One Pokémon at a time")
+            st.caption("The grid shows the shape; this answers the question you ask "
+                       "in a game — can I leave this one in?")
+            worst_slot = hits[0].target_slot
+            slots = [f.slot for f in formes]
+            names = {f.slot: f.display_name for f in formes}
+            fcol, tcol = st.columns([1, 2])
+            focus = fcol.selectbox(
+                "Pokémon", slots, index=slots.index(worst_slot),
+                format_func=lambda s: names[s], key=f"dmg_focus_{paste_id}")
+            show = tcol.multiselect(
+                "Show", list(TIERS), default=[TIERS[0], TIERS[1]],
+                key=f"dmg_tiers_{paste_id}",
+                help="Defaults to the brackets that change a decision. Add the rest "
+                     "to see what this Pokémon can safely come in on.")
+            render_focus(against(hits, focus), names[focus], show)
+
+            with st.expander("Every matchup, hardest first"):
+                render_incoming_table(hits[:60])
     except LookupError as e:
         st.warning(str(e))
 

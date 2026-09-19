@@ -1,0 +1,236 @@
+[
+ {
+  "name": "neutral physical, single target",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Earthquake"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Earthquake",
+  "spread": false
+ },
+ {
+  "name": "special attack, single target",
+  "attacker": {
+   "species": "Gardevoir",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "moves": [
+    "Moonblast"
+   ]
+  },
+  "defender": {
+   "species": "Garchomp",
+   "evs": {
+    "hp": 32
+   },
+   "nature": "Careful"
+  },
+  "move": "Moonblast",
+  "spread": false
+ },
+ {
+  "name": "spread move in doubles",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Earthquake"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Earthquake",
+  "spread": true
+ },
+ {
+  "name": "Fire into Golisopod-Mega, no weather",
+  "attacker": {
+   "species": "Arcanine-Hisui",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Flare Blitz"
+   ]
+  },
+  "defender": {
+   "species": "Golisopod-Mega",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Flare Blitz",
+  "spread": false
+ },
+ {
+  "name": "Fire into Golisopod-Mega, in rain",
+  "attacker": {
+   "species": "Arcanine-Hisui",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Flare Blitz"
+   ]
+  },
+  "defender": {
+   "species": "Golisopod-Mega",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Flare Blitz",
+  "spread": false,
+  "weather": "raindance"
+ },
+ {
+  "name": "Choice Band physical",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "item": "Choice Band",
+   "moves": [
+    "Earthquake"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Earthquake",
+  "spread": false
+ },
+ {
+  "name": "Life Orb special",
+  "attacker": {
+   "species": "Gardevoir",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "item": "Life Orb",
+   "moves": [
+    "Moonblast"
+   ]
+  },
+  "defender": {
+   "species": "Garchomp",
+   "evs": {
+    "hp": 32
+   },
+   "nature": "Careful"
+  },
+  "move": "Moonblast",
+  "spread": false
+ },
+ {
+  "name": "immunity: Dragon into Fairy",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Dragon Claw"
+   ]
+  },
+  "defender": {
+   "species": "Gardevoir-Mega",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Bold"
+  },
+  "move": "Dragon Claw",
+  "spread": false
+ },
+ {
+  "name": "resisted hit, halving path",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Dragon Claw"
+   ]
+  },
+  "defender": {
+   "species": "Kingambit",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Dragon Claw",
+  "spread": false
+ },
+ {
+  "name": "4x STAB special into a frail target",
+  "attacker": {
+   "species": "Raichu-Mega-Y",
+   "evs": {
+    "hp": 2,
+    "spe": 32
+   },
+   "nature": "Timid",
+   "moves": [
+    "Zap Cannon"
+   ]
+  },
+  "defender": {
+   "species": "Pelipper",
+   "evs": {
+    "hp": 2,
+    "spa": 32,
+    "spe": 32
+   },
+   "nature": "Modest",
+   "item": "Focus Sash"
+  },
+  "move": "Zap Cannon",
+  "spread": false
+ }
+]

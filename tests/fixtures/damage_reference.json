@@ -1,0 +1,586 @@
+[
+  {
+    "name": "neutral physical, single target",
+    "attacker": {
+      "species": "Garchomp",
+      "evs": {
+        "atk": 32
+      },
+      "nature": "Adamant",
+      "moves": [
+        "Earthquake"
+      ]
+    },
+    "defender": {
+      "species": "Incineroar",
+      "evs": {
+        "hp": 32,
+        "def": 32
+      },
+      "nature": "Impish"
+    },
+    "move": "Earthquake",
+    "spread": false,
+    "rolls": [
+      146,
+      146,
+      150,
+      152,
+      152,
+      156,
+      156,
+      158,
+      158,
+      162,
+      164,
+      164,
+      168,
+      168,
+      170,
+      174
+    ],
+    "defender_hp": 202,
+    "defender_stats": {
+      "def": 156,
+      "spd": 110
+    },
+    "defender_stats_raw": {
+      "def": 156,
+      "spd": 110
+    },
+    "attacker_stats": {
+      "atk": 200,
+      "spa": 90
+    },
+    "attacker_stats_raw": {
+      "atk": 200,
+      "spa": 90
+    }
+  },
+  {
+    "name": "special attack, single target",
+    "attacker": {
+      "species": "Gardevoir",
+      "evs": {
+        "spa": 32
+      },
+      "nature": "Modest",
+      "moves": [
+        "Moonblast"
+      ]
+    },
+    "defender": {
+      "species": "Garchomp",
+      "evs": {
+        "hp": 32
+      },
+      "nature": "Careful"
+    },
+    "move": "Moonblast",
+    "spread": false,
+    "rolls": [
+      182,
+      182,
+      186,
+      188,
+      192,
+      192,
+      194,
+      198,
+      198,
+      200,
+      204,
+      206,
+      206,
+      210,
+      212,
+      216
+    ],
+    "defender_hp": 215,
+    "defender_stats": {
+      "def": 115,
+      "spd": 115
+    },
+    "defender_stats_raw": {
+      "def": 115,
+      "spd": 115
+    },
+    "attacker_stats": {
+      "atk": 76,
+      "spa": 194
+    },
+    "attacker_stats_raw": {
+      "atk": 76,
+      "spa": 194
+    }
+  },
+  {
+    "name": "spread move in doubles",
+    "attacker": {
+      "species": "Garchomp",
+      "evs": {
+        "atk": 32
+      },
+      "nature": "Adamant",
+      "moves": [
+        "Earthquake"
+      ]
+    },
+    "defender": {
+      "species": "Incineroar",
+      "evs": {
+        "hp": 32,
+        "def": 32
+      },
+      "nature": "Impish"
+    },
+    "move": "Earthquake",
+    "spread": true,
+    "rolls": [
+      108,
+      108,
+      110,
+      110,
+      114,
+      114,
+      116,
+      116,
+      116,
+      120,
+      120,
+      122,
+      122,
+      126,
+      126,
+      128
+    ],
+    "defender_hp": 202,
+    "defender_stats": {
+      "def": 156,
+      "spd": 110
+    },
+    "defender_stats_raw": {
+      "def": 156,
+      "spd": 110
+    },
+    "attacker_stats": {
+      "atk": 200,
+      "spa": 90
+    },
+    "attacker_stats_raw": {
+      "atk": 200,
+      "spa": 90
+    }
+  },
+  {
+    "name": "Fire into Golisopod-Mega, no weather",
+    "attacker": {
+      "species": "Arcanine-Hisui",
+      "evs": {
+        "atk": 32
+      },
+      "nature": "Adamant",
+      "moves": [
+        "Flare Blitz"
+      ]
+    },
+    "defender": {
+      "species": "Golisopod-Mega",
+      "evs": {
+        "hp": 32,
+        "def": 32
+      },
+      "nature": "Impish"
+    },
+    "move": "Flare Blitz",
+    "spread": false,
+    "rolls": [
+      204,
+      204,
+      204,
+      208,
+      208,
+      216,
+      216,
+      216,
+      220,
+      220,
+      228,
+      228,
+      228,
+      232,
+      232,
+      240
+    ],
+    "defender_hp": 182,
+    "defender_stats": {
+      "def": 249,
+      "spd": 140
+    },
+    "defender_stats_raw": {
+      "def": 249,
+      "spd": 140
+    },
+    "attacker_stats": {
+      "atk": 183,
+      "spa": 103
+    },
+    "attacker_stats_raw": {
+      "atk": 183,
+      "spa": 103
+    }
+  },
+  {
+    "name": "Fire into Golisopod-Mega, in rain",
+    "attacker": {
+      "species": "Arcanine-Hisui",
+      "evs": {
+        "atk": 32
+      },
+      "nature": "Adamant",
+      "moves": [
+        "Flare Blitz"
+      ]
+    },
+    "defender": {
+      "species": "Golisopod-Mega",
+      "evs": {
+        "hp": 32,
+        "def": 32
+      },
+      "nature": "Impish"
+    },
+    "move": "Flare Blitz",
+    "spread": false,
+    "weather": "raindance",
+    "rolls": [
+      100,
+      100,
+      100,
+      100,
+      100,
+      108,
+      108,
+      108,
+      108,
+      108,
+      112,
+      112,
+      112,
+      112,
+      112,
+      120
+    ],
+    "defender_hp": 182,
+    "defender_stats": {
+      "def": 249,
+      "spd": 140
+    },
+    "defender_stats_raw": {
+      "def": 249,
+      "spd": 140
+    },
+    "attacker_stats": {
+      "atk": 183,
+      "spa": 103
+    },
+    "attacker_stats_raw": {
+      "atk": 183,
+      "spa": 103
+    }
+  },
+  {
+    "name": "Choice Band physical",
+    "attacker": {
+      "species": "Garchomp",
+      "evs": {
+        "atk": 32
+      },
+      "nature": "Adamant",
+      "item": "Choice Band",
+      "moves": [
+        "Earthquake"
+      ]
+    },
+    "defender": {
+      "species": "Incineroar",
+      "evs": {
+        "hp": 32,
+        "def": 32
+      },
+      "nature": "Impish"
+    },
+    "move": "Earthquake",
+    "spread": false,
+    "rolls": [
+      218,
+      218,
+      222,
+      224,
+      228,
+      230,
+      234,
+      236,
+      236,
+      240,
+      242,
+      246,
+      248,
+      252,
+      254,
+      258
+    ],
+    "defender_hp": 202,
+    "defender_stats": {
+      "def": 156,
+      "spd": 110
+    },
+    "defender_stats_raw": {
+      "def": 156,
+      "spd": 110
+    },
+    "attacker_stats": {
+      "atk": 300,
+      "spa": 90
+    },
+    "attacker_stats_raw": {
+      "atk": 200,
+      "spa": 90
+    }
+  },
+  {
+    "name": "Life Orb special",
+    "attacker": {
+      "species": "Gardevoir",
+      "evs": {
+        "spa": 32
+      },
+      "nature": "Modest",
+      "item": "Life Orb",
+      "moves": [
+        "Moonblast"
+      ]
+    },
+    "defender": {
+      "species": "Garchomp",
+      "evs": {
+        "hp": 32
+      },
+      "nature": "Careful"
+    },
+    "move": "Moonblast",
+    "spread": false,
+    "rolls": [
+      237,
+      237,
+      242,
+      244,
+      250,
+      250,
+      252,
+      257,
+      257,
+      260,
+      265,
+      268,
+      268,
+      273,
+      276,
+      281
+    ],
+    "defender_hp": 215,
+    "defender_stats": {
+      "def": 115,
+      "spd": 115
+    },
+    "defender_stats_raw": {
+      "def": 115,
+      "spd": 115
+    },
+    "attacker_stats": {
+      "atk": 76,
+      "spa": 194
+    },
+    "attacker_stats_raw": {
+      "atk": 76,
+      "spa": 194
+    }
+  },
+  {
+    "name": "immunity: Dragon into Fairy",
+    "attacker": {
+      "species": "Garchomp",
+      "evs": {
+        "atk": 32
+      },
+      "nature": "Adamant",
+      "moves": [
+        "Dragon Claw"
+      ]
+    },
+    "defender": {
+      "species": "Gardevoir-Mega",
+      "evs": {
+        "hp": 32,
+        "def": 32
+      },
+      "nature": "Bold"
+    },
+    "move": "Dragon Claw",
+    "spread": false,
+    "rolls": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "defender_hp": 175,
+    "defender_stats": {
+      "def": 128,
+      "spd": 155
+    },
+    "defender_stats_raw": {
+      "def": 128,
+      "spd": 155
+    },
+    "attacker_stats": {
+      "atk": 200,
+      "spa": 90
+    },
+    "attacker_stats_raw": {
+      "atk": 200,
+      "spa": 90
+    }
+  },
+  {
+    "name": "resisted hit, halving path",
+    "attacker": {
+      "species": "Garchomp",
+      "evs": {
+        "atk": 32
+      },
+      "nature": "Adamant",
+      "moves": [
+        "Dragon Claw"
+      ]
+    },
+    "defender": {
+      "species": "Kingambit",
+      "evs": {
+        "hp": 32,
+        "def": 32
+      },
+      "nature": "Impish"
+    },
+    "move": "Dragon Claw",
+    "spread": false,
+    "rolls": [
+      24,
+      24,
+      24,
+      25,
+      25,
+      26,
+      26,
+      26,
+      27,
+      27,
+      27,
+      27,
+      27,
+      28,
+      28,
+      29
+    ],
+    "defender_hp": 207,
+    "defender_stats": {
+      "def": 189,
+      "spd": 105
+    },
+    "defender_stats_raw": {
+      "def": 189,
+      "spd": 105
+    },
+    "attacker_stats": {
+      "atk": 200,
+      "spa": 90
+    },
+    "attacker_stats_raw": {
+      "atk": 200,
+      "spa": 90
+    }
+  },
+  {
+    "name": "4x STAB special into a frail target",
+    "attacker": {
+      "species": "Raichu-Mega-Y",
+      "evs": {
+        "hp": 2,
+        "spe": 32
+      },
+      "nature": "Timid",
+      "moves": [
+        "Zap Cannon"
+      ]
+    },
+    "defender": {
+      "species": "Pelipper",
+      "evs": {
+        "hp": 2,
+        "spa": 32,
+        "spe": 32
+      },
+      "nature": "Modest",
+      "item": "Focus Sash"
+    },
+    "move": "Zap Cannon",
+    "spread": false,
+    "rolls": [
+      540,
+      552,
+      556,
+      564,
+      568,
+      576,
+      580,
+      588,
+      592,
+      600,
+      604,
+      612,
+      616,
+      624,
+      628,
+      640
+    ],
+    "defender_hp": 137,
+    "defender_stats": {
+      "def": 120,
+      "spd": 90
+    },
+    "defender_stats_raw": {
+      "def": 120,
+      "spd": 90
+    },
+    "attacker_stats": {
+      "atk": 108,
+      "spa": 180
+    },
+    "attacker_stats_raw": {
+      "atk": 108,
+      "spa": 180
+    }
+  }
+]

@@ -1,5 +1,11 @@
 # VGC Teambuilding — state at end of v1, and what's next
 
+> **Superseded in part.** This describes v1. A long session on 2026-09-18 completed
+> roadmap Tier 1 and several later items — see `SUMMARY_2026-09-18.md` for current
+> state, the corrections that changed the design, and the ranked next steps.
+> Sections 1-5 here are still accurate background; the §6 roadmap is largely done.
+
+
 Written 2026-09-18, at the end of the session that completed Phases 2 and 3.
 Read this first, then `DECISIONS.md` (why things are the way they are) and
 `PROJECT_OUTLINE.md` (original scope and data model).
