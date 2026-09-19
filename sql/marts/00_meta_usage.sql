@@ -40,17 +40,24 @@
 --
 -- snapshot_date is the latest event_date included, not a load date: for a view
 -- computed per filter selection, "the meta as of this event" is the honest label.
+-- One row per (team, species) after filtering, with that team's weight. Every mart
+-- that slices the meta builds on this, so the filter semantics are defined once:
+-- meta_usage counts species, meta_cores pairs them, and neither can drift from the
+-- other's idea of which teams are in scope.
+CREATE OR REPLACE MACRO meta_entries(reg, cut, since, min_players, weight_mode) AS TABLE
+SELECT DISTINCT
+       t.regulation, s.tournament_id, s.player_id, s.pokemon_id, t.event_date,
+       CASE WHEN weight_mode = 'wins' THEN coalesce(s.wins, 0) ELSE 1 END AS wt
+FROM fact_tournament_set s
+JOIN fact_tournament t USING (tournament_id)
+WHERE (reg IS NULL OR t.regulation = reg)
+  AND (cut IS NULL OR (s.placement IS NOT NULL AND s.placement <= cut))
+  AND (since IS NULL OR t.event_date >= since)
+  AND (min_players IS NULL OR t.players >= min_players);
+
 CREATE OR REPLACE MACRO meta_usage(reg, cut, since, min_players, weight_mode) AS TABLE
 WITH entry AS (
-    SELECT DISTINCT
-           t.regulation, s.tournament_id, s.player_id, s.pokemon_id, t.event_date,
-           CASE WHEN weight_mode = 'wins' THEN coalesce(s.wins, 0) ELSE 1 END AS wt
-    FROM fact_tournament_set s
-    JOIN fact_tournament t USING (tournament_id)
-    WHERE (reg IS NULL OR t.regulation = reg)
-      AND (cut IS NULL OR (s.placement IS NOT NULL AND s.placement <= cut))
-      AND (since IS NULL OR t.event_date >= since)
-      AND (min_players IS NULL OR t.players >= min_players)
+    SELECT * FROM meta_entries(reg, cut, since, min_players, weight_mode)
 ),
 team AS (
     SELECT DISTINCT regulation, tournament_id, player_id, event_date, wt FROM entry

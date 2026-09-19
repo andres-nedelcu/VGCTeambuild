@@ -40,11 +40,20 @@ def sprite_name(pokemon_id: str, base_species_id: str | None) -> str:
 
 
 def collect(con) -> dict[str, str]:
-    """pokemon_id -> sprite name, for every forme the app can draw."""
+    """pokemon_id -> sprite name, for every Pokemon the app can draw.
+
+    Formes alone are not enough. The Cores tab works at species grain -- you pick a
+    species and the stone is a later build choice -- so a meta row for
+    Charizard-Mega-Y still needs a plain Charizard sprite beside its core. Base
+    species are therefore pulled in alongside the formes.
+    """
     rows = con.execute("""
         SELECT DISTINCT p.pokemon_id, p.base_species_id
         FROM dim_pokemon p
         WHERE p.pokemon_id IN (SELECT forme_id FROM mart_meta_top)
+           OR p.pokemon_id IN (SELECT species_id FROM mart_meta_top)
+           OR p.pokemon_id IN (SELECT base_species_id FROM dim_pokemon
+                               WHERE pokemon_id IN (SELECT forme_id FROM mart_meta_top))
            OR p.pokemon_id IN (SELECT pokemon_id FROM my_team)
         ORDER BY 1
     """).fetchall()

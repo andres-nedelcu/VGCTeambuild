@@ -5,11 +5,15 @@ import time
 import pandas as pd
 import streamlit as st
 
+from components.cores_view import (render_cores, render_item_cores, render_partners,
+                                  render_suggestions)
 from components.coverage_grid import render_coverage_grid
 from components.defense_grid import render_defense_grid
 from components.speed_view import render_speed_tiers, render_team_speeds
 from components.threat_list import render_threat_list
 from vgc import regulations
+from vgc.cores import cores as meta_cores
+from vgc.cores import item_cores, min_support, partners
 from vgc.db import load_settings, warehouse_path
 from vgc.defense import defense_matrix, flagged_types, mega_comparison, summarize
 from vgc.freshness import sources as data_sources
@@ -18,6 +22,7 @@ from vgc.metafilter import TEAMS, THIN_SAMPLE, WINS, MetaFilter, extent, sample_
 from vgc.offense import attackers, coverage_matrix, holes, team_best, threats
 from vgc.pressure import rank as rank_threats
 from vgc.speed import TAILWIND_OPTIONS, Field, meta_speed, team_speeds
+from vgc.suggest import suggestions
 from vgc.sprites import data_uri as sprite_data_uri
 from vgc.team import list_pastes, load_team
 
@@ -141,8 +146,8 @@ matrix = defense_matrix(formes)
 summary = summarize(matrix)
 flags = flagged_types(summary)
 
-tab_defense, tab_coverage, tab_speed, tab_threats = st.tabs(
-    ["Defensive grid", "Offensive coverage", "Speed tiers", "Threat list"])
+tab_defense, tab_coverage, tab_speed, tab_threats, tab_cores = st.tabs(
+    ["Defensive grid", "Offensive coverage", "Speed tiers", "Threat list", "What to add"])
 
 with tab_defense:
     st.subheader("Defensive type grid")
@@ -227,6 +232,49 @@ with tab_threats:
                              key=f"threat_top_{paste_id}")
         render_threat_list(rank_threats(reg, formes, threat_n, meta_filter), len(formes),
                            {f.display_name: sprite_data_uri(f.forme_id) for f in formes})
+    except LookupError as e:
+        st.warning(str(e))
+
+with tab_cores:
+    try:
+        add_n = st.slider("Meta considered", 10, 40,
+                          int(load_settings()["defaults"]["top_n"]), step=5,
+                          key=f"add_top_{paste_id}",
+                          help="Both the candidate pool and the holes being fixed come "
+                               "from this many threats.")
+        picks = suggestions(reg, team, formes, meta_filter, add_n)
+        meta_for_gaps = threats(reg, add_n, meta_filter)
+        gaps = holes(coverage_matrix(attackers(team, formes), meta_for_gaps))
+
+        st.subheader("Candidates for this team")
+        render_suggestions(picks, gaps, flags)
+
+        floor = min_support(reg, meta_filter)
+        st.subheader("What the meta pairs together")
+        st.caption("Co-occurrence across tournament teams. Read **Lift**, not Share: "
+                   "Rillaboom is on over half of all teams, so almost everything pairs "
+                   "with it at a high share. Lift divides that out. A lift near 1 is "
+                   "usually chance — but check the item view below before concluding "
+                   "that, because a species with two opposing builds cancels itself "
+                   f"out here. Pairs need at least {floor} teams at this filter.")
+
+        st.markdown("**Partners for this team**")
+        render_partners(partners(reg, [m.pokemon_id for m in team], meta_filter))
+
+        st.markdown("**The meta's strongest cores**")
+        render_cores(meta_cores(reg, meta_filter).head(25))
+
+        st.markdown("**Builds that choose their own partner**")
+        st.caption("Where the item a Pokémon holds decides who it is brought with. "
+                   "These partnerships are invisible above, because averaging a "
+                   "species' builds together hides them.")
+        mine_ids = [m.pokemon_id for m in team]
+        yours = item_cores(reg, meta_filter, holders=mine_ids)
+        if not yours.empty:
+            st.caption("**On this team:**")
+            render_item_cores(yours.head(10))
+            st.caption("**Across the meta:**")
+        render_item_cores(item_cores(reg, meta_filter).head(15))
     except LookupError as e:
         st.warning(str(e))
 

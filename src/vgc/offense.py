@@ -38,6 +38,7 @@ class Threat:
     types: tuple[str, ...]
     ability_id: str | None
     usage_pct: float
+    species_id: str = ""   # cores and build data are keyed by species, not forme
 
 
 @lru_cache(maxsize=1)
@@ -109,7 +110,7 @@ def threats(regulation: str, top_n: int = 20,
             raise LookupError(f"The meta marts are not built. Run: {BUILD_CMD}") from e
     return [
         Threat(forme_id, name, tuple(t for t in (t1, t2) if t),
-               _threat_ability(regulation, species_id, forme_id), usage)
+               _threat_ability(regulation, species_id, forme_id), usage, species_id)
         for species_id, forme_id, name, t1, t2, usage in rows
     ]
 
