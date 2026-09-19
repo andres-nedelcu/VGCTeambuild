@@ -18,6 +18,7 @@ from vgc.metafilter import TEAMS, THIN_SAMPLE, WINS, MetaFilter, extent, sample_
 from vgc.offense import attackers, coverage_matrix, holes, team_best, threats
 from vgc.pressure import rank as rank_threats
 from vgc.speed import TAILWIND_OPTIONS, Field, meta_speed, team_speeds
+from vgc.sprites import data_uri as sprite_data_uri
 from vgc.team import list_pastes, load_team
 
 LOAD_CMD = "uv run python scripts/load_paste.py <pokepaste-url>"
@@ -163,10 +164,12 @@ with tab_defense:
 
     with st.expander("Formes and abilities used"):
         st.dataframe(pd.DataFrame([
-            {"slot": f.slot, "forme": f.display_name, "types": " / ".join(f.types),
+            {"sprite": sprite_data_uri(f.forme_id), "slot": f.slot,
+             "forme": f.display_name, "types": " / ".join(f.types),
              "ability": f.ability_id, "mega": "Yes" if f.is_mega else ""}
             for f in formes
-        ]), hide_index=True, width="stretch")
+        ]), hide_index=True, width="stretch",
+            column_config={"sprite": st.column_config.ImageColumn()})
 
 with tab_coverage:
     st.subheader("Offensive coverage vs the meta")

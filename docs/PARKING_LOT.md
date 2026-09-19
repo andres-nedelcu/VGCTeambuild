@@ -13,7 +13,7 @@ Ideas go here, not into code. Review only after v1 is done.
 - Bring-4 recommendations (**belongs to VFC xV**)
 - ML of any kind
 - Hosting on Streamlit Community Cloud
-- Sprites and visual polish
+- Sprites in the coverage heatmap and defensive grid chart x-axis (6.2 landed sprites in the two dataframe views only; the Plotly charts are 6.3's job per 6.2's non-goals)
 - In-app PokePaste URL preview (parse in memory, no warehouse write)
 - Ability damage modifiers in the defensive grid: Dry Skin (Fire x1.25), Fluffy (Fire x2 / contact x0.5), Filter / Solid Rock, Bulletproof, Soundproof, Tera Shell (full-HP resist), Mimicry (terrain typing)
 - Aura Guard (Champions, Mega Lucario Z): contact damage x0.5

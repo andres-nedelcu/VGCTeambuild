@@ -1029,6 +1029,7 @@ source = { editable = "." }
 dependencies = [
     { name = "duckdb" },
     { name = "pandas" },
+    { name = "pillow" },
     { name = "plotly" },
     { name = "pyyaml" },
     { name = "requests" },
@@ -1044,6 +1045,7 @@ dev = [
 requires-dist = [
     { name = "duckdb", specifier = ">=1.5.5" },
     { name = "pandas", specifier = ">=3.0.5" },
+    { name = "pillow", specifier = ">=11.0.0" },
     { name = "plotly", specifier = ">=7.1.0" },
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "requests", specifier = ">=2.34.2" },

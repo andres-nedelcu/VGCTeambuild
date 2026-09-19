@@ -6,10 +6,12 @@ import pandas as pd
 import streamlit as st
 
 from vgc.pressure import Pressure
+from vgc.sprites import data_uri
 
 
 def render_threat_list(rows: list[Pressure], team_size: int) -> None:
     table = pd.DataFrame([{
+        "Sprite": data_uri(p.threat.forme_id),
         "Threat": p.threat.display_name,
         "Usage %": 100 * p.threat.usage_pct,
         "Threat score": p.score,
@@ -22,6 +24,7 @@ def render_threat_list(rows: list[Pressure], team_size: int) -> None:
     st.dataframe(
         table, hide_index=True, width="stretch",
         column_config={
+            "Sprite": st.column_config.ImageColumn(),
             "Usage %": st.column_config.NumberColumn(format="%.1f"),
             "Threat score": st.column_config.ProgressColumn(
                 format="%.0f", min_value=0.0,
