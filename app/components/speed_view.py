@@ -28,7 +28,8 @@ SCARF_COLS = ["Max ⚡", "Neu ⚡"]
 def render_team_speeds(speeds: list[TeamSpeed]) -> None:
     st.dataframe(pd.DataFrame([
         {"Slot": s.slot, "Pokémon": s.display_name, "Base": s.base_spe,
-         "Nature": (s.nature or "-").title(), "Spe SP": s.sp, "Speed": s.speed}
+         "Nature": (s.nature or "-").title(), "Spe SP": s.sp,
+         "⚡": "Scarf" if s.scarfed else "", "Speed": s.speed}
         for s in sorted(speeds, key=lambda s: s.speed, reverse=True)
     ]), hide_index=True, width="stretch")
 

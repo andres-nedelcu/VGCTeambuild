@@ -62,6 +62,20 @@ def sp_from_investment(inv: dict[str, Any] | str | None) -> dict[str, int]:
     return sp
 
 
+CHOICE_SCARF = "choicescarf"
+SCARF_NUMERATOR, SCARF_DENOMINATOR = 3, 2
+
+
+def scarf(spe: int) -> int:
+    """Choice Scarf: Speed x1.5, floored.
+
+    Mirrored by the champ_scarf SQL macro in sql/marts/03_meta_speed.sql, and both
+    are pinned to the same reference table by tests/test_speed_tiers.py so they
+    cannot drift. Keep this the only Python copy.
+    """
+    return spe * SCARF_NUMERATOR // SCARF_DENOMINATOR
+
+
 def calc_stat(base: int, investment: int, nature_mod: float = 1.0,
               level: int = 50, stat: str = "spe") -> int:
     """HP = base + SP + 75. Others = floor((base + SP + 20) * nature)."""

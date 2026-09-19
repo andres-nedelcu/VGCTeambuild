@@ -11,7 +11,7 @@ import duckdb
 import pytest
 
 from vgc import REPO_ROOT
-from vgc.stats import calc_stat
+from vgc.stats import calc_stat, scarf
 
 # base Speed -> (max+, max neutral, uninvested, uninvested -Spe, max+ scarf, neutral scarf)
 REFERENCE = {
@@ -32,13 +32,6 @@ REFERENCE = {
     103: (170, 155, 123, 110, 255, 232), 102: (169, 154, 122, 109, 253, 231),
     101: (168, 153, 121, 108, 252, 229),
 }
-
-SCARF_NUMERATOR, SCARF_DENOMINATOR = 3, 2
-
-
-def scarf(spe: int) -> int:
-    return spe * SCARF_NUMERATOR // SCARF_DENOMINATOR
-
 
 @pytest.mark.parametrize("base,expected", sorted(REFERENCE.items()))
 def test_calc_stat_matches_reference_table(base, expected):

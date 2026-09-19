@@ -16,7 +16,7 @@ import pandas as pd
 from vgc.db import session
 from vgc.megas import Forme
 from vgc.metafilter import MetaFilter
-from vgc.stats import calc_stat, nature_mod, sp_from_investment
+from vgc.stats import CHOICE_SCARF, calc_stat, nature_mod, scarf, sp_from_investment
 from vgc.team import Member
 
 OUTSPEED, DEPENDS, OUTSPED = "You outspeed", "Depends", "Outsped"
@@ -57,7 +57,8 @@ class TeamSpeed:
     base_spe: int
     sp: int
     nature: str | None
-    speed: int
+    speed: int          # after the item, so this is the number to compare with
+    scarfed: bool = False
 
 
 @lru_cache(maxsize=1)
@@ -71,7 +72,15 @@ def clear_cache() -> None:
 
 
 def team_speeds(team: Sequence[Member], formes: Sequence[Forme]) -> list[TeamSpeed]:
-    """Actual Speed for each resolved forme, using that member's nature and SP."""
+    """Actual Speed for each resolved forme, from that member's nature, SP and item.
+
+    Choice Scarf is applied to your own Pokemon outright, where for a meta threat it
+    only sets a flag. That asymmetry is deliberate and is the whole point: your item
+    is a fact read from the paste, theirs is inferred from how often the species is
+    seen holding one. Applying a known item keeps every number provably correct.
+
+    A Mega-evolved slot holds its stone, not a Scarf, so the two never collide.
+    """
     spe = base_speeds()
     by_slot = {m.slot: m for m in team}
     out = []
@@ -79,8 +88,10 @@ def team_speeds(team: Sequence[Member], formes: Sequence[Forme]) -> list[TeamSpe
         member = by_slot[f.slot]
         sp = sp_from_investment(member.investment)["spe"]
         base = spe[f.forme_id]
+        raw = calc_stat(base, sp, nature_mod(member.nature, "spe"))
+        scarfed = member.item_id == CHOICE_SCARF
         out.append(TeamSpeed(f.slot, f.display_name, base, sp, member.nature,
-                             calc_stat(base, sp, nature_mod(member.nature, "spe"))))
+                             scarf(raw) if scarfed else raw, scarfed))
     return out
 
 

@@ -58,3 +58,12 @@ The fix is to sum usage per `(regulation, forme_id)`, but `species_id`,
 `forme_share`, `species_usage_pct` and `species_rank` are species-level columns that
 then need a rule (carry the largest contributor? null them?). Worth settling
 deliberately rather than inside another change.
+
+### Other Speed-modifying items (added 2026-09-18)
+
+`team_speeds` applies Choice Scarf only. `dim_item` also carries **Iron Ball** and
+**Macho Brace** (halve Speed), **Quick Powder** (Ditto only) and the move-last items
+Lagging Tail and Full Incense. The halving pair matters more now that the Speed tab
+has a Trick Room mode, since that is exactly where they get used. Same one-line
+change in `team_speeds`; the open question is whether to model move-last items at all,
+as they are an ordering rule rather than a Speed multiplier.

@@ -3,8 +3,11 @@ from types import SimpleNamespace
 
 import pytest
 
+from vgc.megas import resolve_team
 from vgc.speed import (DEPENDS, MOVE_FIRST, MOVE_LAST, OUTSPED, OUTSPEED, Field, benchmarks,
-                        ceiling, matchup)
+                        ceiling, matchup, team_speeds)
+from vgc.stats import CHOICE_SCARF, calc_stat, nature_mod, scarf
+from vgc.team import load_team
 
 # base 120 threat: max+ 189, max neutral 172, uninvested 140, uninvested -Spe 126
 THREAT = dict(spe_max_plus=189, spe_max_neutral=172, spe_uninvested=140,
@@ -128,3 +131,47 @@ def test_scarf_then_tailwind_order_pinned_on_odd_speed():
     threat = row(scarf_flag=True, spe_max_plus=223, spe_max_plus_scarf=334)
     assert ceiling(threat, Field(tailwind="theirs")) == 668
     assert ceiling(threat, Field(tailwind="theirs")) != 2 * 223 * 3 // 2
+
+
+# ---- Your own item: known, so applied outright --------------------------------------
+#
+# A threat's Choice Scarf only moves a marker, because it is inferred from how often
+# the species is seen holding one. Yours is read from the paste, so it is applied.
+
+PASTE = "b58a4fb249fb3cbf"
+
+
+@pytest.fixture(scope="module")
+def loaded_team():
+    try:
+        return load_team(PASTE)
+    except FileNotFoundError:
+        pytest.skip("warehouse not built")
+
+
+@pytest.mark.parametrize("raw,expected", [(143, 214), (100, 150), (101, 151)])
+def test_scarf_multiplies_by_one_and_a_half_and_floors(raw, expected):
+    assert scarf(raw) == expected
+
+
+def test_your_speed_is_the_formula_times_the_item(loaded_team):
+    """Every slot: the stat formula, Scarfed only where the paste actually holds one."""
+    by_slot = {m.slot: m for m in loaded_team}
+    speeds = team_speeds(loaded_team, resolve_team(loaded_team, None))
+    assert speeds
+    for s in speeds:
+        held_scarf = by_slot[s.slot].item_id == CHOICE_SCARF
+        assert s.scarfed == held_scarf
+        raw = calc_stat(s.base_spe, s.sp, nature_mod(s.nature, "spe"))
+        assert s.speed == (scarf(raw) if held_scarf else raw)
+
+
+def test_the_scarf_case_is_actually_exercised(loaded_team):
+    """Guards the test above, which would pass vacuously on a team with no Scarf."""
+    speeds = team_speeds(loaded_team, resolve_team(loaded_team, None))
+    holders = [s for s in speeds if s.scarfed]
+    if not holders:
+        pytest.skip(f"paste {PASTE} has no Choice Scarf user to exercise")
+    for s in holders:
+        raw = calc_stat(s.base_spe, s.sp, nature_mod(s.nature, "spe"))
+        assert s.speed > raw, "a Scarf holder must come out faster than its bare stat"
