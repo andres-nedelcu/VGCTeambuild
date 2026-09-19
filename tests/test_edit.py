@@ -95,3 +95,33 @@ def test_export_omits_an_empty_spread():
     text = to_paste(bare)
     assert "EVs:" not in text and "Nature" not in text
     assert "Rillaboom @ Miracle Seed" in text
+
+
+def test_an_untouched_team_is_never_reported_as_edited():
+    """The banner bug: a paste carries "Adamant", the nature selectbox carries the
+    lowercase option it was built from, and comparing them raw claimed every member
+    had been edited before anything was. Found by opening the app."""
+    from vgc.team import list_pastes, load_team
+
+    natured = []
+    for pid, _name, _mons in list_pastes():
+        team = load_team(pid)
+        if any(m.nature for m in team):
+            natured.append(team)
+    if not natured:
+        pytest.skip("no loaded paste carries natures")
+
+    for team in natured:
+        before = {m.slot: read_spread(m) for m in team}
+        # What the editor holds after one render: the same spread, nature lowercased.
+        widgets = {slot: Spread(s.nature.lower() if s.nature else None, dict(s.sp))
+                   for slot, s in before.items()}
+        after = apply(team, widgets)
+        assert [m.slot for m in after if read_spread(m) != before[m.slot]] == []
+
+
+def test_spread_equality_ignores_nature_case():
+    sp = dict.fromkeys(STATS, 0)
+    assert read_spread(Member(1, "rillaboom", None, None, nature="Adamant")) == \
+        read_spread(Member(1, "rillaboom", None, None, nature="adamant"))
+    assert Spread("adamant", sp) == Spread("adamant", dict(sp))

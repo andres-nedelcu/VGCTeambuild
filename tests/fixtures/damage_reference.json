@@ -1548,5 +1548,265 @@
       "atk": 99,
       "spa": 156
     }
+  },
+  {
+    "name": "dex: Grassy Glide into Incineroar in Grassy Terrain",
+    "attacker": {
+      "species": "Rillaboom",
+      "ability": "Grassy Surge",
+      "item": "Miracle Seed",
+      "nature": "Adamant",
+      "evs": {
+        "hp": 32,
+        "atk": 32,
+        "spd": 2
+      },
+      "moves": [
+        "Grassy Glide"
+      ]
+    },
+    "defender": {
+      "species": "Incineroar",
+      "ability": "Blaze",
+      "item": "Sitrus Berry",
+      "nature": "Impish",
+      "evs": {
+        "hp": 32,
+        "def": 14,
+        "spd": 20
+      }
+    },
+    "move": "Grassy Glide",
+    "terrain": "grassyterrain",
+    "spread": false,
+    "rolls": [
+      34,
+      35,
+      35,
+      36,
+      36,
+      36,
+      37,
+      37,
+      38,
+      38,
+      39,
+      39,
+      39,
+      39,
+      40,
+      41
+    ],
+    "defender_hp": 202,
+    "defender_stats": {
+      "def": 136,
+      "spd": 130
+    },
+    "defender_stats_raw": {
+      "def": 136,
+      "spd": 130
+    },
+    "attacker_stats": {
+      "atk": 194,
+      "spa": 72
+    },
+    "attacker_stats_raw": {
+      "atk": 194,
+      "spa": 72
+    }
+  },
+  {
+    "name": "dex: Close Combat into Kingambit at -1 Atk",
+    "attacker": {
+      "species": "Sneasler",
+      "ability": "Unburden",
+      "nature": "Adamant",
+      "evs": {
+        "hp": 2,
+        "atk": 32,
+        "spe": 32
+      },
+      "moves": [
+        "Close Combat"
+      ],
+      "boosts": {
+        "atk": -1
+      }
+    },
+    "defender": {
+      "species": "Kingambit",
+      "ability": "Defiant",
+      "nature": "Adamant",
+      "evs": {
+        "hp": 32,
+        "atk": 32,
+        "spd": 2
+      }
+    },
+    "move": "Close Combat",
+    "spread": false,
+    "rolls": [
+      264,
+      264,
+      268,
+      268,
+      276,
+      276,
+      280,
+      280,
+      288,
+      288,
+      292,
+      292,
+      300,
+      300,
+      304,
+      312
+    ],
+    "defender_hp": 207,
+    "defender_stats": {
+      "def": 140,
+      "spd": 107
+    },
+    "defender_stats_raw": {
+      "def": 140,
+      "spd": 107
+    },
+    "attacker_stats": {
+      "atk": 133,
+      "spa": 54
+    },
+    "attacker_stats_raw": {
+      "atk": 200,
+      "spa": 54
+    }
+  },
+  {
+    "name": "dex: Choice Band Flare Blitz into Gholdengo",
+    "attacker": {
+      "species": "Arcanine-Hisui",
+      "ability": "Rock Head",
+      "item": "Choice Band",
+      "nature": "Adamant",
+      "evs": {
+        "hp": 31,
+        "atk": 32,
+        "spd": 3
+      },
+      "moves": [
+        "Flare Blitz"
+      ]
+    },
+    "defender": {
+      "species": "Gholdengo",
+      "ability": "Good as Gold",
+      "nature": "Timid",
+      "evs": {
+        "hp": 2,
+        "spa": 32,
+        "spe": 32
+      }
+    },
+    "move": "Flare Blitz",
+    "spread": false,
+    "rolls": [
+      320,
+      326,
+      330,
+      332,
+      338,
+      342,
+      344,
+      348,
+      354,
+      356,
+      360,
+      362,
+      368,
+      372,
+      374,
+      380
+    ],
+    "defender_hp": 164,
+    "defender_stats": {
+      "def": 115,
+      "spd": 111
+    },
+    "defender_stats_raw": {
+      "def": 115,
+      "spd": 111
+    },
+    "attacker_stats": {
+      "atk": 274,
+      "spa": 103
+    },
+    "attacker_stats_raw": {
+      "atk": 183,
+      "spa": 103
+    }
+  },
+  {
+    "name": "dex: Expanding Force in Psychic Terrain, hitting both",
+    "attacker": {
+      "species": "Indeedee-F",
+      "ability": "Psychic Surge",
+      "nature": "Modest",
+      "evs": {
+        "hp": 2,
+        "spa": 32,
+        "spe": 32
+      },
+      "moves": [
+        "Expanding Force"
+      ]
+    },
+    "defender": {
+      "species": "Kingambit",
+      "ability": "Defiant",
+      "nature": "Adamant",
+      "evs": {
+        "hp": 32,
+        "atk": 32,
+        "spd": 2
+      }
+    },
+    "move": "Expanding Force",
+    "terrain": "psychicterrain",
+    "spread": true,
+    "rolls": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "defender_hp": 207,
+    "defender_stats": {
+      "def": 140,
+      "spd": 107
+    },
+    "defender_stats_raw": {
+      "def": 140,
+      "spd": 107
+    },
+    "attacker_stats": {
+      "atk": 67,
+      "spa": 161
+    },
+    "attacker_stats_raw": {
+      "atk": 67,
+      "spa": 161
+    }
   }
 ]

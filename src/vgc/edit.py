@@ -44,12 +44,20 @@ class Spread:
 
 
 def read_spread(member: Member) -> Spread:
-    """The spread a paste arrived with. Missing investment reads as all zeroes."""
+    """The spread a paste arrived with. Missing investment reads as all zeroes.
+
+    The nature is lowercased here so that `Spread` equality is case-insensitive by
+    construction. It has to be: a paste carries "Adamant", the editor's selectbox
+    carries the lowercase option it was built from, and comparing the two raw made
+    the app announce "showing edited spreads for 6 Pokémon" the moment the Spreads
+    tab had rendered once — with nothing edited. Same shape of bug as comparing raw
+    `investment` instead of parsed spreads, one field over.
+    """
     try:
         sp = sp_from_investment(member.investment)
     except ValueError:
         sp = dict.fromkeys(STATS, 0)
-    return Spread(member.nature, dict(sp))
+    return Spread(member.nature.lower() if member.nature else None, dict(sp))
 
 
 def problem(spread: Spread) -> str | None:

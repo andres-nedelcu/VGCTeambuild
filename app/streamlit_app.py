@@ -8,6 +8,7 @@ import streamlit as st
 from components.cores_view import (render_combos, render_cores, render_item_cores,
                                   render_partners, render_suggestions, render_swaps,
                                   render_uniques)
+from components.dex_view import render_dex
 from components.damage_grid import (render_damage_grid, render_focus,
                                     render_incoming_table)
 from components.outgoing_grid import render_outgoing_grid, render_outgoing_table
@@ -40,6 +41,13 @@ from vgc.team import list_pastes, load_team
 LOAD_CMD = "uv run python scripts/load_paste.py <pokepaste-url>"
 REFRESH_CMD = "uv run python scripts/refresh.py"
 NO_MEGA = 0  # radio sentinel; Streamlit treats None as 'no selection'
+
+# Two ways of using the tool, not two more tabs. The seven tabs are all facets of one
+# question — how does *my team* line up — and the dex view is a different question
+# entirely, so making it an eighth peer would have deepened the clutter Andres has
+# already flagged on "What to add" rather than paying for itself. A mode switch also
+# leaves the tab set free to be reorganised without touching this.
+MY_TEAM, DEX = "My team", "Dex"
 
 st.set_page_config(page_title="VGC Teambuilding", page_icon="⚔️", layout="wide")
 t0 = time.perf_counter()
@@ -150,14 +158,32 @@ if edited:
     st.info(f"Showing edited spreads for {len(edited)} Pokémon — session only, not "
             "saved. The Spreads tab has an export you can copy.")
 st.caption(f"Meta: {meta_filter.label()} · {teams_counted:,} teams")
+
+mode = st.segmented_control(
+    "View", [MY_TEAM, DEX], default=MY_TEAM, key="view_mode",
+    label_visibility="collapsed",
+    help="**My team** is every tab below — how the loaded paste lines up against the "
+         "meta. **Dex** is one Pokémon at a time: look anything up and calculate "
+         "against it.")
+
 if teams_counted == 0:
     st.error("No tournament teams match these meta filters. Widen them in the sidebar.")
-    st.stop()
-if teams_counted < THIN_SAMPLE:
+    if mode == MY_TEAM:
+        st.stop()
+elif teams_counted < THIN_SAMPLE:
     st.warning(
         f"{teams_counted:,} teams is a thin sample — the unfiltered regulation has "
         f"{sample_size(reg):,}. Treat the order as indicative: which names appear "
         "matters more than where they sit.")
+
+if mode == DEX:
+    # st.stop() ends the whole script run, which is exactly what is wanted here and
+    # is the opposite of the trap it was inside the Damage tab: nothing below this
+    # should be built. The footer is repeated rather than reindenting every tab.
+    render_dex(reg, meta_filter, team,
+               [f for f in resolve_team(team, mega_slot) if f.slot in slots])
+    st.caption(f"Rendered in {time.perf_counter() - t0:.2f}s")
+    st.stop()
 
 if not slots:
     st.info("Select at least one Pokémon.")

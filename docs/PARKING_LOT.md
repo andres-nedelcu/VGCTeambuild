@@ -48,3 +48,25 @@ Lagging Tail and Full Incense. The halving pair matters more now that the Speed 
 has a Trick Room mode, since that is exactly where they get used. Same one-line
 change in `team_speeds`; the open question is whether to model move-last items at all,
 as they are an ordering rule rather than a Speed multiplier.
+
+### Follow-ups from the dex view (added 2026-09-19)
+
+- **Sprites only exist for the meta.** 259 are cached, against 394 pickable dex
+  entries, so an off-meta pick renders with no sprite. The headline and the damage
+  tables both handle it, but it looks thin. Widening `fetch_sprites.py` to the
+  pickable set is the same idempotent fetcher pointed at a longer list — it needs
+  network, so it has to run before travelling, not on the plane.
+- **The Damage tab and the dex view can disagree by a point or two on the same
+  pair.** Not a bug: the Damage tab computes against per-stat modal investment
+  (marginals, correct there because only one stat is read per hit) while the dex
+  panel computes against the most common *full* spread, because six numbers shown
+  together have to be a legal build. Worth deciding whether to say so in the app, or
+  to offer the marginals as a named option in the spread control.
+- **`versus()` has no spread-move override.** Deliberate — the flag comes from
+  dim_move and `spreads_in_terrain` — but it means a spread move aimed at a single
+  target (ally fainted, or a 1v1 endgame) cannot be calculated. A "hitting one
+  target" checkbox would cover it, and the fixture already has the single-target
+  Earthquake cases to pin it against.
+- **The build panel does not expose Tera, screens or crits**, which are the three
+  things a Showdown calculator has that this now visibly lacks. Screens have an
+  honest approximation through the defence stage already; the other two do not.
