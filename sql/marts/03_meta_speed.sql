@@ -66,10 +66,19 @@ SELECT t.regulation, t.snapshot_date, t.species_id, t.forme_id, t.display_name,
        champ_stat(t.spe, 32, 100) AS spe_max_neutral,
        champ_stat(t.spe, 0, 100)  AS spe_uninvested,
        champ_stat(t.spe, 0, 90)   AS spe_uninvested_neg,
-       champ_scarf(champ_stat(t.spe, 32, 110)) AS spe_max_plus_scarf,
-       champ_scarf(champ_stat(t.spe, 32, 100)) AS spe_max_neutral_scarf,
+       -- NULL on a Mega forme, and the flag with it: the slot is holding a stone,
+       -- so there is no Choice Scarf benchmark for it to reach. The share itself
+       -- comes from the BASE species' builds (Scarf Salamence is a real set), which
+       -- is what made this wrong rather than merely unhelpful -- `ceiling()` judged
+       -- Salamence-Mega against a Speed no Mega can have, so the verdict column read
+       -- "Depends" where the honest answer was "You outspeed". Nulling the numbers
+       -- rather than leaving them for the app to hide keeps every reader consistent.
+       CASE WHEN t.is_mega THEN NULL
+            ELSE champ_scarf(champ_stat(t.spe, 32, 110)) END AS spe_max_plus_scarf,
+       CASE WHEN t.is_mega THEN NULL
+            ELSE champ_scarf(champ_stat(t.spe, 32, 100)) END AS spe_max_neutral_scarf,
        coalesce(s.scarf_share, 0) AS scarf_share,
-       coalesce(s.scarf_share, 0) >= {{scarf_threshold}} AS scarf_flag,
+       NOT t.is_mega AND coalesce(s.scarf_share, 0) >= {{scarf_threshold}} AS scarf_flag,
        -- Annotation only: likely_spe never feeds a verdict. The benchmark columns
        -- above are exact, this is an observation about what people bring, and the
        -- two shares are INDEPENDENT marginals -- CBD publishes nature and spread

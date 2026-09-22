@@ -29,7 +29,7 @@ from typing import Sequence
 
 from vgc.damage import (PHYSICAL, Result, attack_after_item, base_power_multiplier,
                         boosted, damage_rolls, defence_after_item, final_multiplier,
-                        spreads_in_terrain, weather_multiplier)
+                        spreads_in_terrain, weather_move, weather_multiplier)
 from vgc.db import session
 from vgc.megas import Forme
 from vgc.metafilter import MetaFilter
@@ -156,6 +156,10 @@ def outgoing(regulation: str, team: Sequence[Member], formes: Sequence[Forme],
         atk_b, spa_b = my_base[forme.forme_id]
 
         for move_id, name, move_type_raw, category, base_power, spread in moves[forme.slot]:
+            # The move reads the weather before the ability does: Weather Ball is
+            # Water in rain even on an Aerilate holder.
+            move_type_raw, base_power = weather_move(
+                move_id, move_type_raw, int(base_power), weather)
             move_type = attack_type(move_type_raw, forme.ability_id)
             key = "atk" if category == PHYSICAL else "spa"
             raw = calc_stat(atk_b if category == PHYSICAL else spa_b,
@@ -184,7 +188,7 @@ def outgoing(regulation: str, team: Sequence[Member], formes: Sequence[Forme],
 
                 def roll(defence: int, hp: int) -> Result:
                     return Result(name, move_type, damage_rolls(
-                        base_power=int(base_power),
+                        base_power=base_power,
                         attack=attack,
                         defense=defence_after_item(boosted(defence, def_stage),
                                                    their_item, category),

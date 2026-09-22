@@ -30,6 +30,11 @@ fact that `modify` is 4096-step fixed point rather than a float multiply
 (sim/battle.ts:2342), are the two things an implementation gets wrong and only
 notices as an off-by-one against real values.
 
+Two things happen BEFORE any of that, when the move is used rather than when damage
+is computed: the move's own `onModifyType` / `onModifyMove` callbacks (:430-431) and
+then the attacker's ability's (:438). That is where Weather Ball picks up its type
+and its doubled power, so `weather_move` runs ahead of everything here.
+
 NOT MODELLED, deliberately, and stated wherever a number is shown: abilities that
 scale damage (Adaptability, Thick Fat, Multiscale, Guts and the rest), screens,
 terrain move boosts, critical hits, burn, and Intimidate. Abilities that change type
@@ -85,6 +90,42 @@ TERRAIN_MAKES_SPREAD = {(PSYCHIC_T, "expandingforce")}
 
 def spreads_in_terrain(terrain: str | None, move_id: str) -> bool:
     return (terrain, move_id) in TERRAIN_MAKES_SPREAD
+
+
+# Weather Ball reads the field for its TYPE as well as its power (data/moves.ts:20702).
+# Both of its callbacks are singleEvents fired in useMoveInner -- ModifyType at
+# battle-actions.ts:430 and ModifyMove at :431 -- so they land before getDamage sees
+# the move at all. Three consequences, and none of them are optional:
+#
+#   * STAB and type effectiveness are judged against the NEW type, not Normal.
+#   * The weather multiplier then applies to that new type, so rain gives Weather
+#     Ball x1.5 as a Water move rather than the x1 it got as a Normal one.
+#   * The doubling is `move.basePower *= 2`, a plain arithmetic doubling of the raw
+#     50 rather than a chainModify, and it happens before the BasePower event -- so
+#     terrain and a type item chain onto 100.
+#
+# It also runs BEFORE the -ate abilities' own ModifyType at :438, which is why
+# `weather_move` is called ahead of `attack_type`: an Aerilate holder's Weather Ball
+# is Flying in no weather and Water in rain, not Flying in both.
+#
+# Sandstorm (Rock) and snow (Ice) are in the move but not here, because this project
+# models only rain and sun -- see WEATHER_BALL_TYPE staying keyed to those two.
+WEATHER_BALL = "weatherball"
+WEATHER_BALL_TYPE = {RAIN: "Water", SUN: "Fire"}
+
+
+def weather_move(move_id: str, move_type: str, base_power: int,
+                 weather: str | None) -> tuple[str, int]:
+    """The type and base power a weather-dependent move arrives with.
+
+    A pass-through for every other move, so call sites can apply it unconditionally.
+    """
+    if move_id != WEATHER_BALL:
+        return move_type, base_power
+    typed = WEATHER_BALL_TYPE.get(weather or "")
+    if typed is None:
+        return move_type, base_power
+    return typed, base_power * 2
 
 
 def terrain_multiplier(terrain: str | None, move_type: str,

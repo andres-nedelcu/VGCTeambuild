@@ -758,5 +758,133 @@
     "move": "Expanding Force",
     "terrain": "psychicterrain",
     "spread": true
+  },
+  {
+    "name": "Weather Ball, no weather",
+    "attacker": {
+      "species": "Meganium",
+      "evs": {
+        "spa": 32
+      },
+      "nature": "Modest",
+      "ability": "Leaf Guard",
+      "moves": [
+        "Weather Ball"
+      ]
+    },
+    "defender": {
+      "species": "Charizard",
+      "evs": {
+        "hp": 32,
+        "spd": 32
+      },
+      "nature": "Calm",
+      "ability": "Blaze"
+    },
+    "move": "Weather Ball",
+    "spread": false
+  },
+  {
+    "name": "Weather Ball in rain",
+    "attacker": {
+      "species": "Meganium",
+      "evs": {
+        "spa": 32
+      },
+      "nature": "Modest",
+      "ability": "Leaf Guard",
+      "moves": [
+        "Weather Ball"
+      ]
+    },
+    "defender": {
+      "species": "Charizard",
+      "evs": {
+        "hp": 32,
+        "spd": 32
+      },
+      "nature": "Calm",
+      "ability": "Blaze"
+    },
+    "move": "Weather Ball",
+    "spread": false,
+    "weather": "raindance"
+  },
+  {
+    "name": "Weather Ball in sun",
+    "attacker": {
+      "species": "Meganium",
+      "evs": {
+        "spa": 32
+      },
+      "nature": "Modest",
+      "ability": "Leaf Guard",
+      "moves": [
+        "Weather Ball"
+      ]
+    },
+    "defender": {
+      "species": "Charizard",
+      "evs": {
+        "hp": 32,
+        "spd": 32
+      },
+      "nature": "Calm",
+      "ability": "Blaze"
+    },
+    "move": "Weather Ball",
+    "spread": false,
+    "weather": "sunnyday"
+  },
+  {
+    "name": "Weather Ball off a Water attacker, no weather",
+    "attacker": {
+      "species": "Politoed",
+      "evs": {
+        "spa": 32
+      },
+      "nature": "Modest",
+      "ability": "Damp",
+      "moves": [
+        "Weather Ball"
+      ]
+    },
+    "defender": {
+      "species": "Garchomp",
+      "evs": {
+        "hp": 32,
+        "spd": 32
+      },
+      "nature": "Careful",
+      "ability": "Sand Veil"
+    },
+    "move": "Weather Ball",
+    "spread": false
+  },
+  {
+    "name": "Weather Ball off a Water attacker, in rain",
+    "attacker": {
+      "species": "Politoed",
+      "evs": {
+        "spa": 32
+      },
+      "nature": "Modest",
+      "ability": "Damp",
+      "moves": [
+        "Weather Ball"
+      ]
+    },
+    "defender": {
+      "species": "Garchomp",
+      "evs": {
+        "hp": 32,
+        "spd": 32
+      },
+      "nature": "Careful",
+      "ability": "Sand Veil"
+    },
+    "move": "Weather Ball",
+    "spread": false,
+    "weather": "raindance"
   }
 ]

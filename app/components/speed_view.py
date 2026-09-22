@@ -5,13 +5,13 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
-from components.palette import FILL_BAD, FILL_CAUTION, FILL_GOOD, MUTED
+from components.palette import (FILL_BAD, FILL_CAUTION, FILL_GOOD, FILL_TIE,
+                                SCARF_MARK, UNRELIABLE)
 from vgc.sprites import data_uri
-from vgc.speed import (DEPENDS, LOW_CONFIDENCE, MOVE_FIRST, MOVE_LAST, OUTSPED, OUTSPEED,
-                        TAILWIND_BOTH, TAILWIND_NONE, TAILWIND_THEIRS, TAILWIND_YOURS,
-                        Field, TeamSpeed, matchup)
+from vgc.speed import (AHEAD, BEHIND, DEPENDS, LOW_CONFIDENCE, MOVE_FIRST, MOVE_LAST,
+                        OUTSPED, OUTSPEED, TAILWIND_BOTH, TAILWIND_NONE, TAILWIND_THEIRS,
+                        TAILWIND_YOURS, TIE, Field, TeamSpeed, against_benchmark, matchup)
 
-SCARF_BG = FILL_GOOD   # Choice Scarf is common enough on this threat to plan around
 VERDICT_BG = {
     # Green always means good for you, in both Speed order and Trick Room (HANDOFF §6.3).
     OUTSPEED: FILL_GOOD,
@@ -20,11 +20,48 @@ VERDICT_BG = {
     OUTSPED: FILL_BAD,
     MOVE_LAST: FILL_BAD,
 }
+# Every benchmark cell answers the same question the verdict column does, one number
+# at a time, so it takes the same three colours. Reading across a row then shows where
+# your Speed actually sits inside that threat's range instead of leaving you to
+# compare seven numbers against a header by eye.
+BENCHMARK_BG = {AHEAD: FILL_GOOD, BEHIND: FILL_BAD, TIE: FILL_TIE}
 SCARF_COLS = ["Max ⚡", "Neu ⚡"]
 LIKELY_COL = "Likely"
-# Muted rather than coloured: a split spread is not good or bad news, and the fills in
-# this table already mean "good for you", which must keep meaning only that.
-UNSURE = MUTED
+# Displayed column -> the mart column behind it. These are the cells holding a Speed
+# that can be compared with yours; "Base" is deliberately not among them, because it
+# is a base stat rather than a Speed and colouring it would invite reading it as one.
+# The mapping exists because the comparison reads the RAW value: `against_benchmark`
+# applies Tailwind itself, and the displayed column already has their side doubled in.
+SPEED_SOURCE = {
+    LIKELY_COL: "likely_spe",
+    "Max": "spe_max_plus",
+    "Neu": "spe_max_neutral",
+    "0 SP": "spe_uninvested",
+    "Neg": "spe_uninvested_neg",
+    SCARF_COLS[0]: "spe_max_plus_scarf",
+    SCARF_COLS[1]: "spe_max_neutral_scarf",
+}
+# Not a colour of its own: a split spread is not good or bad news, and every fill in
+# this table now means "good for you", which must keep meaning only that. It rides on
+# top of whatever fill the cell already has.
+UNSURE = UNRELIABLE
+
+
+def _speeds(values: pd.Series, multiplier: int) -> list[str]:
+    """A Speed column as text, with a missing benchmark shown as an empty cell.
+
+    Text rather than numbers, and converted here rather than left to `Styler.format`:
+    a column carrying pandas NA reaches Streamlit's grid as the literal string "None"
+    and loses its cell styling on the way, because the styled display values are
+    dropped for a column Arrow could not convert cleanly. Every Speed here is an
+    integer benchmark that is only ever read, never sorted on as a number, so
+    formatting at the source costs nothing and keeps the column styleable.
+
+    A Mega forme is the only source of a missing value: it holds its stone, so a
+    Scarfed Speed for it is not a number that was unavailable, it is one that cannot
+    exist. The mart says so with a NULL and this turns that into a blank cell.
+    """
+    return ["" if pd.isna(v) else f"{int(v) * multiplier:.0f}" for v in values]
 
 
 def render_team_speeds(speeds: list[TeamSpeed]) -> None:
@@ -45,13 +82,8 @@ def render_speed_tiers(meta: pd.DataFrame, reference: TeamSpeed | None,
         "Threat": meta["display_name"],
         "Usage %": 100 * meta["forme_usage_pct"],
         "Base": meta["base_spe"],
-        LIKELY_COL: meta["likely_spe"] * their_mult,
-        "Max": meta["spe_max_plus"] * their_mult,
-        "Neu": meta["spe_max_neutral"] * their_mult,
-        "0 SP": meta["spe_uninvested"] * their_mult,
-        "Neg": meta["spe_uninvested_neg"] * their_mult,
-        SCARF_COLS[0]: meta["spe_max_plus_scarf"] * their_mult,
-        SCARF_COLS[1]: meta["spe_max_neutral_scarf"] * their_mult,
+        **{col: _speeds(meta[source], their_mult)
+           for col, source in SPEED_SOURCE.items()},
     })
     verdict_col = None
     if reference is not None:
@@ -66,29 +98,48 @@ def render_speed_tiers(meta: pd.DataFrame, reference: TeamSpeed | None,
 
     def shade(_: pd.DataFrame) -> pd.DataFrame:
         css = pd.DataFrame("", index=view.index, columns=view.columns)
-        css.loc[scarf, SCARF_COLS] = SCARF_BG
-        css.loc[unsure, LIKELY_COL] = UNSURE
-        if verdict_col:
+        if reference is not None:
+            for col, source in SPEED_SOURCE.items():
+                # A blank cell — a Mega's Scarf column, or a Likely with no build
+                # data behind it — is not a comparison and takes no colour.
+                css[col] = [
+                    "" if pd.isna(v) else
+                    BENCHMARK_BG[against_benchmark(reference.speed, int(v), field)]
+                    for v in meta[source]
+                ]
             for label, bg in VERDICT_BG.items():
                 css.loc[view[verdict_col].str.startswith(label), verdict_col] = bg
+        # Appended, not assigned: the Scarf marker and the split-build marker both
+        # ride on top of the comparison colour rather than replacing it.
+        css.loc[scarf, SCARF_COLS] = css.loc[scarf, SCARF_COLS] + "; " + SCARF_MARK
+        css.loc[unsure, LIKELY_COL] = css.loc[unsure, LIKELY_COL] + "; " + UNSURE
         return css
 
-    st.dataframe(view.style.format({"Usage %": "{:.1f}", LIKELY_COL: "{:.0f}"})
-                 .apply(shade, axis=None), hide_index=True, width="stretch")
+    st.dataframe(view.style.format({"Usage %": "{:.1f}"}).apply(shade, axis=None),
+                 hide_index=True, width="stretch")
+    st.caption(
+        "**Every Speed cell is coloured against the Pokémon you are comparing: "
+        "green where you move first, red where they do, yellow on an exact tie.** "
+        "Read across a row to see where you sit inside that threat's range, rather "
+        "than against the whole band the verdict column judges."
+    )
     st.caption(
         "**Likely** is what that threat is actually built as — its most common Speed "
         "investment and nature direction — placed inside the benchmark band beside it. "
         "It is an observation, never a verdict: the columns either side are exact, and "
         "the verdict is still judged against the whole band. Greyed values are split "
-        "builds worth distrusting. Likely excludes items, so a green ⚡ row can also be "
-        "running 1.5x this number."
+        "builds worth distrusting. Likely excludes items, so a bold ⚡ row can also "
+        "be running 1.5x this number."
     )
     _likely_detail(meta)
     st.caption(
         "Max / Neu = 32 SP with a +Spe or neutral nature · 0 SP / Neg = uninvested, "
-        "neutral or -Spe nature · ⚡ = Choice Scarf. Green ⚡ cells mean Scarf is common "
-        "enough on that threat to plan around, and those rows are judged against the "
-        "Scarfed number. 'tie' means you hit one of its benchmarks exactly."
+        "neutral or -Spe nature · ⚡ = Choice Scarf. **Bold blue** ⚡ cells mean Scarf "
+        "is common enough on that threat to plan around, and those rows are judged "
+        "against the Scarfed number — the fill behind the bold still says who moves "
+        "first. The ⚡ cells are blank on a Mega Evolution, which is holding its stone "
+        "and can never carry a Scarf. 'tie' in the verdict column means you hit one "
+        "of its benchmarks exactly."
     )
     notes = []
     if field.tailwind != TAILWIND_NONE:

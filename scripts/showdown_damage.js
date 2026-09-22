@@ -64,6 +64,15 @@ function rollsFor(c) {
     battle.random = (m) => (m === ROLLS ? roll : 0);
 
     const move = battle.dex.getActiveMove(c.move);
+    // useMoveInner fires the move's OWN ModifyType/ModifyMove before getDamage ever
+    // sees it (battle-actions.ts:430-431). Calling getDamage on its own skips both,
+    // so a move that reads the field for its type or power -- Weather Ball -- would
+    // arrive here as a 50 BP Normal move in every weather. Mirrors that call
+    // exactly, attacker as target and defender as source. The ability-level
+    // ModifyType at :438 is deliberately not run: retyping abilities reach the
+    // Python side through vgc.typechart, not through this fixture.
+    battle.singleEvent('ModifyType', move, null, source, target, move, move);
+    battle.singleEvent('ModifyMove', move, null, source, target, move, move);
     if (c.spread) move.spreadHit = true;
 
     const dmg = battle.actions.getDamage(source, target, move);

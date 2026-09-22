@@ -28,7 +28,7 @@ from typing import Sequence
 
 from vgc.damage import (Result, attack_after_item, base_power_multiplier, boosted,
                         damage_rolls, defence_after_item, final_multiplier,
-                        spreads_in_terrain, weather_multiplier)
+                        spreads_in_terrain, weather_move, weather_multiplier)
 from vgc.db import session
 from vgc.megas import Forme
 from vgc.metafilter import MetaFilter
@@ -156,6 +156,9 @@ def incoming(regulation: str, team: Sequence[Member], formes: Sequence[Forme],
         threat = by_forme.get(forme_id)
         if threat is None:
             continue
+        # The move reads the weather before the ability does, so this runs first.
+        listed_type, base_power = weather_move(
+            move_id, listed_type, int(base_power), weather)
         move_type = attack_type(listed_type, threat.ability_id)
         nature = builds["nature"].get(species_id)
         sp = builds["sp"].get(species_id, {})
@@ -182,7 +185,7 @@ def incoming(regulation: str, team: Sequence[Member], formes: Sequence[Forme],
                 mine["item"], category)
             def roll(attack: int) -> Result:
                 return Result(move_name, move_type, damage_rolls(
-                    base_power=int(base_power), attack=attack, defense=defence,
+                    base_power=base_power, attack=attack, defense=defence,
                     type_mult=mult, stab=move_type in threat.types, spread=bool(spread) or spreads_in_terrain(terrain, move_id),
                     weather_mult=weather_multiplier(weather, move_type),
                     final_mult=final_multiplier(item, mult),

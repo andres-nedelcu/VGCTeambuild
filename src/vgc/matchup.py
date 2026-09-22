@@ -43,7 +43,7 @@ from typing import Sequence
 
 from vgc.damage import (PHYSICAL, Result, attack_after_item, base_power_multiplier,
                         boosted, damage_rolls, defence_after_item, final_multiplier,
-                        spreads_in_terrain, weather_multiplier)
+                        spreads_in_terrain, weather_move, weather_multiplier)
 from vgc.db import session
 from vgc.megas import Forme
 from vgc.stats import STATS, calc_stat, nature_mod, sp_from_investment
@@ -208,6 +208,8 @@ def versus(attacker: Build, defender: Build, *, weather: str | None = None,
 
     for move_id in damaging(moves if moves is not None else attacker.moves):
         name, listed_type, category, base_power, is_spread = data[move_id]
+        # The move's own ModifyType runs before the ability's, so this comes first.
+        listed_type, base_power = weather_move(move_id, listed_type, base_power, weather)
         move_type = attack_type(listed_type, attacker.ability_id)
         akey = "atk" if category == PHYSICAL else "spa"
         dkey = "def" if category == PHYSICAL else "spd"

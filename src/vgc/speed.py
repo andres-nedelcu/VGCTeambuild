@@ -26,6 +26,8 @@ LOW_CONFIDENCE = 0.5
 
 OUTSPEED, DEPENDS, OUTSPED = "You outspeed", "Depends", "Outsped"
 MOVE_FIRST, MOVE_LAST = "You move first", "They move first"
+# One benchmark against your Speed, rather than the whole band `matchup` judges.
+AHEAD, BEHIND, TIE = "ahead", "behind", "tie"
 BUILD_CMD = "uv run python scripts/build_marts.py"
 
 TAILWIND_NONE, TAILWIND_YOURS, TAILWIND_THEIRS, TAILWIND_BOTH = "none", "yours", "theirs", "both"
@@ -148,6 +150,31 @@ def benchmarks(row, field: Field | None = None) -> tuple[int, ...]:
     if row.scarf_flag:
         values += [row.spe_max_plus_scarf, row.spe_max_neutral_scarf]
     return tuple(_scale(int(v), field.their_tailwind) for v in values)
+
+
+def against_benchmark(my_speed: int, their_speed: int,
+                      field: Field | None = None) -> str:
+    """Who moves first between your Speed and ONE of a threat's exact benchmarks.
+
+    `matchup` answers the same question against a threat's whole realistic range and
+    hedges with "Depends" when your Speed lands inside it. This answers it for a
+    single number, which is what a benchmark column is: there is no band to fall
+    inside, so every comparison resolves to ahead, behind, or an exact tie.
+
+    AHEAD always means good for you, in Trick Room too. Trick Room inverts the
+    comparison and not the numbers -- the slower side moves first -- which keeps
+    green meaning one thing across the whole app rather than flipping with the field.
+    Both sides take their own Tailwind first, the same order `ceiling` uses.
+    """
+    field = field or Field()
+    mine = _scale(my_speed, field.your_tailwind)
+    theirs = _scale(their_speed, field.their_tailwind)
+    if mine == theirs:
+        return TIE
+    first = mine > theirs
+    if field.trick_room:
+        first = not first
+    return AHEAD if first else BEHIND
 
 
 def matchup(my_speed: int, row, field: Field | None = None) -> str:

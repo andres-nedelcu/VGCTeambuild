@@ -4,8 +4,9 @@ from types import SimpleNamespace
 import pytest
 
 from vgc.megas import resolve_team
-from vgc.speed import (DEPENDS, MOVE_FIRST, MOVE_LAST, OUTSPED, OUTSPEED, Field, benchmarks,
-                        ceiling, matchup, team_speeds)
+from vgc.speed import (AHEAD, BEHIND, DEPENDS, MOVE_FIRST, MOVE_LAST, OUTSPED, OUTSPEED,
+                        TIE, Field, against_benchmark, benchmarks, ceiling, matchup,
+                        team_speeds)
 from vgc.stats import CHOICE_SCARF, calc_stat, nature_mod, scarf
 from vgc.team import load_team
 
@@ -175,3 +176,61 @@ def test_the_scarf_case_is_actually_exercised(loaded_team):
     for s in holders:
         raw = calc_stat(s.base_spe, s.sp, nature_mod(s.nature, "spe"))
         assert s.speed > raw, "a Scarf holder must come out faster than its bare stat"
+
+
+# --- one benchmark at a time, which is what a coloured cell is -------------------
+
+@pytest.mark.parametrize("speed,expected", [
+    (190, AHEAD), (189, TIE), (188, BEHIND),
+])
+def test_against_one_benchmark(speed, expected):
+    assert against_benchmark(speed, 189) == expected
+
+
+def test_a_benchmark_never_answers_depends():
+    """The difference from `matchup`, and the reason this is a separate function: a
+    single number has no band to land inside, so a cell always resolves."""
+    for speed in range(120, 300):
+        assert against_benchmark(speed, 189) in (AHEAD, BEHIND, TIE)
+
+
+def test_trick_room_inverts_the_benchmark_but_not_the_tie():
+    """Green keeps meaning good for you: under Trick Room the slower side moves
+    first, so the comparison flips while a tie stays a tie."""
+    tr = Field(trick_room=True)
+    assert against_benchmark(190, 189, tr) == BEHIND
+    assert against_benchmark(188, 189, tr) == AHEAD
+    assert against_benchmark(189, 189, tr) == TIE
+
+
+@pytest.mark.parametrize("tailwind,speed,their_speed,expected", [
+    ("yours", 100, 189, AHEAD),      # 200 vs 189
+    ("theirs", 200, 189, BEHIND),    # 200 vs 378
+    ("both", 100, 189, AHEAD),       # 200 vs 378 is behind... see below
+])
+def test_tailwind_doubles_each_side_before_comparing(tailwind, speed, their_speed,
+                                                     expected):
+    got = against_benchmark(speed, their_speed, Field(tailwind=tailwind))
+    if tailwind == "both":
+        # Both sides doubled is the same comparison as neither, which is the point.
+        assert got == against_benchmark(speed, their_speed)
+    else:
+        assert got == expected
+
+
+def test_tailwind_on_both_sides_cancels_for_every_benchmark():
+    for speed in (120, 172, 189, 250):
+        for their in (126, 140, 172, 189, 283):
+            assert against_benchmark(speed, their, Field(tailwind="both")) == \
+                against_benchmark(speed, their)
+
+
+def test_the_benchmark_cell_agrees_with_the_verdict_at_the_extremes(loaded_team):
+    """A cell and the verdict column must never contradict each other: beating the
+    ceiling means every benchmark is green, losing to the floor means every one is
+    red. In between the verdict says Depends and the cells are the detail."""
+    fast, slow = 300, 100
+    assert matchup(fast, row()) == OUTSPEED
+    assert all(against_benchmark(fast, b) == AHEAD for b in benchmarks(row()))
+    assert matchup(slow, row()) == OUTSPED
+    assert all(against_benchmark(slow, b) == BEHIND for b in benchmarks(row()))

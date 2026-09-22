@@ -106,7 +106,15 @@ def test_ko_flag_uses_the_worst_case(ctx):
 
 
 def test_rain_only_softens_fire_and_never_hardens_it(ctx):
-    """Weather is modelled because it is often the whole story."""
+    """Weather is modelled because it is often the whole story.
+
+    Every row is a threat collapsed to its hardest hit, and rain can change WHICH
+    move that is: Weather Ball becomes a 100 BP Water move and overtakes the Fire
+    move it sat behind when dry — Charizard-Mega-Y is the live example, Heat Wave
+    to Weather Ball. That is the feature working, not weather hardening a Fire hit,
+    so the comparison is made move for move and a row that swapped is checked for
+    the thing that really would be a bug.
+    """
     team, formes, _rows = ctx
     dry = {(h.threat.forme_id, h.target_slot): h for h in incoming(REG, team, formes, MetaFilter(), 20)}
     wet = {(h.threat.forme_id, h.target_slot): h for h in
@@ -114,8 +122,32 @@ def test_rain_only_softens_fire_and_never_hardens_it(ctx):
     fire = [k for k, h in dry.items() if h.worst.move_type == "Fire" and k in wet]
     if not fire:
         pytest.skip("no Fire move in the current meta sample")
+    compared = 0
     for key in fire:
-        assert wet[key].worst.low < dry[key].worst.low, "rain did not soften a Fire hit"
+        if wet[key].worst.move_name == dry[key].worst.move_name:
+            assert wet[key].worst.low < dry[key].worst.low, "rain did not soften a Fire hit"
+            compared += 1
+        else:
+            assert wet[key].worst.move_type != "Fire", \
+                "rain replaced a Fire hit with a harder Fire one"
+    assert compared, "every Fire hit was overtaken, so nothing was actually compared"
+
+
+def test_weather_ball_reaches_the_meta_path_as_the_weather_type(ctx):
+    """The unit is pinned in test_damage; this pins that `incoming` actually calls it.
+
+    A Weather Ball on top of a threat's move list in rain has to be reported as a
+    Water move — if the wiring were missing it would still be a 50 BP Normal one and
+    would almost never win the collapse at all, which is exactly why this is checked
+    at the meta level rather than trusted from the unit test.
+    """
+    team, formes, _rows = ctx
+    wet = [h for h in incoming(REG, team, formes, MetaFilter(), 20, weather=RAIN)
+           if h.worst.move_name == "Weather Ball"]
+    if not wet:
+        pytest.skip("no Weather Ball user in the current meta sample")
+    for hit in wet:
+        assert hit.worst.move_type == "Water", hit.threat.display_name
 
 
 def test_max_sp_is_the_documented_cap():

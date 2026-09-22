@@ -21,7 +21,7 @@ import pytest
 from vgc import REPO_ROOT
 from vgc.damage import (attack_after_item, base_power_multiplier, boosted,
                         damage_rolls, defence_after_item, final_multiplier,
-                        weather_multiplier)
+                        weather_move, weather_multiplier)
 from vgc.db import session
 from vgc.ids import to_id
 from vgc.typechart import effectiveness
@@ -58,6 +58,11 @@ def _inputs(case, dex):
     moves, mons = dex
     move_id = to_id(case["move"])
     base_power, move_type, category = moves[move_id]
+    weather = WEATHER.get(case.get("weather"))
+    # Before anything else, exactly as the simulator does it: a weather-dependent
+    # move settles its type and its power first, and STAB, effectiveness and the
+    # weather multiplier below are all judged against what comes back.
+    move_type, base_power = weather_move(move_id, move_type, base_power, weather)
     atk_types = mons[to_id(case["attacker"]["species"])]
     def_types = mons[to_id(case["defender"]["species"])]
     type_mult = effectiveness(move_type, def_types, None)
@@ -82,7 +87,7 @@ def _inputs(case, dex):
         type_mult=type_mult,
         stab=move_type in atk_types,
         spread=bool(case.get("spread")),
-        weather_mult=weather_multiplier(WEATHER.get(case.get("weather")), move_type),
+        weather_mult=weather_multiplier(weather, move_type),
         final_mult=final_multiplier(atk_item, type_mult),
         base_power_mult=base_power_multiplier(
             atk_item, move_type, TERRAIN.get(case.get("terrain")), move_id),
@@ -231,3 +236,56 @@ def test_every_terrain_clause_is_pinned_by_a_case(reference):
     covered = {to_id(c["move"]) for c in reference if c.get("terrain")}
     missing = {mid for (_terrain, mid) in TERRAIN_MOVE_EXTRA} - covered
     assert not missing, f"unverified terrain clauses: {sorted(missing)}"
+
+
+def test_weather_ball_retypes_and_doubles(reference, dex):
+    """Both halves at once, against the simulator rather than against the reading.
+
+    Into Charizard the three types the move can arrive as are all different — Normal
+    1x, Water 2x, Fire 0.5x — so sun is the case that proves the *retype* happened
+    and not just the power doubling: base power doubles and the weather boosts it,
+    and the hit still only grows by about half again because it has become resisted.
+    """
+    dry = next(c for c in reference if c["name"] == "Weather Ball, no weather")
+    rain = next(c for c in reference if c["name"] == "Weather Ball in rain")
+    sun = next(c for c in reference if c["name"] == "Weather Ball in sun")
+
+    for case in (dry, rain, sun):
+        assert damage_rolls(**_inputs(case, dex)) == tuple(case["rolls"]), case["name"]
+
+    # 2 (base power) x 1.5 (rain) x 2 (Water into Fire/Flying) = 6
+    assert 5.6 < rain["rolls"][-1] / dry["rolls"][-1] < 6.1
+    # 2 x 1.5 (sun) x 0.5 (Fire into a Fire type) = 1.5
+    assert 1.35 < sun["rolls"][-1] / dry["rolls"][-1] < 1.6
+
+
+def test_weather_ball_takes_stab_from_the_type_the_weather_gave_it(reference, dex):
+    """A pure Water attacker has no STAB on a Normal move and full STAB on the same
+    move in rain, which is the half of this that a power-only model gets wrong."""
+    dry = next(c for c in reference
+               if c["name"] == "Weather Ball off a Water attacker, no weather")
+    rain = next(c for c in reference
+                if c["name"] == "Weather Ball off a Water attacker, in rain")
+    for case in (dry, rain):
+        assert damage_rolls(**_inputs(case, dex)) == tuple(case["rolls"]), case["name"]
+
+    assert _inputs(dry, dex)["stab"] is False
+    assert _inputs(rain, dex)["stab"] is True
+    # Garchomp is neutral to both Normal and Water, so nothing but base power,
+    # weather and STAB is moving: 2 x 1.5 x 1.5 = 4.5.
+    assert 4.2 < rain["rolls"][-1] / dry["rolls"][-1] < 4.6
+
+
+@pytest.mark.parametrize("weather,expect_type,expect_bp", [
+    (None, "Normal", 50), ("rain", "Water", 100), ("sun", "Fire", 100),
+])
+def test_weather_move_resolves(weather, expect_type, expect_bp):
+    assert weather_move("weatherball", "Normal", 50, weather) == (expect_type, expect_bp)
+
+
+def test_weather_move_leaves_every_other_move_alone():
+    """It is called unconditionally at three call sites, so the pass-through is the
+    behaviour that has to hold, not an edge case."""
+    for weather in (None, "rain", "sun"):
+        assert weather_move("hydropump", "Water", 110, weather) == ("Water", 110)
+        assert weather_move("hypervoice", "Normal", 90, weather) == ("Normal", 90)

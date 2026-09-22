@@ -93,3 +93,46 @@ def test_unmerged_formes_cannot_exceed_their_species(con):
         where contributing_species = 1 and forme_usage_pct > species_usage_pct + 1e-12
     """).fetchall()
     assert bad == [], f"forme usage exceeds its species: {bad}"
+
+
+def test_a_mega_forme_carries_no_choice_scarf_benchmark(con):
+    """A Mega is holding its stone, so a Scarfed Speed for it cannot exist.
+
+    The Scarf share behind the flag is the BASE species' — Scarf Salamence is a real
+    set — so before this, a Mega inherited it and `vgc.speed.ceiling` judged the Mega
+    against a Speed it can never reach. Staraptor-Mega is the live case at 21.9%,
+    over the 20% threshold, reading "Depends" where the answer was "You outspeed".
+    """
+    bad = con.execute("""
+        select s.display_name, s.scarf_flag, s.spe_max_plus_scarf, s.spe_max_neutral_scarf
+        from mart_meta_speed s
+        join mart_meta_top t
+          on t.forme_id = s.forme_id and t.regulation = s.regulation
+        where t.is_mega and (s.scarf_flag
+                             or s.spe_max_plus_scarf is not null
+                             or s.spe_max_neutral_scarf is not null)
+    """).fetchall()
+    assert bad == [], f"Mega formes still carrying a Scarf benchmark: {bad}"
+
+
+def test_the_mega_scarf_rule_has_something_to_suppress(con):
+    """Guards the test above, which passes vacuously if no Mega ever cleared the
+    threshold — and one does, which is why the bug was visible at all."""
+    over = con.execute("""
+        select count(*) from mart_meta_speed s
+        join mart_meta_top t
+          on t.forme_id = s.forme_id and t.regulation = s.regulation
+        where t.is_mega and s.scarf_share >= 0.20
+    """).fetchone()[0]
+    assert over > 0, "no Mega forme is over the Scarf threshold, so nothing is proved"
+
+
+def test_a_non_mega_keeps_its_scarf_benchmark(con):
+    """The suppression must be surgical: ordinary formes still get both numbers."""
+    rows = con.execute("""
+        select count(*) from mart_meta_speed s
+        join mart_meta_top t
+          on t.forme_id = s.forme_id and t.regulation = s.regulation
+        where not t.is_mega and s.scarf_flag and s.spe_max_plus_scarf is not null
+    """).fetchone()[0]
+    assert rows > 0, "no ordinary forme is flagged for Scarf any more"
