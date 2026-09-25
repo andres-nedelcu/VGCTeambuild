@@ -65,3 +65,14 @@ downstream:
 
 375 tests cover the damage engine against a pinned Pokémon Showdown checkout, the
 ingest and transform pipeline, and the app itself.
+
+## License and third-party assets
+
+The code is MIT licensed (see `LICENSE`). That covers the code only.
+
+The 259 sprites cached under `data/sprites/gen5/` come from
+[Pokémon Showdown](https://play.pokemonshowdown.com/sprites/gen5/) and are
+ultimately Nintendo / Creatures / GAME FREAK artwork. They are committed so the
+app works with no network, not relicensed — the MIT grant above does not extend
+to them. Pokémon and Pokémon character names are trademarks of Nintendo. This is
+an unofficial fan project with no affiliation or endorsement.
