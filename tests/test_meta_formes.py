@@ -7,7 +7,7 @@ Two things can break that keying, and both are pinned here.
 
 import pytest
 
-from vgc.db import session
+from vgc.db import load_settings, session
 
 REG = "M-C"
 
@@ -115,16 +115,44 @@ def test_a_mega_forme_carries_no_choice_scarf_benchmark(con):
     assert bad == [], f"Mega formes still carrying a Scarf benchmark: {bad}"
 
 
-def test_the_mega_scarf_rule_has_something_to_suppress(con):
-    """Guards the test above, which passes vacuously if no Mega ever cleared the
-    threshold — and one does, which is why the bug was visible at all."""
-    over = con.execute("""
-        select count(*) from mart_meta_speed s
+def test_the_mega_scarf_rule_has_numbers_to_suppress(con):
+    """Guards the NUMBERS half of the test above. The mart nulls both Scarf columns on
+    `is_mega` alone, with no reference to the share, so every Mega row would carry them
+    if that CASE were removed. The only way this half goes vacuous is a meta with no
+    Mega in it at all, which is what this asserts against."""
+    megas = con.execute("select count(*) from mart_meta_top where is_mega").fetchone()[0]
+    assert megas > 0, "no Mega forme in the meta sample, so the NULL columns prove nothing"
+
+
+def test_the_mega_scarf_rule_has_a_flag_to_suppress(con):
+    """Guards the FLAG half, which is a fact about the meta rather than about the code:
+    `scarf_flag` only differs from the unsuppressed rule for a Mega whose BASE species
+    is over the threshold. Staraptor-Mega was that case at 21.9%.
+
+    It is no longer: the share comes from build data and the meta moved under it —
+    Staraptor-Mega is the highest at 0.140 against a 0.20 threshold, and the gap has
+    widened, not closed. So this skips rather than re-pinning the comparison lower.
+    Re-pinning would be the worse of the two: the mart flags at defaults.scarf_threshold,
+    so a guard that accepted 0.14 would pass while the flag half stayed vacuous — the
+    one failure mode a guard exists to prevent. The threshold is read from settings
+    rather than written here so this cannot test a different number than the mart uses.
+    """
+    threshold = load_settings()["defaults"]["scarf_threshold"]
+    top = con.execute("""
+        select s.display_name, s.scarf_share
+        from mart_meta_speed s
         join mart_meta_top t
           on t.forme_id = s.forme_id and t.regulation = s.regulation
-        where t.is_mega and s.scarf_share >= 0.20
-    """).fetchone()[0]
-    assert over > 0, "no Mega forme is over the Scarf threshold, so nothing is proved"
+        where t.is_mega
+        order by s.scarf_share desc
+        limit 1
+    """).fetchone()
+    if top is None or top[1] < threshold:
+        highest = f"highest is {top[0]} at {top[1]:.3f}" if top else "no Mega rows at all"
+        pytest.skip(f"no Mega forme's base species reaches the {threshold:g} Choice Scarf "
+                    f"threshold ({highest}), so the flag half of the rule above is "
+                    f"vacuous today — the numbers half is still pinned")
+    assert top[1] >= threshold
 
 
 def test_a_non_mega_keeps_its_scarf_benchmark(con):
