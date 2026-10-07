@@ -9,19 +9,23 @@ A default MetaFilter() is the whole regulation, every event, every finisher, whi
 reproduces fact_usage exactly (tests/test_meta_filter.py pins this). So passing no
 filter anywhere behaves exactly as before.
 
-What each field is good for right now, against 19 events spanning nine days at
-42-148 players each:
+What each field is good for, against the 159 events landed on 2026-10-07, spanning
+2026-09-09 to 2026-10-06 at 16-388 players each:
 
 - cut          the sharp one. "What did teams that actually finished well bring."
-               Costs sample: top 16 is 304 teams against 1,553, so small rank moves
-               inside a cut view are noise, not signal.
-- weight       the gentle one. Keeps all 1,553 teams and weights each by its wins,
+               Costs sample: top 16 is 2,431 teams against 8,959, so small rank moves
+               inside a cut view are still noise, not signal.
+- weight       the gentle one. Keeps all 8,959 teams and weights each by its wins,
                so it is far more stable than a cut while still rewarding results.
                Agreeing moves between cut and weight are the ones worth trusting.
-- since        plumbed, but the landed data spans nine days, so it barely bites yet.
-- min_players  plumbed, but every landed event is 42-148 players, with no majors.
-               Both become useful as more events land; neither is worth reading
-               much into today.
+- since        no longer decorative -- this is now the filter that matters most. The
+               window spans 27 days and the meta turned over inside it: Salamence ran
+               41.3% -> 12.8% across the four weeks, Garchomp 11.7% -> 30.9%, Raichu
+               6.4% -> 32.5%. An unfiltered view is an average over metas that are no
+               longer the same one, so it understates both the risers and the fallers.
+- min_players  bites more than it did (16-388, against 42-148 before), but the largest
+               events here are still community events, not majors, so it separates by
+               event size rather than by field strength.
 """
 
 from __future__ import annotations
@@ -35,8 +39,8 @@ TEAMS, WINS = "teams", "wins"
 WEIGHTS = (TEAMS, WINS)
 
 # Below this many teams, treat rank order as indicative rather than meaningful.
-# The meta stability work put ~3,000 teams as the bar for settling a top 15, against
-# 1,553 landed; a cut view is a fraction of that again.
+# The meta stability work put ~3,000 teams as the bar for settling a top 15. The
+# unfiltered view now clears that at 8,959; a cut view is still a fraction of it.
 THIN_SAMPLE = 400
 
 

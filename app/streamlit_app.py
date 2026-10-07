@@ -41,6 +41,9 @@ from vgc.team import list_pastes, load_team
 LOAD_CMD = "uv run python scripts/load_paste.py <pokepaste-url>"
 REFRESH_CMD = "uv run python scripts/refresh.py"
 NO_MEGA = 0  # radio sentinel; Streamlit treats None as 'no selection'
+# Days of landed events above which the date filter is worth reaching for rather
+# than noted as inert. Two weeks is roughly where this meta last took to turn over.
+DATE_FILTER_BITES_DAYS = 14
 
 # Two ways of using the tool, not two more tabs. The seven tabs are all facets of one
 # question — how does *my team* line up — and the dex view is a different question
@@ -117,8 +120,20 @@ with st.sidebar:
         if span.events:
             st.caption(f"{span.events} events · {span.first} to {span.last} "
                        f"({span.days} days) · {span.smallest}–{span.largest} players")
-        st.caption("Both of these work, but today's events span barely a week and "
-                   "none of them are majors, so neither separates much yet.")
+        # Derived from the landed extent rather than asserted. The previous copy here
+        # claimed the events "span barely a week", which was true when it was written
+        # and silently stopped being true as events accumulated -- telling the reader a
+        # control was inert at exactly the point it became the most useful one.
+        if span.days >= DATE_FILTER_BITES_DAYS:
+            st.caption(f"**Events from** is worth reaching for now: the landed events "
+                       f"span {span.days} days and the meta has moved inside that "
+                       f"window, so an unfiltered view averages across the change. "
+                       f"**Minimum event size** still separates less — the largest "
+                       f"community events here are not majors.")
+        else:
+            st.caption(f"Both of these work, but the landed events span only "
+                       f"{span.days} days and none of them are majors, so neither "
+                       f"separates much yet.")
         if span.first and span.last and span.first < span.last:
             picked = st.date_input("Events from", value=span.first,
                                    min_value=span.first, max_value=span.last)
