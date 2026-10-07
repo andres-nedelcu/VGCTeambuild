@@ -2,7 +2,11 @@ warehouse_path: data/warehouse.duckdb
 raw_data_dir: data/raw
 
 smogon:
-  rating_cutoff: null    # TODO(Phase 3): pick one (0 / 1500 / 1630 / 1760) and never mix
+  # Chosen 2026-10-07 and not to be mixed: every Smogon row in the warehouse is this
+  # cutoff. The loader refuses a file whose info.cutoff differs, so "never mix" is
+  # mechanical rather than a note. See docs/briefs/6.8-smogon-ladder.md for the
+  # evidence; changing it means reloading every Smogon row, not just the new ones.
+  rating_cutoff: 1630
 
 defaults:
   top_n: 20
