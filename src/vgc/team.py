@@ -20,11 +20,15 @@ class Member:
 
 
 def list_pastes() -> list[tuple[str, str | None, list[str]]]:
-    """(paste_id, team_name, [pokemon_id by slot]) for every loaded paste."""
+    """(paste_id, team_name, [pokemon_id by slot]) for every loaded paste.
+
+    Newest first: the team you just loaded is the one you want to look at, and
+    paste_id order is a hex hash, i.e. arbitrary.
+    """
     with session() as con:
         return con.execute("""
             select paste_id, any_value(team_name), list(pokemon_id order by slot)
-            from my_team group by paste_id order by paste_id
+            from my_team group by paste_id order by max(loaded_at) desc
         """).fetchall()
 
 
