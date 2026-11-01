@@ -70,6 +70,21 @@ def _move_names() -> dict[str, str]:
             "select move_id, display_name from dim_move order by display_name").fetchall())
 
 
+@st.cache_data(show_spinner=False)
+def _profile(pokemon_id: str, reg: str, filt):
+    """`vgc.dex.profile` costs ~127 ms, and Streamlit runs an expander's body whether
+    it is open or not — so six members put three quarters of a second on *every*
+    render of the Spreads tab, which is the one surface you sit and iterate on.
+
+    Cached on (species, regulation, filter), which is exactly what it depends on. A
+    meta-filter change still pays for it once, which is correct.
+    """
+    try:
+        return profile(pokemon_id, reg, filt)
+    except (LookupError, KeyError):
+        return None
+
+
 def _free_slot(members: list[Member]) -> int:
     """Lowest unused slot, so removing the third and adding one does not make a
     slot 7 — slots are identity, but they are also what the user reads."""
@@ -120,10 +135,7 @@ def render_member(team_id: str, member: Member, entry, reg: str, filt,
     items, moves = _item_names(), _move_names()
     abilities = ability_names()
 
-    try:
-        prof = profile(member.pokemon_id, reg, filt)
-    except (LookupError, KeyError):
-        prof = None
+    prof = _profile(member.pokemon_id, reg, filt)
 
     # Items this species is actually seen holding, then everything else. Same reason
     # as the dex picker: the list opens on what you are most likely to want.
