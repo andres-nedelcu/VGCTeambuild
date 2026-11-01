@@ -131,6 +131,42 @@ def test_validate_accepts_a_real_saved_team():
     assert problems == []
 
 
+def test_an_empty_team_round_trips(store):
+    """Starting from nothing is a supported route, not a degenerate import: a team
+    built in the Spreads tab never had a paste to come from."""
+    save(Team(id="scratch", name="Scratch", members=[], source={"kind": "scratch"}))
+    back = get("scratch")
+    assert back.members == []
+    assert back.name == "Scratch"
+    assert [t.id for t in list_teams()] == ["scratch"]
+
+
+def test_saving_a_changed_roster_replaces_the_members(store):
+    """What the Spreads tab's Save does after a roster edit: the pending member list
+    is written wholesale, so a removal really removes rather than merging."""
+    from dataclasses import replace as dc_replace
+
+    original = save(a_team("roster", "Roster"))
+    assert len(original.members) == 2
+    trimmed = [m for m in original.members if m.slot == 1]
+    added = Member(slot=2, pokemon_id="incineroar", item_id="sitrusberry",
+                   ability_id="intimidate", nature="Careful",
+                   investment={"unit": "sp", "values": {"hp": 32}},
+                   moves=["fakeout", "flareblitz", "partingshot", "darkestlariat"])
+    save(dc_replace(original, members=[*trimmed, added]))
+
+    back = get("roster")
+    assert [m.pokemon_id for m in back.members] == ["rillaboom", "incineroar"]
+    assert back.members[1].item_id == "sitrusberry"
+
+
+def test_validate_accepts_an_empty_team():
+    """An empty team is incomplete, not invalid — otherwise it could never be saved
+    on the way to being filled in."""
+    problems, _ = validate([])
+    assert problems == []
+
+
 def test_validate_refuses_more_than_six(store):
     many = a_team().members * 4
     problems, _ = validate(many)

@@ -11,7 +11,8 @@ def test_schema_builds_in_memory():
     con.execute(sql)
     con.execute(sql)  # idempotent
     tables = {r[0] for r in con.execute("SHOW TABLES").fetchall()}
-    assert {"dim_pokemon", "fact_usage", "my_team"} <= tables
+    assert {"dim_pokemon", "fact_usage"} <= tables
+    assert "my_team" not in tables, "teams live in data/teams/ now (DECISIONS 2026-11-01)"
 
 
 def test_settings_load():

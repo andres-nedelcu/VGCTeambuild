@@ -7,26 +7,26 @@ a hole it does not cover is worse than no suggestion at all.
 
 import pytest
 
-from helpers import full_team_id
+from helpers import reference_team
 from vgc.defense import defense_matrix, flagged_types, summarize
 from vgc.megas import resolve_team
 from vgc.metafilter import MetaFilter
 from vgc.offense import attackers, coverage_matrix, holes, threats
 from vgc.suggest import suggestions
-from vgc.team import load_team
 from vgc.typechart import effectiveness
 
 REG = "M-C"
-PASTE = full_team_id()
 TOP_N = 20
 
 
 @pytest.fixture(scope="module")
 def ctx():
-    try:
-        team = load_team(PASTE)
-    except (FileNotFoundError, LookupError):
-        pytest.skip("paste not loaded")
+    # The suite's own six rather than whatever is saved: these tests guard against
+    # passing vacuously ("no resist claims were exercised"), so they need a team that
+    # actually has a flagged type and a coverage hole to answer. A team with neither
+    # exercises nothing and the guards fire — which is what happened when the store
+    # changed underneath them.
+    team = reference_team()
     formes = resolve_team(team, None)
     try:
         meta = threats(REG, TOP_N)

@@ -103,17 +103,8 @@ CREATE TABLE IF NOT EXISTS fact_tournament_set (
 
 -- ───────────── Your team ─────────────
 
-CREATE TABLE IF NOT EXISTS my_team (
-    paste_id    VARCHAR,
-    team_name   VARCHAR,
-    slot        INT,
-    pokemon_id  VARCHAR,
-    nickname    VARCHAR,
-    item_id     VARCHAR,
-    ability_id  VARCHAR,
-    nature      VARCHAR,
-    investment  JSON,                       -- raw investment as parsed (see outline 7.5)
-    moves       VARCHAR[],
-    loaded_at   TIMESTAMP,
-    PRIMARY KEY (paste_id, slot)
-);
+-- my_team used to live here. Teams moved to data/teams/*.json on 2026-11-01:
+-- they were the only hand-authored rows in a warehouse of derived data, and
+-- they have to be writable from the app, which the single-writer rule forbids
+-- for anything sharing this file. See docs/DECISIONS.md and vgc/team.py.
+-- scripts/drop_my_team.py removes the table from an existing warehouse.

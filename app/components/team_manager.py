@@ -17,11 +17,12 @@ from dataclasses import replace
 
 import streamlit as st
 
+from components.roster import clear as clear_roster
 from vgc.ingest import pokepaste
 from vgc.team import (Team, delete, get, list_teams, members_from_sets, save,
                       unique_id, validate, variant_of)
 
-URL, TEXT = "Paste link", "Paste text"
+URL, TEXT, EMPTY = "Paste link", "Paste text", "Start empty"
 
 
 def _save(name: str, sets: list[dict], source: dict, dex) -> bool:
@@ -60,9 +61,21 @@ def _save(name: str, sets: list[dict], source: dict, dex) -> bool:
 
 
 def render_import(dex) -> None:
-    st.markdown("**Import a team**")
-    how = st.radio("How", [URL, TEXT], horizontal=True, key="import_how",
+    st.markdown("**Add a team**")
+    how = st.radio("How", [URL, TEXT, EMPTY], horizontal=True, key="import_how",
                    label_visibility="collapsed")
+
+    if how == EMPTY:
+        # Building from nothing is a first-class route, not a degenerate import: a
+        # team invented in the Spreads tab never had a paste to come from.
+        name = st.text_input("Name", key="import_empty_name", placeholder="required")
+        st.caption("Creates an empty team. Add Pokémon from the Spreads tab.")
+        if st.button("Create", key="import_empty_go", disabled=not name.strip()):
+            team = save(Team(id=unique_id(name.strip()), name=name.strip(),
+                             members=[], source={"kind": "scratch"}))
+            st.success(f"Created “{team.name}”. Add Pokémon from the Spreads tab.")
+            st.rerun()
+        return
 
     if how == URL:
         url = st.text_input("PokePaste link", key="import_url",
@@ -96,7 +109,8 @@ def render_import(dex) -> None:
                 st.rerun()
 
 
-def render_save(team_id: str, members, edited: list[int]) -> None:
+def render_save(team_id: str, members, edited: list[int],
+                roster_edited: bool = False) -> None:
     """Persist in-session spread edits, or fork them into a variant.
 
     Editing stays in session state — that is what keeps the slider loop fast, and it
@@ -107,12 +121,17 @@ def render_save(team_id: str, members, edited: list[int]) -> None:
     Both buttons land the team at the top of the picker, because `list_teams` orders
     by modified time and the thing you just saved is the thing you want to look at.
     """
-    if not edited:
+    if not edited and not roster_edited:
         st.caption("No unsaved changes.")
         return
 
     current = get(team_id)
-    st.warning(f"{len(edited)} Pokémon edited in this session — not saved yet.")
+    what = []
+    if edited:
+        what.append(f"{len(edited)} spread{'s' if len(edited) > 1 else ''}")
+    if roster_edited:
+        what.append("the roster")
+    st.warning(f"Edited this session — {' and '.join(what)} — not saved yet.")
     keep, fork = st.columns(2)
 
     if keep.button("Save to this team", key=f"save_{team_id}", type="primary"):
@@ -121,6 +140,7 @@ def render_save(team_id: str, members, edited: list[int]) -> None:
             st.error("Not saved: " + "; ".join(problems))
             return
         save(replace(current, members=list(members)))
+        clear_roster(team_id)
         st.rerun()
 
     name = st.text_input("Variant name", key=f"variant_name_{team_id}",
@@ -132,6 +152,7 @@ def render_save(team_id: str, members, edited: list[int]) -> None:
             return
         fresh = variant_of(current, name.strip() or None)
         save(replace(fresh, members=list(members)))
+        clear_roster(team_id)
         st.rerun()
 
 

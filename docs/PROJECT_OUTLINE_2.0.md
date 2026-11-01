@@ -165,21 +165,35 @@ for derived data on its own merits.
 - **Migration done:** 8 teams, 43 members, verified by read-back.
   `scripts/migrate_teams.py` reads `my_team` without writing to it.
 
-**Still open:** dropping `my_team` from `sql/00_schema.sql`. Deliberately a
-separate step — migrate, verify, then drop.
+**Schema updated 1 Nov:** `my_team` is gone from `sql/00_schema.sql`, and
+`scripts/drop_my_team.py` removes it from an existing warehouse — but it
+**refuses** unless every paste is accounted for in `data/teams/`, which is the
+whole point of a step that makes the migration irreversible.
+
+**Creating and editing teams, also built 1 Nov:** start a team from scratch (no
+paste), add and remove Pokémon, and edit item, ability and moves per slot. A new
+Pokémon is seeded from the meta's most common build. Roster edits are held in
+session state and land with the same Save as spreads.
 
 ---
 
 ## 5. Per-area decisions
 
-### 5.1 Spreads editing — **SETTLED**
+### 5.1 Spreads editing — **BUILT** (1 Nov 2026)
 
-Keep the v1 editor, which works. Add move and item editing.
+The v1 editor is unchanged. Added: item, ability and move editing per slot, plus
+adding and removing Pokémon, behind an expander in the Spreads tab.
 
-**Dependency:** item editing is coupled to item coverage in the engine (§7.2).
-The moment the UI offers an item dropdown it implies the engine understands the
-choice. Either ship them together, or mark unmodelled items visibly in the picker
-— per Principle 1, silence is not acceptable.
+**Still outstanding from this section:** the item picker offers every item in
+`dim_item`, and the damage engine models a subset (§7.2). Per Principle 1 that
+has to become visible — an unmodelled item should say so where it is chosen.
+Not yet done.
+
+**Also outstanding: move legality is unchecked.** There is no learnset in the
+warehouse. The picker mitigates it by defaulting to moves the species actually
+runs in the meta, with the full list behind a labelled toggle, but the real fix
+is exporting `vendor/pokemon-showdown/data/learnsets.ts` — the export script
+already holds `Dex.mod('champions')`, so the pieces are in place.
 
 ### 5.2 Defence + coverage merge — **SETTLED**
 

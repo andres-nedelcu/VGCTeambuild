@@ -2,13 +2,12 @@
 
 import pytest
 
-from helpers import full_team_id
+from helpers import reference_team
 from vgc.megas import (STONE_SPECIES, _mega_ability, load_dex, load_stones,
                        mega_forme_id, mega_options, resolve_team)
 from vgc.team import Member, load_team
 from vgc.typechart import effectiveness
 
-PASTE = full_team_id()
 
 
 @pytest.fixture(scope="module")
@@ -59,7 +58,8 @@ def test_garchomp_z_toggle(dex):
 
 
 def test_real_paste(dex):
-    team = load_team(PASTE)
+    """A fixed team of the suite's own: two Mega options, one at a time."""
+    team = reference_team()
     assert mega_options(team) == {1: "golisopodmega", 5: "gardevoirmega"}
 
     base = {f.slot: f for f in resolve_team(team, None)}

@@ -14,6 +14,10 @@ from components.damage_grid import (render_damage_grid, render_focus,
 from components.outgoing_grid import render_outgoing_grid, render_outgoing_table
 from components.spread_editor import render_editor, render_export, stored_spreads
 from components.team_manager import (render_delete, render_import, render_save)
+from components.roster import clear as clear_roster
+from components.roster import is_edited as roster_is_edited
+from components.roster import pending as pending_roster
+from components.roster import render_add, render_member
 from components.coverage_grid import render_coverage_grid
 from components.defense_grid import render_defense_grid
 from components.speed_view import render_speed_tiers, render_team_speeds
@@ -84,11 +88,15 @@ with st.sidebar:
     if not team_id:
         st.stop()
 
-    loaded = load_team(team_id)
-    # Spread edits live in session state and are read here, before any visual is
-    # built — see components/spread_editor for why the ordering matters.
+    saved_members = load_team(team_id)
+    # Roster edits (who is on the team, what they hold) and spread edits both live in
+    # session state and both land with the same Save, so the team is only ever in one
+    # of two states: as saved, or as edited this session. Roster first — a spread is
+    # read per slot, so the slots have to be settled before spreads are looked up.
+    loaded = pending_roster(team_id, saved_members)
     spread_edits = stored_spreads(team_id, loaded)
     team = apply_spreads(loaded, spread_edits)
+    roster_edited = roster_is_edited(team_id, saved_members)
     # Compare parsed spreads: apply() turns the stored JSON string into a dict, so
     # comparing `investment` directly reports every member as edited on first load.
     _before = {m.slot: read_spread(m) for m in loaded}
@@ -205,6 +213,18 @@ if mode == DEX:
     st.caption(f"Rendered in {time.perf_counter() - t0:.2f}s")
     st.stop()
 
+if not team:
+    # An empty team is a legitimate starting point now, so this is a build prompt
+    # rather than an error. Every visual below reads a move list, so there is nothing
+    # to show until there is at least one Pokémon.
+    st.subheader("Start building")
+    st.caption(f"**{labels[team_id].split(' · ')[0]}** has no Pokémon yet. Add one "
+               "to bring the rest of the tool to life — it will arrive with the "
+               "meta's most common build, which you can edit from there.")
+    render_add(team_id, team, reg, meta_filter)
+    st.caption(f"Rendered in {time.perf_counter() - t0:.2f}s")
+    st.stop()
+
 if not slots:
     st.info("Select at least one Pokémon.")
     st.stop()
@@ -221,7 +241,19 @@ flags = flagged_types(summary)
 with tab_spreads:
     st.subheader("Set SP and natures")
     render_editor(team_id, loaded, resolve_team(team, mega_slot), spread_edits)
-    render_save(team_id, team, edited)
+
+    with st.expander("Change who is on the team, and what they hold"):
+        st.caption("Item, ability and moves per slot, plus adding and removing "
+                   "Pokémon. These are held for this session like spreads are, and "
+                   "land with the same Save below.")
+        for member in sorted(team, key=lambda m: m.slot):
+            st.markdown(f"**{dex[member.pokemon_id].display_name}**")
+            render_member(team_id, member, dex.get(member.pokemon_id), reg,
+                          meta_filter, team)
+            st.divider()
+        render_add(team_id, team, reg, meta_filter)
+
+    render_save(team_id, team, edited, roster_edited)
     render_export(to_paste(team))
 
 with tab_defense:
