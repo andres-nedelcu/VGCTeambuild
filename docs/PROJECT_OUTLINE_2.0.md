@@ -165,10 +165,15 @@ for derived data on its own merits.
 - **Migration done:** 8 teams, 43 members, verified by read-back.
   `scripts/migrate_teams.py` reads `my_team` without writing to it.
 
-**Schema updated 1 Nov:** `my_team` is gone from `sql/00_schema.sql`, and
-`scripts/drop_my_team.py` removes it from an existing warehouse — but it
-**refuses** unless every paste is accounted for in `data/teams/`, which is the
-whole point of a step that makes the migration irreversible.
+**Migration complete, 1 Nov:** `my_team` is gone from `sql/00_schema.sql` and
+dropped from the warehouse, which now holds 18 tables, all derived.
+`scripts/drop_my_team.py` refuses unless every paste is accounted for in
+`data/teams/` — on the first run it correctly refused, because four teams had been
+deleted through the app in the meantime. Andres confirmed those deletions were
+deliberate and it was run with `--force`.
+
+**Teams now have no backup.** `data/teams/` is gitignored and the warehouse copy
+is gone, so the files are the only copy. Worth a periodic copy somewhere.
 
 **Creating and editing teams, also built 1 Nov:** start a team from scratch (no
 paste), add and remove Pokémon, and edit item, ability and moves per slot. A new

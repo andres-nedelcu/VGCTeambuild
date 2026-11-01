@@ -35,7 +35,7 @@ def nature_mod(nature: str | None, stat: str) -> float:
 
 
 def sp_from_investment(inv: dict[str, Any] | str | None) -> dict[str, int]:
-    """Normalize my_team.investment to SP per stat.
+    """Normalize a team member's investment to SP per stat.
 
     unit 'sp' -> validated as SP.
     unit 'ev' -> treated as SP if within SP limits; real EVs are rejected.

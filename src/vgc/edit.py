@@ -1,18 +1,20 @@
-"""In-app spread editing: overrides held in memory, never written to the warehouse.
+"""In-app spread editing: overrides held in memory until they are saved.
 
-The app is read-only by design and stays that way — `DECISIONS.md` has the reason
-(DuckDB allows one writer and VFC xV reads the same file). Nothing here touches it.
 An edit produces a modified copy of the Member list, which is all the visuals need:
 every one of them already takes `team` and `formes` as arguments rather than reading
-`my_team` itself.
+a team from anywhere itself. Nothing here touches the warehouse, which holds only
+derived data and is still written by `refresh.py` alone.
 
 Why it exists: a team locked in the game arrives without spreads, and the decisions
 that actually matter — what survives what — *are* the spread decisions. Until they
 are set, every damage figure in the tool is computed at 0 SP with a neutral nature,
 which is not the team being played.
 
-Edits live for the session. `to_paste` exists so a spread worth keeping can be copied
-out to a note or to pokepast.es rather than lost to a browser refresh.
+Edits are held for the session and land explicitly, via the Spreads tab's Save.
+Keeping them in memory rather than writing on every change is what makes the slider
+loop usable; saving is a button because trying a spread and backing out should cost
+nothing. `to_paste` remains the way to take a spread somewhere else entirely — a
+note, or pokepast.es — and is what `scripts/load_paste.py` reads back.
 """
 
 from __future__ import annotations
