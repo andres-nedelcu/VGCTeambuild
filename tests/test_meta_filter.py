@@ -10,6 +10,7 @@ from datetime import date
 
 import pytest
 
+from helpers import full_team_id
 from vgc.db import session
 from vgc.megas import resolve_team
 from vgc.metafilter import TEAMS, THIN_SAMPLE, WINS, MetaFilter, sample_size
@@ -19,7 +20,7 @@ from vgc.speed import meta_speed
 from vgc.team import load_team
 
 REG = "M-C"
-PASTE = "b58a4fb249fb3cbf"
+PASTE = full_team_id()
 
 
 @pytest.fixture(scope="module")
@@ -125,7 +126,7 @@ def test_speed_and_pressure_accept_the_same_filter(built):
     filt = MetaFilter(cut=16)
     try:
         team = load_team(PASTE)
-    except FileNotFoundError:
+    except (FileNotFoundError, LookupError):
         pytest.skip("paste not loaded")
     assert not meta_speed(REG, 10, filt).empty
     assert rank(REG, resolve_team(team, None), 10, filt)

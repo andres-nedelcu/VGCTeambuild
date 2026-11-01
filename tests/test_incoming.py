@@ -7,6 +7,7 @@ and that the two figures it reports mean what the app says they mean.
 
 import pytest
 
+from helpers import full_team_id
 from vgc.damage import RAIN
 from vgc.incoming import MAX_SP, SHAKY, incoming, team_bulk
 from vgc.megas import resolve_team
@@ -15,14 +16,14 @@ from vgc.stats import calc_stat, nature_mod, sp_from_investment
 from vgc.team import load_team
 
 REG = "M-C"
-PASTE = "b58a4fb249fb3cbf"
+PASTE = full_team_id()
 
 
 @pytest.fixture(scope="module")
 def ctx():
     try:
         team = load_team(PASTE)
-    except FileNotFoundError:
+    except (FileNotFoundError, LookupError):
         pytest.skip("paste not loaded")
     formes = resolve_team(team, None)
     try:

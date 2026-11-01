@@ -26,6 +26,7 @@ import requests
 
 from vgc import REPO_ROOT
 from vgc.db import connect
+from vgc.team import list_teams
 
 SPRITE_URL = "https://play.pokemonshowdown.com/sprites/gen5/{name}.png"
 REPORT_PATH = REPO_ROOT / "data" / "sprites" / "coverage.json"
@@ -47,16 +48,20 @@ def collect(con) -> dict[str, str]:
     Charizard-Mega-Y still needs a plain Charizard sprite beside its core. Base
     species are therefore pulled in alongside the formes.
     """
-    rows = con.execute("""
+    # Your own teams are files now, not a warehouse table, so they arrive as a bound
+    # list rather than a subquery. Still included: a sprite missing for something you
+    # actually run is the one gap you would notice immediately.
+    mine = sorted({m.pokemon_id for t in list_teams() for m in t.members})
+    rows = con.execute(f"""
         SELECT DISTINCT p.pokemon_id, p.base_species_id
         FROM dim_pokemon p
         WHERE p.pokemon_id IN (SELECT forme_id FROM mart_meta_top)
            OR p.pokemon_id IN (SELECT species_id FROM mart_meta_top)
            OR p.pokemon_id IN (SELECT base_species_id FROM dim_pokemon
                                WHERE pokemon_id IN (SELECT forme_id FROM mart_meta_top))
-           OR p.pokemon_id IN (SELECT pokemon_id FROM my_team)
+           OR p.pokemon_id IN ({','.join('?' * len(mine)) or 'NULL'})
         ORDER BY 1
-    """).fetchall()
+    """, mine).fetchall()
     return {pid: sprite_name(pid, base) for pid, base in rows}
 
 

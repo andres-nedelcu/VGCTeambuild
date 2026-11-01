@@ -42,7 +42,7 @@ from vgc.metafilter import MetaFilter
 from vgc.offense import threats
 from vgc.outgoing import outgoing
 from vgc.stats import STATS
-from vgc.team import list_pastes, load_team
+from vgc.team import list_teams, load_team
 
 REG = "M-C"
 TOP_N = 10
@@ -71,10 +71,10 @@ def dex_types():
 
 @pytest.fixture(scope="module")
 def ctx():
-    full = [p for p in list_pastes() if len(p[2]) > 1]
+    full = [t for t in list_teams() if len(t.members) > 1]
     if not full:
-        pytest.skip("no multi-Pokémon paste loaded")
-    team = load_team(full[0][0])
+        pytest.skip("no multi-Pokémon team saved")
+    team = load_team(full[0].id)
     formes = resolve_team(team, None)
     try:
         meta = threats(REG, TOP_N, MetaFilter())

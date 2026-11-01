@@ -2,19 +2,20 @@
 
 import pytest
 
+from helpers import full_team_id
 from vgc.megas import (STONE_SPECIES, _mega_ability, load_dex, load_stones,
                        mega_forme_id, mega_options, resolve_team)
 from vgc.team import Member, load_team
 from vgc.typechart import effectiveness
 
-PASTE = "b58a4fb249fb3cbf"
+PASTE = full_team_id()
 
 
 @pytest.fixture(scope="module")
 def dex():
     try:
         return load_dex()
-    except FileNotFoundError:
+    except (FileNotFoundError, LookupError):
         pytest.skip("warehouse not built")
 
 

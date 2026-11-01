@@ -2,19 +2,20 @@
 
 import pytest
 
+from helpers import full_team_id
 from vgc.defense import RESIST_ROW, WEAK_ROW, defense_matrix, flagged_types, summarize
 from vgc.megas import resolve_team
 from vgc.team import load_team
 from vgc.typechart import TYPES
 
-PASTE = "b58a4fb249fb3cbf"
+PASTE = full_team_id()
 
 
 @pytest.fixture(scope="module")
 def team():
     try:
         return load_team(PASTE)
-    except FileNotFoundError:
+    except (FileNotFoundError, LookupError):
         pytest.skip("warehouse not built")
 
 

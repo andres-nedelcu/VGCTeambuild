@@ -29,7 +29,7 @@ from vgc.pressure import rank as rank_threats
 from vgc.speed import clear_cache as clear_speed_cache
 from vgc.speed import matchup, meta_speed, team_speeds
 from vgc.sprites import data_uri
-from vgc.team import list_pastes, load_team
+from vgc.team import list_teams, load_team
 
 REG = "M-C"
 
@@ -64,13 +64,13 @@ def test_the_block_actually_blocks(no_network):
 
 
 def test_all_four_tabs_render_offline(no_network):
-    pastes = list_pastes()
-    if not pastes:
-        pytest.skip("no teams loaded")
-    paste_id = next(pid for pid, _name, mons in pastes if len(mons) > 1)
+    saved = [t for t in list_teams() if len(t.members) > 1]
+    if not saved:
+        pytest.skip("no multi-Pokémon team saved")
+    team_id = saved[0].id
 
     dex = load_dex()
-    team = load_team(paste_id)
+    team = load_team(team_id)
     formes = resolve_team(team, None)
     assert dex and team and formes
 
@@ -107,11 +107,11 @@ def test_all_four_tabs_render_offline(no_network):
 def test_the_dex_view_renders_offline(no_network):
     """The newest page, and the one with the most moving parts: 394 dex entries, a
     profile read, a build seeded from the marts, and damage fired both directions."""
-    pastes = list_pastes()
-    if not pastes:
-        pytest.skip("no teams loaded")
-    paste_id = next(pid for pid, _name, mons in pastes if len(mons) > 1)
-    team = load_team(paste_id)
+    saved = [t for t in list_teams() if len(t.members) > 1]
+    if not saved:
+        pytest.skip("no multi-Pokémon team saved")
+    team_id = saved[0].id
+    team = load_team(team_id)
     formes = resolve_team(team, None)
     filt = MetaFilter()
 

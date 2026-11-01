@@ -5,6 +5,10 @@ __pycache__/
 .pytest_cache/
 .DS_Store
 
+# Your teams. Not derived data and not reproducible — but secret until the event
+# is over, and this repository is public. Back them up yourself.
+data/teams/
+
 # Data (raw files are reproducible from sources; warehouse is rebuilt from raw)
 data/raw/*
 !data/raw/.gitkeep

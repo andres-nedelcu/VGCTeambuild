@@ -2,13 +2,14 @@
 
 import pytest
 
+from helpers import full_team_id
 from vgc.megas import Forme
 from vgc.offense import Threat
 from vgc.pressure import STAB, _best_hit, rank
 from vgc.team import load_team
 from vgc.typechart import MOVE_TYPE_ABILITIES, attack_type
 
-PASTE = "b58a4fb249fb3cbf"
+PASTE = full_team_id()
 
 # (move_id, display name, listed type, share) as mart_meta_common_moves returns them
 HYPER_VOICE = ("hypervoice", "Hyper Voice", "Normal", 0.92)
@@ -60,7 +61,7 @@ def test_best_move_wins_and_defender_ability_applies():
 def test_ranking_is_sorted_and_scored_against_the_real_team():
     try:
         team = load_team(PASTE)
-    except FileNotFoundError:
+    except (FileNotFoundError, LookupError):
         pytest.skip("warehouse not built")
     from vgc.megas import resolve_team
     rows = rank("M-C", resolve_team(team, None), 10)

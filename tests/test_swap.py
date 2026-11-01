@@ -7,6 +7,7 @@ is the reason to reject an otherwise attractive candidate.
 
 import pytest
 
+from helpers import full_team_id
 from vgc.defense import defense_matrix, flagged_types, summarize
 from vgc.megas import resolve_team
 from vgc.metafilter import MetaFilter
@@ -15,7 +16,7 @@ from vgc.swap import sole_coverage, swaps
 from vgc.team import load_team
 
 REG = "M-C"
-PASTE = "b58a4fb249fb3cbf"
+PASTE = full_team_id()
 TOP_N = 20
 
 
@@ -23,7 +24,7 @@ TOP_N = 20
 def ctx():
     try:
         team = load_team(PASTE)
-    except FileNotFoundError:
+    except (FileNotFoundError, LookupError):
         pytest.skip("paste not loaded")
     formes = resolve_team(team, None)
     try:

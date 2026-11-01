@@ -1,5 +1,9 @@
 warehouse_path: data/warehouse.duckdb
 raw_data_dir: data/raw
+# Your teams. Files, not warehouse tables: they are the only hand-authored data
+# here and they have to be writable from the app. Gitignored — a team is secret
+# until the event is over, and this repository is public.
+teams_dir: data/teams
 
 smogon:
   # Chosen 2026-10-07 and not to be mixed: every Smogon row in the warehouse is this

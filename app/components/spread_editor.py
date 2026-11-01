@@ -23,28 +23,28 @@ from vgc.edit import Spread, read_spread
 from vgc.sprites import data_uri
 
 
-def _prefix(paste_id: str, slot: int) -> str:
-    return f"{paste_id}_{slot}"
+def _prefix(team_id: str, slot: int) -> str:
+    return f"{team_id}_{slot}"
 
 
-def stored_spreads(paste_id: str, team) -> dict[int, Spread]:
+def stored_spreads(team_id: str, team) -> dict[int, Spread]:
     """Read edits out of session state. Call this BEFORE building the visuals."""
-    return {m.slot: stored_spread(_prefix(paste_id, m.slot), read_spread(m))
+    return {m.slot: stored_spread(_prefix(team_id, m.slot), read_spread(m))
             for m in team}
 
 
-def render_editor(paste_id: str, team, formes, spreads: dict[int, Spread]) -> None:
+def render_editor(team_id: str, team, formes, spreads: dict[int, Spread]) -> None:
     st.caption(
-        caps_caption() + " Edits apply to every tab immediately and are **not** saved "
-        "to the warehouse — copy the export below if you want to keep a spread past a "
-        "browser refresh."
+        caps_caption() + " Edits apply to every tab immediately and are held for this "
+        "session only — **Save** below keeps them, or **Save as variant** forks them "
+        "into a second team so two spreads can be compared."
     )
     by_slot = {f.slot: f for f in formes}
 
     for member in sorted(team, key=lambda m: m.slot):
         forme = by_slot.get(member.slot)
         spread = spreads[member.slot]
-        prefix = _prefix(paste_id, member.slot)
+        prefix = _prefix(team_id, member.slot)
 
         head, natcol = st.columns([2, 2])
         with head:

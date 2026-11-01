@@ -2,12 +2,13 @@
 
 import pytest
 
+from helpers import full_team_id
 from vgc.megas import resolve_team
 from vgc.offense import (Attacker, Threat, attackers, coverage_matrix, holes,
                          team_best, threats)
 from vgc.team import load_team
 
-PASTE = "b58a4fb249fb3cbf"
+PASTE = full_team_id()
 
 # Synthetic threats keep the logic tests independent of whatever the meta looks like.
 BUG_STEEL = Threat("golisopodmega", "Bug/Steel", ("Bug", "Steel"), None, 0.2)
@@ -23,7 +24,7 @@ NO_MOVES = Attacker(3, "Support mon", ())
 def team():
     try:
         return load_team(PASTE)
-    except FileNotFoundError:
+    except (FileNotFoundError, LookupError):
         pytest.skip("warehouse not built")
 
 

@@ -3,6 +3,7 @@ from types import SimpleNamespace
 
 import pytest
 
+from helpers import full_team_id
 from vgc.megas import resolve_team
 from vgc.speed import (AHEAD, BEHIND, DEPENDS, MOVE_FIRST, MOVE_LAST, OUTSPED, OUTSPEED,
                         TIE, Field, against_benchmark, benchmarks, ceiling, matchup,
@@ -139,14 +140,14 @@ def test_scarf_then_tailwind_order_pinned_on_odd_speed():
 # A threat's Choice Scarf only moves a marker, because it is inferred from how often
 # the species is seen holding one. Yours is read from the paste, so it is applied.
 
-PASTE = "b58a4fb249fb3cbf"
+PASTE = full_team_id()
 
 
 @pytest.fixture(scope="module")
 def loaded_team():
     try:
         return load_team(PASTE)
-    except FileNotFoundError:
+    except (FileNotFoundError, LookupError):
         pytest.skip("warehouse not built")
 
 

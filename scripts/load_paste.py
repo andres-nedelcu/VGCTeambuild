@@ -1,90 +1,67 @@
-"""Fetch a PokePaste, check every reference resolves, and load it into my_team.
+"""Fetch a PokePaste, check every reference resolves, and save it to data/teams/.
 
-Usage: uv run python scripts/load_paste.py https://pokepast.es/<16-hex-id>
-Writes only if everything resolves; rerunning replaces that paste's rows.
+Usage: uv run python scripts/load_paste.py https://pokepast.es/<16-hex-id> [--name NAME]
+Writes only if everything resolves; re-importing the same paste replaces that team.
+
+The app can do this too now (teams are files, not warehouse rows), so this script is
+the terminal route rather than the only one. Both go through vgc.team.validate, so
+neither can save a team the other would refuse.
 """
 
 import argparse
-import json
 import sys
-from datetime import datetime
 
-from vgc.db import connect
-from vgc.ids import to_id
 from vgc.ingest import pokepaste
+from vgc.stats import STATS
+from vgc.team import (Team, list_teams, members_from_sets, save, unique_id,
+                      validate)
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("url")
+    ap.add_argument("--name", help="override the team name (default: the paste title)")
     args = ap.parse_args()
 
     pid, payload = pokepaste.fetch(args.url)
     sets = pokepaste.parse(payload["paste"])
-    team_name = payload.get("title") or pid
+    team_name = args.name or payload.get("title") or pid
     print(f"Paste {pid}: '{team_name}' by {payload.get('author') or '?'}; {len(sets)} Pokémon")
 
-    con = connect(read_only=False)
-    try:
-        pokemon = {r[0]: r[1:] for r in con.execute(
-            "SELECT pokemon_id, base_species_id, is_mega, is_nonstandard FROM dim_pokemon").fetchall()}
-        moves = {r[0] for r in con.execute("SELECT move_id FROM dim_move").fetchall()}
-        items = {r[0]: r[1:] for r in con.execute(
-            "SELECT item_id, is_mega_stone, mega_forme_id FROM dim_item").fetchall()}
-        abilities = {to_id(r[0]) for r in con.execute(
-            "SELECT DISTINCT unnest(abilities) FROM dim_pokemon").fetchall()}
+    members = members_from_sets(sets)
 
-        problems, warnings, rows = [], [], []
-        for slot, s in enumerate(sets, 1):
-            pkid, iid, aid = to_id(s["species"]), to_id(s["item"]), to_id(s["ability"])
-            mids = [to_id(m) for m in s["moves"]]
-            label = f"slot {slot} {s['species']}"
-            if pkid not in pokemon:
-                problems.append(f"{label}: species not in dim_pokemon")
-            elif pokemon[pkid][2]:
-                warnings.append(f"{label}: flagged {pokemon[pkid][2]} in Showdown's Champions data")
-            if iid and iid not in items:
-                problems.append(f"{label}: item {s['item']!r} not in dim_item")
-            if aid and aid not in abilities:
-                problems.append(f"{label}: ability {s['ability']!r} unknown")
-            if not aid:
-                warnings.append(f"{label}: no ability line")
-            for m, mid in zip(s["moves"], mids):
-                if mid not in moves:
-                    problems.append(f"{label}: move {m!r} not in dim_move")
-            if len(mids) != 4:
-                warnings.append(f"{label}: {len(mids)} moves")
-            inv = s["investment"]
-            if inv["unit"] != "sp":
-                problems.append(f"{label}: EVs look like mainline EVs ({inv['values']}), not Champions stat points")
-            rows.append((pid, team_name, slot, pkid, s["nickname"], iid, aid, s["nature"],
-                         json.dumps(inv), mids, datetime.now()))
-            sp = inv["values"]
-            print(f"  {slot}. {s['species']:<18} @ {s['item'] or '-':<16} {s['ability'] or '-':<16} "
-                  f"{s['nature'] or '-':<8} SP {sp} ({inv['total']}/66)  {', '.join(s['moves'])}")
-            if iid in items and items[iid][0]:
-                forme = items[iid][1]
-                note = forme or "AMBIGUOUS stone (resolve from forme)"
-                if forme and forme in pokemon and pokemon[forme][0] != (pokemon.get(pkid) or [None])[0]:
-                    problems.append(f"{label}: {s['item']} does not belong to this species")
-                print(f"     Mega via {s['item']} -> {note}")
+    # Re-importing a paste replaces the team it produced before, rather than piling
+    # up near-duplicates: the paste id is the identity, the slug is only the filename.
+    existing = next((t for t in list_teams()
+                     if t.source.get("paste_id") == pid), None)
+    team_id = existing.id if existing else unique_id(team_name)
 
-        for w in warnings:
-            print("  warning:", w)
-        if problems:
-            print("\nEXIT CHECK: FAIL — nothing written")
-            for p in problems:
-                print("  -", p)
-            sys.exit(1)
+    for m in members:
+        inv = m.investment or {}
+        sp = inv.get("values", {}) if isinstance(inv, dict) else {}
+        shown = {s: sp[s] for s in STATS if sp.get(s)}
+        print(f"  {m.slot}. {m.pokemon_id:<18} @ {m.item_id or '-':<16} "
+              f"{m.ability_id or '-':<16} {m.nature or '-':<8} "
+              f"SP {shown} ({inv.get('total', 0)}/66)  {', '.join(m.moves or [])}")
 
-        con.begin()
-        con.execute("DELETE FROM my_team WHERE paste_id = ?", [pid])
-        con.executemany("INSERT INTO my_team VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", rows)
-        con.commit()
-        n = con.execute("SELECT count(*) FROM my_team WHERE paste_id = ?", [pid]).fetchone()[0]
-        print(f"\nEXIT CHECK: PASS — {n} rows in my_team for paste {pid}")
-    finally:
-        con.close()
+    problems, warnings = validate(members)
+    for w in warnings:
+        print("  warning:", w)
+    if problems:
+        print("\nEXIT CHECK: FAIL — nothing written")
+        for p in problems:
+            print("  -", p)
+        sys.exit(1)
+
+    team = save(Team(
+        id=team_id, name=team_name, members=members,
+        source={"kind": "pokepaste", "paste_id": pid,
+                "url": f"https://pokepast.es/{pid}",
+                "author": payload.get("author") or None},
+        created_at=existing.created_at if existing else None,
+    ))
+    verb = "replaced" if existing else "saved"
+    print(f"\nEXIT CHECK: PASS — {verb} {len(team.members)} members as {team.id}.json")
 
 
 if __name__ == "__main__":

@@ -7,13 +7,14 @@ Getting that wrong silently halves the results and reports the wrong percentages
 
 import pytest
 
+from helpers import full_team_id
 from vgc.cores import CHANCE, cores, min_support, partners
 from vgc.db import session
 from vgc.metafilter import MetaFilter, sample_size
 from vgc.team import load_team
 
 REG = "M-C"
-PASTE = "b58a4fb249fb3cbf"
+PASTE = full_team_id()
 
 
 @pytest.fixture(scope="module")
@@ -29,7 +30,7 @@ def built():
 def mine(built):
     try:
         return [m.pokemon_id for m in load_team(PASTE)]
-    except FileNotFoundError:
+    except (FileNotFoundError, LookupError):
         pytest.skip("paste not loaded")
 
 

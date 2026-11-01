@@ -3,7 +3,7 @@
 **Stack:** Python · DuckDB · Streamlit · Plotly (unchanged)
 **Format:** Pokémon Champions VGC Doubles (current: Regulation M-C)
 **Status:** scoping. Nothing in here is built yet.
-**Last updated:** 1 November 2026
+**Last updated:** 1 November 2026 (§4 built)
 
 > **Read this first if you are a new session picking up 2.0 work.**
 > `PROJECT_OUTLINE.md` describes v1 and is still accurate about the data layer.
@@ -129,7 +129,7 @@ flexible calculator surface in v1 and moves to Surface 3 rather than being lost.
 
 ---
 
-## 4. Teams move out of the warehouse — **SETTLED** (principle), **OPEN** (mechanism)
+## 4. Teams move out of the warehouse — **SETTLED AND BUILT** (1 Nov 2026)
 
 **The finding:** `my_team` is the only hand-authored table in a warehouse of
 derived data. Everything else is rebuilt from `data/raw/` by `refresh.py`. Teams
@@ -149,9 +149,24 @@ single-writer rule was partly justified by a second process reading the same
 warehouse file; that justification is now weaker, though the rule still stands
 for derived data on its own merits.
 
-**OPEN:** where teams actually live (a JSON or SQLite store beside the warehouse,
-format, migration of the eight existing pastes). Needs a decision before Surface
-1 work starts, because everything on that surface depends on it.
+**Built.** Teams live in `data/teams/<id>.json`, one file per team, gitignored.
+`vgc/team.py` is the whole store — list, get, save, delete, validate, `variant_of`
+— and `load_team()` still returns `list[Member]`, so nothing downstream changed.
+
+- **Structured, not paste text.** The paste is lossy: `to_paste` drops nicknames,
+  gender had nowhere to land, IVs are parsed and discarded. The paste is
+  regenerated on demand instead, and `gender` gained a column.
+- **Editing stays in session state; saving is explicit.** Session state was never
+  the problem — it is what keeps the slider loop fast. "Save to this team" and
+  "Save as variant" are buttons; nothing autosaves.
+- **Variants** are ordinary teams with `derived_from` set. No nesting.
+- **Validation is shared.** `vgc.team.validate` is what both the app and
+  `scripts/load_paste.py` call, so neither can write what the other would refuse.
+- **Migration done:** 8 teams, 43 members, verified by read-back.
+  `scripts/migrate_teams.py` reads `my_team` without writing to it.
+
+**Still open:** dropping `my_team` from `sql/00_schema.sql`. Deliberately a
+separate step — migrate, verify, then drop.
 
 ---
 
@@ -383,7 +398,11 @@ Rough dependency order. Not a schedule.
 Every **OPEN** item above, in one place, so a new session can see what still
 needs Andres rather than hunting for it:
 
-- Where and how teams are stored (§4) — blocking Surface 1
+- ~~Where and how teams are stored (§4)~~ — **settled and built, 1 Nov 2026.**
+  What remains is dropping `my_team` from the schema, once the file store has had
+  some use
+- Whether moves and items get edited in the Spreads tab now that teams persist
+  (§5.1), and whether that waits on item coverage (§7.2)
 - Whether a recommender returns in any form (§5.4)
 - The speed landscape's final design, after prototyping (§5.3)
 - The meta snapshot's shape: surface, export, or scheduled artifact (§6)

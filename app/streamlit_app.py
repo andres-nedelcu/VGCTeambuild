@@ -13,6 +13,7 @@ from components.damage_grid import (render_damage_grid, render_focus,
                                     render_incoming_table)
 from components.outgoing_grid import render_outgoing_grid, render_outgoing_table
 from components.spread_editor import render_editor, render_export, stored_spreads
+from components.team_manager import (render_delete, render_import, render_save)
 from components.coverage_grid import render_coverage_grid
 from components.defense_grid import render_defense_grid
 from components.speed_view import render_speed_tiers, render_team_speeds
@@ -36,7 +37,7 @@ from vgc.outgoing import outgoing
 from vgc.suggest import suggestions
 from vgc.swap import sole_coverage, swaps
 from vgc.sprites import data_uri as sprite_data_uri
-from vgc.team import list_pastes, load_team
+from vgc.team import list_teams, load_team
 
 LOAD_CMD = "uv run python scripts/load_paste.py <pokepaste-url>"
 REFRESH_CMD = "uv run python scripts/refresh.py"
@@ -56,7 +57,7 @@ st.set_page_config(page_title="VGC Teambuilding", page_icon="⚔️", layout="wi
 t0 = time.perf_counter()
 
 try:
-    pastes = list_pastes()
+    teams = list_teams()
     dex = load_dex()
 except FileNotFoundError as e:
     st.error(str(e))
@@ -64,25 +65,29 @@ except FileNotFoundError as e:
 
 with st.sidebar:
     st.header("Team")
-    if not pastes:
-        st.info("No teams loaded yet. From the repo root, run:")
+    if not teams:
+        st.info("No teams yet. Import one below, or from the repo root run:")
         st.code(LOAD_CMD, language="bash")
-        st.stop()
 
     labels = {
-        pid: f"{name or pid} · " + " / ".join(dex[p].display_name for p in mons)
-        for pid, name, mons in pastes
+        t.id: f"{t.name} · " + " / ".join(dex[p].display_name for p in t.pokemon_ids)
+        + (" ↳variant" if t.derived_from else "")
+        for t in teams
     }
-    paste_id = st.selectbox("Team", list(labels), format_func=labels.get)
-    with st.expander("Add a new paste"):
-        st.caption("The app is read-only. From the repo root, run:")
-        st.code(LOAD_CMD, language="bash")
-        st.caption("Then refresh this page.")
+    team_id = st.selectbox("Team", list(labels), format_func=labels.get) if teams else None
 
-    loaded = load_team(paste_id)
+    with st.expander("Manage teams"):
+        render_import(dex)
+        if team_id:
+            render_delete(team_id, labels[team_id])
+
+    if not team_id:
+        st.stop()
+
+    loaded = load_team(team_id)
     # Spread edits live in session state and are read here, before any visual is
     # built — see components/spread_editor for why the ordering matters.
-    spread_edits = stored_spreads(paste_id, loaded)
+    spread_edits = stored_spreads(team_id, loaded)
     team = apply_spreads(loaded, spread_edits)
     # Compare parsed spreads: apply() turns the stored JSON string into a dict, so
     # comparing `investment` directly reports every member as edited on first load.
@@ -92,7 +97,7 @@ with st.sidebar:
     all_slots = [m.slot for m in team]
     slots = st.multiselect(
         "Pokémon", all_slots, default=all_slots,
-        format_func=lambda s: names[s], key=f"slots_{paste_id}",
+        format_func=lambda s: names[s], key=f"slots_{team_id}",
     )
 
     regs = list(regulations.load()["regulations"])
@@ -151,7 +156,7 @@ with st.sidebar:
         "Mega Evolution", [NO_MEGA, *options],
         format_func=lambda s: "No Mega" if s == NO_MEGA
         else f"{names[s]} → {dex[options[s]].display_name}",
-        key=f"mega_{paste_id}",
+        key=f"mega_{team_id}",
     )
     mega_slot = None if choice == NO_MEGA else choice
 
@@ -215,7 +220,8 @@ flags = flagged_types(summary)
 
 with tab_spreads:
     st.subheader("Set SP and natures")
-    render_editor(paste_id, loaded, resolve_team(team, mega_slot), spread_edits)
+    render_editor(team_id, loaded, resolve_team(team, mega_slot), spread_edits)
+    render_save(team_id, team, edited)
     render_export(to_paste(team))
 
 with tab_defense:
@@ -251,7 +257,7 @@ with tab_coverage:
     try:
         top_n = st.slider("Threats shown", 10, 40,
                           int(load_settings()["defaults"]["top_n"]), step=5,
-                          key=f"cover_top_{paste_id}")
+                          key=f"cover_top_{team_id}")
         meta = threats(reg, top_n, meta_filter)
         cover = coverage_matrix(attackers(team, formes), meta)
         gaps = holes(cover)
@@ -281,12 +287,12 @@ with tab_speed:
         ref_slot = left.selectbox(
             "Compare against", list(by_slot), index=list(by_slot).index(fastest),
             format_func=lambda s: f"{by_slot[s].display_name} ({by_slot[s].speed})",
-            key=f"speed_ref_{paste_id}_{mega_slot}",  # Mega changes the label, not the slot
+            key=f"speed_ref_{team_id}_{mega_slot}",  # Mega changes the label, not the slot
         )
         tailwind = tw_col.selectbox(
-            "Tailwind", TAILWIND_OPTIONS, format_func=str.title, key=f"speed_tw_{paste_id}",
+            "Tailwind", TAILWIND_OPTIONS, format_func=str.title, key=f"speed_tw_{team_id}",
         )
-        trick_room = tr_col.checkbox("Trick Room", key=f"speed_tr_{paste_id}")
+        trick_room = tr_col.checkbox("Trick Room", key=f"speed_tr_{team_id}")
         top_n = right.slider("Threats shown", 10, 60, default_top, step=5)
         field = Field(tailwind=tailwind, trick_room=trick_room)
         render_speed_tiers(meta_speed(reg, top_n, meta_filter), by_slot[ref_slot], field)
@@ -298,7 +304,7 @@ with tab_threats:
     try:
         threat_n = st.slider("Threats ranked", 10, 40,
                              int(load_settings()["defaults"]["top_n"]), step=5,
-                             key=f"threat_top_{paste_id}")
+                             key=f"threat_top_{team_id}")
         render_threat_list(rank_threats(reg, formes, threat_n, meta_filter), len(formes),
                            {f.display_name: sprite_data_uri(f.forme_id) for f in formes})
     except LookupError as e:
@@ -314,31 +320,31 @@ with tab_damage:
         weather = left.selectbox(
             "Weather", [None, RAIN, SUN],
             format_func=lambda w: {None: "None", RAIN: "Rain", SUN: "Sun"}[w],
-            key=f"dmg_weather_{paste_id}",
+            key=f"dmg_weather_{team_id}",
             help="Rain halves Fire damage and boosts Water; Sun is the mirror. It is "
                  "often the whole story — rain turns a 4x Fire hit into 2x.")
         terrain = mid.selectbox(
             "Terrain", [None, GRASSY, PSYCHIC_T, ELECTRIC_T],
             format_func=lambda t: {None: "None", GRASSY: "Grassy",
                                    PSYCHIC_T: "Psychic", ELECTRIC_T: "Electric"}[t],
-            key=f"dmg_terrain_{paste_id}",
+            key=f"dmg_terrain_{team_id}",
             help="Boosts the matching type by 5325/4096 for a grounded attacker, and "
                  "Grassy halves Earthquake. Assumes both sides are grounded.")
         dmg_n = right.slider("Threats shown", 10, 30,
                              int(load_settings()["defaults"]["top_n"]), step=5,
-                             key=f"dmg_top_{paste_id}")
+                             key=f"dmg_top_{team_id}")
         acol, dcol = st.columns(2)
         atk_stage = acol.slider(
-            "Their attack stage", -6, 6, 0, key=f"dmg_atk_{paste_id}",
+            "Their attack stage", -6, 6, 0, key=f"dmg_atk_{team_id}",
             help="How this models abilities instead of hardcoding them: Intimidate "
                  "is -1, Swords Dance or Nasty Plot is +2.")
         def_stage = dcol.slider(
-            "Your defence stage", -6, 6, 0, key=f"dmg_def_{paste_id}",
+            "Your defence stage", -6, 6, 0, key=f"dmg_def_{team_id}",
             help="Stamina is +1 per hit taken; screens are not modelled, so this is "
                  "also the honest way to approximate one.")
         direction = st.radio(
             "Direction", ["What hits me", "What I hit"], horizontal=True,
-            key=f"dmg_dir_{paste_id}",
+            key=f"dmg_dir_{team_id}",
             help="The stage sliders read from the attacker's side either way: on "
                  "'What I hit' they are your boosts and their defence.")
 
@@ -358,7 +364,7 @@ with tab_damage:
                 pcol, mcol = st.columns([1, 1])
                 pick = pcol.selectbox(
                     "Attacker", [f.slot for f in formes],
-                    format_func=lambda s: names[s], key=f"out_focus_{paste_id}")
+                    format_func=lambda s: names[s], key=f"out_focus_{team_id}")
 
                 every = outgoing(reg, team, formes, meta_filter, dmg_n, weather,
                                  atk_stage, def_stage, terrain, per_move=True)
@@ -368,7 +374,7 @@ with tab_damage:
                     st.info(f"{names[pick]} has no damaging move.")
                 else:
                     move = mcol.selectbox("Move", move_names,
-                                          key=f"out_move_{paste_id}_{pick}")
+                                          key=f"out_move_{team_id}_{pick}")
                     render_outgoing_table(
                         sorted([h for h in mine if h.likely.move_name == move],
                                key=lambda h: h.bulkiest.low_pct, reverse=True))
@@ -395,10 +401,10 @@ with tab_damage:
             fcol, tcol = st.columns([1, 2])
             focus = fcol.selectbox(
                 "Pokémon", slots, index=slots.index(worst_slot),
-                format_func=lambda s: names[s], key=f"dmg_focus_{paste_id}")
+                format_func=lambda s: names[s], key=f"dmg_focus_{team_id}")
             show = tcol.multiselect(
                 "Show", list(TIERS), default=[TIERS[0], TIERS[1]],
-                key=f"dmg_tiers_{paste_id}",
+                key=f"dmg_tiers_{team_id}",
                 help="Defaults to the brackets that change a decision. Add the rest "
                      "to see what this Pokémon can safely come in on.")
             render_focus(against(hits, focus), names[focus], show)
@@ -412,7 +418,7 @@ with tab_cores:
     try:
         add_n = st.slider("Meta considered", 10, 40,
                           int(load_settings()["defaults"]["top_n"]), step=5,
-                          key=f"add_top_{paste_id}",
+                          key=f"add_top_{team_id}",
                           help="Both the candidate pool and the holes being fixed come "
                                "from this many threats.")
         meta_for_gaps = threats(reg, add_n, meta_filter)
@@ -425,7 +431,7 @@ with tab_cores:
             format_func=lambda m: {ANY_SLOT: "Best swap — consider every slot",
                                    ADD_ONLY: "Nothing — show additions for a free slot"
                                    }.get(m, f"Swap out {slot_names.get(m, m)}"),
-            key=f"swap_mode_{paste_id}",
+            key=f"swap_mode_{team_id}",
             help="A full team has no free slot, so an addition is really a swap — and "
                  "whoever leaves takes their coverage with them.")
 
@@ -463,7 +469,7 @@ with tab_cores:
         st.caption("The three-Pokémon combinations people actually bring. Good for "
                    "drafting a plan against a field rather than a single threat.")
         only_mine = st.checkbox(
-            "Only combinations involving my team", key=f"combo_mine_{paste_id}",
+            "Only combinations involving my team", key=f"combo_mine_{team_id}",
             help="Shows what the meta pairs your own picks with.")
         render_combos(combos(reg, meta_filter, 20,
                              [m.pokemon_id for m in team] if only_mine else None))

@@ -7,11 +7,12 @@ reverts to a 0 SP neutral build and nothing on screen says so.
 
 import pytest
 
+from helpers import full_team_id
 from vgc.edit import ALL_NATURES, Spread, apply, problem, read_spread, to_paste
 from vgc.stats import SP_MAX_PER_STAT, SP_MAX_TOTAL, STATS, sp_from_investment
 from vgc.team import Member, load_team
 
-PASTE = "b58a4fb249fb3cbf"
+PASTE = full_team_id()
 
 
 @pytest.fixture(scope="module")
@@ -101,11 +102,11 @@ def test_an_untouched_team_is_never_reported_as_edited():
     """The banner bug: a paste carries "Adamant", the nature selectbox carries the
     lowercase option it was built from, and comparing them raw claimed every member
     had been edited before anything was. Found by opening the app."""
-    from vgc.team import list_pastes, load_team
+    from vgc.team import list_teams
 
     natured = []
-    for pid, _name, _mons in list_pastes():
-        team = load_team(pid)
+    for saved in list_teams():
+        team = saved.members
         if any(m.nature for m in team):
             natured.append(team)
     if not natured:
