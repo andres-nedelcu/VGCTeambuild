@@ -33,7 +33,8 @@ from vgc.metafilter import TEAMS, THIN_SAMPLE, WINS, MetaFilter, extent, sample_
 from vgc.offense import attackers, coverage_matrix, holes, team_best, threats
 from vgc.pressure import rank as rank_threats
 from vgc.speed import TAILWIND_OPTIONS, Field, meta_speed, team_speeds
-from vgc.damage import ELECTRIC_T, GRASSY, PSYCHIC_T, RAIN, SUN
+from vgc.damage import (AURORA_VEIL, ELECTRIC_T, GRASSY, LIGHT_SCREEN, PSYCHIC_T,
+                        RAIN, REFLECT, SAND, SNOW, SUN)
 from vgc.edit import apply as apply_spreads
 from vgc.edit import read_spread, to_paste
 from vgc.incoming import TIERS, against, incoming
@@ -350,11 +351,14 @@ with tab_damage:
     try:
         left, mid, right = st.columns([1, 1, 2])
         weather = left.selectbox(
-            "Weather", [None, RAIN, SUN],
-            format_func=lambda w: {None: "None", RAIN: "Rain", SUN: "Sun"}[w],
+            "Weather", [None, RAIN, SUN, SNOW, SAND],
+            format_func=lambda w: {None: "None", RAIN: "Rain", SUN: "Sun",
+                                   SNOW: "Snow", SAND: "Sand"}[w],
             key=f"dmg_weather_{team_id}",
-            help="Rain halves Fire damage and boosts Water; Sun is the mirror. It is "
-                 "often the whole story — rain turns a 4x Fire hit into 2x.")
+            help="Rain and Sun scale the move — rain turns a 4x Fire hit into 2x. "
+                 "Snow and Sand scale a stat instead: snow gives an Ice-type +50% "
+                 "Def, sand gives a Rock-type +50% SpD. All four retype Weather "
+                 "Ball.")
         terrain = mid.selectbox(
             "Terrain", [None, GRASSY, PSYCHIC_T, ELECTRIC_T],
             format_func=lambda t: {None: "None", GRASSY: "Grassy",
@@ -372,17 +376,30 @@ with tab_damage:
                  "is -1, Swords Dance or Nasty Plot is +2.")
         def_stage = dcol.slider(
             "Your defence stage", -6, 6, 0, key=f"dmg_def_{team_id}",
-            help="Stamina is +1 per hit taken; screens are not modelled, so this is "
-                 "also the honest way to approximate one.")
+            help="Stamina is +1 per hit taken, and an ability that scales damage "
+                 "can be approximated here. Screens have their own control now.")
         direction = st.radio(
             "Direction", ["What hits me", "What I hit"], horizontal=True,
             key=f"dmg_dir_{team_id}",
             help="The stage sliders read from the attacker's side either way: on "
                  "'What I hit' they are your boosts and their defence.")
+        # The screen always protects whoever is DEFENDING, so which side it belongs
+        # to flips with the direction. Labelled rather than left to be inferred.
+        whose = "on your side" if direction == "What hits me" else "on their side"
+        screen = st.selectbox(
+            f"Screen {whose}", [None, REFLECT, LIGHT_SCREEN, AURORA_VEIL],
+            format_func=lambda s: {None: "None", REFLECT: "Reflect",
+                                   LIGHT_SCREEN: "Light Screen",
+                                   AURORA_VEIL: "Aurora Veil"}[s],
+            key=f"dmg_screen_{team_id}",
+            help="x2732/4096 in doubles — about 0.67, not the 0.5 of singles. "
+                 "Reflect covers physical, Light Screen special, Aurora Veil both. "
+                 "Aurora Veil also needs snow up when it is set, which is a "
+                 "turn-order question this does not check.")
 
         if direction == "What I hit":
             out = outgoing(reg, team, formes, meta_filter, dmg_n, weather,
-                           atk_stage, def_stage, terrain)
+                           atk_stage, def_stage, terrain, screen=screen)
             if not out:
                 st.warning("No threats at this filter.")
             else:
@@ -399,7 +416,8 @@ with tab_damage:
                     format_func=lambda s: names[s], key=f"out_focus_{team_id}")
 
                 every = outgoing(reg, team, formes, meta_filter, dmg_n, weather,
-                                 atk_stage, def_stage, terrain, per_move=True)
+                                 atk_stage, def_stage, terrain, per_move=True,
+                                 screen=screen)
                 mine = [h for h in every if h.attacker_slot == pick]
                 move_names = list(dict.fromkeys(h.likely.move_name for h in mine))
                 if not move_names:
@@ -414,7 +432,7 @@ with tab_damage:
         # st.stop() would end the whole script run, not this tab, and the tabs below
         # would never be built — so the incoming path is an else, not a fallthrough.
         elif not (hits := incoming(reg, team, formes, meta_filter, dmg_n, weather,
-                                   atk_stage, def_stage, terrain)):
+                                   atk_stage, def_stage, terrain, screen=screen)):
             st.warning("No threats at this filter.")
         else:
             order = [(f.display_name, f.forme_id) for f in formes]

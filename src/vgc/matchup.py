@@ -43,8 +43,9 @@ from typing import Sequence
 
 from vgc.damage import (FOCUS_SASH, PHYSICAL, Result, attack_after_item,
                         base_power_multiplier, boosted, damage_multiplier,
-                        damage_rolls, defence_after_item, seed_boost,
-                        spreads_in_terrain, weather_move, weather_multiplier)
+                        damage_rolls, defence_after_item, defence_after_weather,
+                        seed_boost, spreads_in_terrain, weather_move,
+                        weather_multiplier)
 from vgc.db import session
 from vgc.megas import Forme
 from vgc.stats import STATS, calc_stat, nature_mod, sp_from_investment
@@ -194,7 +195,7 @@ class Matchup:
 
 def versus(attacker: Build, defender: Build, *, weather: str | None = None,
            terrain: str | None = None, atk_stage: int = 0, def_stage: int = 0,
-           unknown: str | None = DEFENDER,
+           unknown: str | None = DEFENDER, screen: str | None = None,
            moves: Sequence[str] | None = None) -> list[Matchup]:
     """Every damaging move the attacker has, against this defender, hardest first.
 
@@ -229,13 +230,17 @@ def versus(attacker: Build, defender: Build, *, weather: str | None = None,
                 base_power=base_power,
                 attack=attack_after_item(boosted(attack_raw, atk_stage),
                                          attacker.item_id, category),
-                defense=defence_after_item(boosted(defence_raw, def_stage + seed),
-                                           defender.item_id, category),
+                # base -> stage -> weather -> item: snow and sand scale the stat at
+                # onModify*Priority 10, ahead of every other stat modifier.
+                defense=defence_after_item(
+                    defence_after_weather(boosted(defence_raw, def_stage + seed),
+                                          weather, defender.types, category),
+                    defender.item_id, category),
                 type_mult=mult, stab=stab,
                 spread=is_spread or spreads_in_terrain(terrain, move_id),
                 weather_mult=weather_multiplier(weather, move_type),
                 final_mult=damage_multiplier(attacker.item_id, defender.item_id,
-                                             move_type, mult),
+                                             move_type, mult, screen, category),
                 base_power_mult=base_power_multiplier(
                     attacker.item_id, move_type, terrain, move_id)),
                 hp, mult, stab,

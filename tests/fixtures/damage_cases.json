@@ -1054,5 +1054,339 @@
   },
   "move": "Earthquake",
   "spread": false
+ },
+ {
+  "name": "Reflect halves a physical hit (2732/4096 in doubles)",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Earthquake"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Earthquake",
+  "screen": "reflect",
+  "spread": false
+ },
+ {
+  "name": "Reflect does nothing to a special hit",
+  "attacker": {
+   "species": "Gholdengo",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "moves": [
+    "Make It Rain"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "spd": 32
+   },
+   "nature": "Careful"
+  },
+  "move": "Make It Rain",
+  "screen": "reflect",
+  "spread": false
+ },
+ {
+  "name": "Light Screen halves a special hit",
+  "attacker": {
+   "species": "Gholdengo",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "moves": [
+    "Make It Rain"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "spd": 32
+   },
+   "nature": "Careful"
+  },
+  "move": "Make It Rain",
+  "screen": "lightscreen",
+  "spread": false
+ },
+ {
+  "name": "Aurora Veil halves a physical hit",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Earthquake"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Earthquake",
+  "screen": "auroraveil",
+  "weather": "snowscape",
+  "spread": false
+ },
+ {
+  "name": "Aurora Veil halves a special hit too",
+  "attacker": {
+   "species": "Gholdengo",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "moves": [
+    "Make It Rain"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "spd": 32
+   },
+   "nature": "Careful"
+  },
+  "move": "Make It Rain",
+  "screen": "auroraveil",
+  "weather": "snowscape",
+  "spread": false
+ },
+ {
+  "name": "Reflect AND Life Orb chain in one ModifyDamage",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "item": "Life Orb",
+   "moves": [
+    "Earthquake"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Earthquake",
+  "screen": "reflect",
+  "spread": false
+ },
+ {
+  "name": "snow gives an Ice-type +50% Def",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Earthquake"
+   ]
+  },
+  "defender": {
+   "species": "Froslass",
+   "evs": {
+    "hp": 32
+   },
+   "nature": "Timid"
+  },
+  "move": "Earthquake",
+  "weather": "snowscape",
+  "spread": false
+ },
+ {
+  "name": "snow does nothing for a non-Ice defender",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Earthquake"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Earthquake",
+  "weather": "snowscape",
+  "spread": false
+ },
+ {
+  "name": "snow does not protect an Ice-type from a SPECIAL hit",
+  "attacker": {
+   "species": "Gholdengo",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "moves": [
+    "Make It Rain"
+   ]
+  },
+  "defender": {
+   "species": "Froslass",
+   "evs": {
+    "hp": 32
+   },
+   "nature": "Timid"
+  },
+  "move": "Make It Rain",
+  "weather": "snowscape",
+  "spread": false
+ },
+ {
+  "name": "sand gives a Rock-type +50% SpD",
+  "attacker": {
+   "species": "Gholdengo",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "moves": [
+    "Make It Rain"
+   ]
+  },
+  "defender": {
+   "species": "Tyranitar",
+   "evs": {
+    "hp": 32
+   },
+   "nature": "Careful"
+  },
+  "move": "Make It Rain",
+  "weather": "sandstorm",
+  "spread": false
+ },
+ {
+  "name": "Weather Ball is Ice in snow",
+  "attacker": {
+   "species": "Pelipper",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "moves": [
+    "Weather Ball"
+   ]
+  },
+  "defender": {
+   "species": "Garchomp",
+   "evs": {
+    "hp": 32
+   },
+   "nature": "Adamant"
+  },
+  "move": "Weather Ball",
+  "weather": "snowscape",
+  "spread": false
+ },
+ {
+  "name": "Reflect on a SINGLE-TARGET physical hit",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Dragon Claw"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Dragon Claw",
+  "screen": "reflect",
+  "spread": false
+ },
+ {
+  "name": "Light Screen on a SINGLE-TARGET special hit",
+  "attacker": {
+   "species": "Gholdengo",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "moves": [
+    "Shadow Ball"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "spd": 32
+   },
+   "nature": "Careful"
+  },
+  "move": "Shadow Ball",
+  "screen": "lightscreen",
+  "spread": false
+ },
+ {
+  "name": "snow Ice Def on a SINGLE-TARGET physical hit",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Dragon Claw"
+   ]
+  },
+  "defender": {
+   "species": "Froslass",
+   "evs": {
+    "hp": 32
+   },
+   "nature": "Timid"
+  },
+  "move": "Dragon Claw",
+  "weather": "snowscape",
+  "spread": false
  }
 ]

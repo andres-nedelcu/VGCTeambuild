@@ -47,7 +47,10 @@ from vgc.team import list_teams, load_team
 REG = "M-C"
 TOP_N = 10
 FIXTURE = REPO_ROOT / "tests" / "fixtures" / "damage_reference.json"
-WEATHER = {"raindance": "rain", "sunnyday": "sun"}
+# Same map as tests/test_damage.py, and hail is absent for the same reason: only
+# `snowscape` carries the Ice Def boost.
+WEATHER = {"raindance": "rain", "sunnyday": "sun",
+           "snowscape": "snow", "sandstorm": "sand"}
 TERRAIN = {"grassyterrain": "grassy", "psychicterrain": "psychic",
            "electricterrain": "electric"}
 
@@ -133,6 +136,7 @@ def test_versus_reproduces_the_simulator_roll_for_roll(reference, dex_types):
             terrain=TERRAIN.get(case.get("terrain")),
             atk_stage=(case["attacker"].get("boosts") or {}).get(akey, 0),
             def_stage=(case["defender"].get("boosts") or {}).get(dkey, 0),
+            screen=case.get("screen"),
             unknown=None)
         if not rows:
             continue

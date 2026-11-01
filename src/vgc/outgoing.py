@@ -29,7 +29,7 @@ from typing import Sequence
 
 from vgc.damage import (PHYSICAL, Result, attack_after_item, base_power_multiplier,
                         boosted, damage_rolls, defence_after_item, damage_multiplier,
-                        seed_boost, FOCUS_SASH,
+                        defence_after_weather, seed_boost, FOCUS_SASH,
                         spreads_in_terrain, weather_move, weather_multiplier)
 from vgc.db import session
 from vgc.megas import Forme
@@ -136,7 +136,8 @@ def _my_moves(team: Sequence[Member]) -> dict[int, list[tuple]]:
 def outgoing(regulation: str, team: Sequence[Member], formes: Sequence[Forme],
              filt: MetaFilter | None = None, top_n: int = 20,
              weather: str | None = None, atk_stage: int = 0, def_stage: int = 0,
-             terrain: str | None = None, per_move: bool = False) -> list[Outgoing]:
+             terrain: str | None = None, per_move: bool = False,
+             screen: str | None = None) -> list[Outgoing]:
     """Your best hit on each meta threat, from each of your Pokémon."""
     filt = filt or MetaFilter()
     meta = threats(regulation, top_n, filt)
@@ -192,13 +193,16 @@ def outgoing(regulation: str, team: Sequence[Member], formes: Sequence[Forme],
                         base_power=base_power,
                         attack=attack,
                         defense=defence_after_item(
-                            boosted(defence, def_stage
-                                    + seed_boost(their_item, terrain, dkey)),
+                            defence_after_weather(
+                                boosted(defence, def_stage
+                                        + seed_boost(their_item, terrain, dkey)),
+                                weather, threat.types, category),
                             their_item, category),
                         type_mult=mult, stab=stab, spread=bool(spread) or spreads_in_terrain(terrain, move_id),
                         weather_mult=weather_multiplier(weather, move_type),
                         final_mult=damage_multiplier(member.item_id, their_item,
-                                                     move_type, mult),
+                                                     move_type, mult, screen,
+                                                     category),
                         base_power_mult=base_power_multiplier(
                             member.item_id, move_type, terrain, move_id)),
                         hp, mult, stab,

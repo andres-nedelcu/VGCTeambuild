@@ -42,17 +42,26 @@ so a stat change rather than a damage one) and Focus Sash, which touches neither
 lives in `Result`'s verdict. The two sides' damage modifiers are both ModifyDamage
 handlers and therefore CHAIN -- see `chain` and `damage_multiplier`.
 
+WEATHER comes in two kinds and they enter in different places. Rain and sun scale the
+MOVE (`weather_multiplier`); snow and sand scale a defensive STAT -- Ice Def and Rock
+SpD respectively -- so they land in `defence_after_weather`, before the item modifier.
+All four retype Weather Ball.
+
+SCREENS are `onAnyModifyDamage` handlers, so they chain with the items above. The
+reduction is 2732/4096 in doubles, NOT the 0.5 of singles.
+
 NOT MODELLED, deliberately, and stated wherever a number is shown: abilities that
-scale damage (Adaptability, Thick Fat, Multiscale, Guts and the rest), screens
-(Reflect, Light Screen, Aurora Veil), critical hits, burn, multi-hit and fixed-damage
-moves, and any weather beyond rain and sun -- sand and snow are absent, which matters
-for a Snow Warning Mega. Abilities that change type effectiveness *are* handled,
-because they arrive through vgc.typechart.effectiveness before this module sees them.
+scale damage (Adaptability, Thick Fat, Multiscale, Guts and the rest), critical hits,
+burn, multi-hit and fixed-damage moves, and Misty Terrain (which would also have to
+halve Dragon damage, and is on 0.12% of teams). Abilities that change type
+effectiveness *are* handled, because they arrive through vgc.typechart.effectiveness
+before this module sees them.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Sequence
 
 LEVEL = 50
 ROLLS = 16                     # 85..100 inclusive, sim/battle.ts:2391
@@ -62,6 +71,15 @@ RAIN_WATER, RAIN_FIRE = 1.5, 0.5     # data/conditions.ts:488-495
 SUN_FIRE, SUN_WATER = 1.5, 0.5       # data/conditions.ts:562-568
 
 RAIN, SUN = "rain", "sun"
+# Snow and sand scale a STAT rather than the move: snow gives an Ice-type +50% Def
+# and sand gives a Rock-type +50% SpD (data/conditions.ts, onModifyDef /
+# onModifySpD at priority 10). Neither multiplies damage the way rain and sun do,
+# which is why they are absent from `weather_multiplier` and present here instead.
+SNOW, SAND = "snow", "sand"
+WEATHERS = (RAIN, SUN, SNOW, SAND)
+# (weather, defended type, which stat it protects)
+WEATHER_DEFENCE = {SNOW: ("Ice", "def"), SAND: ("Rock", "spd")}
+WEATHER_DEFENCE_BOOST = 1.5
 
 # Terrain modifies BASE POWER, not damage — battle-actions.ts:1650 runs the BasePower
 # event before the formula, where weather is applied afterwards at :1746. Different
@@ -119,7 +137,7 @@ def spreads_in_terrain(terrain: str | None, move_id: str) -> bool:
 # Sandstorm (Rock) and snow (Ice) are in the move but not here, because this project
 # models only rain and sun -- see WEATHER_BALL_TYPE staying keyed to those two.
 WEATHER_BALL = "weatherball"
-WEATHER_BALL_TYPE = {RAIN: "Water", SUN: "Fire"}
+WEATHER_BALL_TYPE = {RAIN: "Water", SUN: "Fire", SNOW: "Ice", SAND: "Rock"}
 
 
 def weather_move(move_id: str, move_type: str, base_power: int,
@@ -440,8 +458,62 @@ def chain(modifier: float, numerator: float, denominator: int = 1) -> float:
     return ((previous * nxt + 2048) >> 12) / 4096
 
 
+# Screens. All three are `onAnyModifyDamage` handlers (data/moves.ts), so they land
+# in the same event as Life Orb and the resist berries and chain with them.
+#
+# THE MULTIPLIER IS 2732/4096 IN DOUBLES, NOT 0.5. The source reads
+# `if (this.activePerHalf > 1) return this.chainModify([2732, 4096]);` and only falls
+# through to 0.5 in singles. This format is doubles, so 0.5 would be wrong on every
+# screened hit — measured at 0.664 against the simulator before this was written.
+#
+# A critical hit and an Infiltrator user both bypass a screen; neither is modelled,
+# so neither is represented here.
+REFLECT, LIGHT_SCREEN, AURORA_VEIL = "reflect", "lightscreen", "auroraveil"
+SCREENS = (REFLECT, LIGHT_SCREEN, AURORA_VEIL)
+SCREEN_DOUBLES = 2732 / 4096
+
+
+def screen_multiplier(screen: str | None, category: str) -> float:
+    """Reflect covers Physical, Light Screen covers Special, Aurora Veil covers both.
+
+    Aurora Veil additionally requires snow to have been up when it was *set*, which
+    is a turn-order fact rather than a damage one — the caller owns that, and the app
+    says so where the control lives.
+    """
+    if screen is None:
+        return 1.0
+    if screen == AURORA_VEIL:
+        return SCREEN_DOUBLES
+    if screen == REFLECT and category == PHYSICAL:
+        return SCREEN_DOUBLES
+    if screen == LIGHT_SCREEN and category == SPECIAL:
+        return SCREEN_DOUBLES
+    return 1.0
+
+
+def defence_after_weather(stat: int, weather: str | None,
+                          defender_types: Sequence[str], category: str) -> int:
+    """Snow's Ice Def and sand's Rock SpD, applied to the STAT.
+
+    `onModifyDefPriority: 10` with the comment "This should be applied directly to
+    the stat before any of the other modifiers are chained", so the order is
+    base -> stage -> weather -> item, and this sits between `boosted` and
+    `defence_after_item`.
+    """
+    entry = WEATHER_DEFENCE.get(weather or "")
+    if entry is None:
+        return stat
+    needed_type, protects = entry
+    wanted = "def" if category == PHYSICAL else "spd"
+    if protects != wanted or needed_type not in defender_types:
+        return stat
+    return modify(stat, WEATHER_DEFENCE_BOOST)
+
+
 def damage_multiplier(attacker_item: str | None, defender_item: str | None,
-                      move_type: str, type_mult: float) -> float:
+                      move_type: str, type_mult: float,
+                      screen: str | None = None, category: str = PHYSICAL) -> float:
     """Everything the ModifyDamage event applies, from both sides, chained once."""
     modifier = chain(1.0, final_multiplier(attacker_item, type_mult))
-    return chain(modifier, resist_berry_multiplier(defender_item, move_type, type_mult))
+    modifier = chain(modifier, resist_berry_multiplier(defender_item, move_type, type_mult))
+    return chain(modifier, screen_multiplier(screen, category))

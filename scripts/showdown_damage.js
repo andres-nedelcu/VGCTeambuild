@@ -56,6 +56,11 @@ function rollsFor(c) {
     // setWeather refuses without a source; the attacker stands in for the setter.
     if (c.weather) battle.field.setWeather(c.weather, source);
     if (c.terrain) battle.field.setTerrain(c.terrain, source);
+    // Screens are a SIDE condition on the defender, not a field one, and their
+    // reduction is 2732/4096 in doubles rather than the 0.5 of singles
+    // (data/moves.ts onAnyModifyDamage). Added directly so Aurora Veil can be
+    // exercised without first standing in snow for a turn.
+    if (c.screen) target.side.addSideCondition(c.screen, source);
     // Stat stages, so Intimidate / Stamina / Swords Dance can be checked without
     // modelling any of them individually.
     if (c.attacker.boosts) source.boosts = Object.assign(source.boosts, c.attacker.boosts);

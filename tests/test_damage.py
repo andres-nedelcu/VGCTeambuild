@@ -22,14 +22,21 @@ from vgc import REPO_ROOT
 from vgc.damage import (attack_after_item, base_power_multiplier, boosted,
                         damage_rolls, defence_after_item, damage_multiplier,
                         seed_boost, RESIST_BERRIES, Result, chain,
-                        resist_berry_multiplier,
+                        resist_berry_multiplier, defence_after_weather,
+                        screen_multiplier, SCREEN_DOUBLES, SNOW, SAND,
+                        PHYSICAL, SPECIAL,
                         weather_move, weather_multiplier)
 from vgc.db import session
 from vgc.ids import to_id
 from vgc.typechart import effectiveness
 
 FIXTURE = REPO_ROOT / "tests" / "fixtures" / "damage_reference.json"
-WEATHER = {"raindance": "rain", "sunnyday": "sun"}
+SCREENS_IN_FIXTURE = ("reflect", "lightscreen", "auroraveil")
+# Showdown's weather ids. Hail is deliberately absent: Aurora Veil accepts it, but
+# only `snowscape` carries the Ice Def boost (data/conditions.ts), so mapping hail
+# to snow here would invent a modifier the simulator does not apply.
+WEATHER = {"raindance": "rain", "sunnyday": "sun",
+           "snowscape": SNOW, "sandstorm": SAND}
 TERRAIN = {"grassyterrain": "grassy", "psychicterrain": "psychic",
            "electricterrain": "electric"}
 
@@ -84,14 +91,19 @@ def _inputs(case, dex):
 
     terrain = TERRAIN.get(case.get("terrain"))
     dkey = "def" if category == "Physical" else "spd"
+    screen = case.get("screen")
 
     return dict(
         base_power=base_power,
         attack=attack_after_item(boosted(raw_atk, atk_stage), atk_item, category),
         # A terrain seed is a stat change, so it rides with the stage, before the
         # item modifier -- not in the ModifyDamage chain below.
+        # base -> stage -> weather -> item. Snow and sand scale the stat at
+        # onModify*Priority 10, ahead of every other stat modifier.
         defense=defence_after_item(
-            boosted(raw_def, def_stage + seed_boost(def_item, terrain, dkey)),
+            defence_after_weather(
+                boosted(raw_def, def_stage + seed_boost(def_item, terrain, dkey)),
+                weather, def_types, category),
             def_item, category),
         type_mult=type_mult,
         stab=move_type in atk_types,
@@ -100,7 +112,8 @@ def _inputs(case, dex):
         # Both sides' ModifyDamage handlers accumulate into ONE modifier
         # (battle.ts:932), so the attacker's item and the defender's berry chain
         # here rather than being applied one after the other.
-        final_mult=damage_multiplier(atk_item, def_item, move_type, type_mult),
+        final_mult=damage_multiplier(atk_item, def_item, move_type, type_mult,
+                                     screen, category),
         base_power_mult=base_power_multiplier(
             atk_item, move_type, terrain, move_id),
     )
@@ -375,3 +388,53 @@ def test_a_sash_does_not_change_a_hit_that_was_never_a_ohko():
     bare = Result("Test", "Normal", rolls, 150, 1.0, False)
     sash = Result("Test", "Normal", rolls, 150, 1.0, False, defender_sash=True)
     assert bare.guaranteed_hits == sash.guaranteed_hits == 2
+
+
+# --- screens and the two stat-scaling weathers ----------------------------------
+
+def test_screens_use_the_doubles_multiplier_not_one_half():
+    """`if (this.activePerHalf > 1) return this.chainModify([2732, 4096]);` — the
+    0.5 below it is the singles branch. This format is doubles, so 0.5 would be
+    wrong on every screened hit. Measured at 0.664 against the simulator."""
+    assert SCREEN_DOUBLES == 2732 / 4096
+    assert abs(SCREEN_DOUBLES - 0.5) > 0.1
+    assert screen_multiplier("reflect", PHYSICAL) == SCREEN_DOUBLES
+
+
+@pytest.mark.parametrize("screen,category,applies", [
+    ("reflect", PHYSICAL, True), ("reflect", SPECIAL, False),
+    ("lightscreen", SPECIAL, True), ("lightscreen", PHYSICAL, False),
+    ("auroraveil", PHYSICAL, True), ("auroraveil", SPECIAL, True),
+    (None, PHYSICAL, False), (None, SPECIAL, False),
+])
+def test_each_screen_covers_its_own_category(screen, category, applies):
+    got = screen_multiplier(screen, category)
+    assert got == (SCREEN_DOUBLES if applies else 1.0)
+
+
+def test_a_screen_chains_with_the_attackers_item():
+    """Screens are onAnyModifyDamage, the same event as Life Orb and the berries, so
+    all of them accumulate into one modifier rather than being applied in turn."""
+    both = damage_multiplier("lifeorb", None, "Ground", 1.0, "reflect", PHYSICAL)
+    assert both == chain(chain(1.0, 1.3), SCREEN_DOUBLES)
+
+
+@pytest.mark.parametrize("weather,types,category,boosted_stat", [
+    (SNOW, ("Ice", "Ghost"), PHYSICAL, True),
+    (SNOW, ("Ice",), SPECIAL, False),      # snow protects Def, not SpD
+    (SNOW, ("Fire",), PHYSICAL, False),    # and only for Ice types
+    (SAND, ("Rock", "Dark"), SPECIAL, True),
+    (SAND, ("Rock",), PHYSICAL, False),    # sand protects SpD, not Def
+    (None, ("Ice",), PHYSICAL, False),
+])
+def test_snow_and_sand_scale_the_right_stat(weather, types, category, boosted_stat):
+    got = defence_after_weather(100, weather, types, category)
+    assert got == (150 if boosted_stat else 100)
+
+
+def test_the_reference_covers_screens_and_both_stat_weathers(reference):
+    names = " ".join(c["name"] for c in reference)
+    assert any(c.get("screen") for c in reference), "no screen case"
+    assert "snow" in names and "sand" in names
+    assert any(c.get("weather") == "snowscape" for c in reference)
+    assert any(c.get("weather") == "sandstorm" for c in reference)

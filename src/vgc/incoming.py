@@ -28,7 +28,7 @@ from typing import Sequence
 
 from vgc.damage import (Result, attack_after_item, base_power_multiplier, boosted,
                         damage_rolls, defence_after_item, damage_multiplier,
-                        seed_boost, FOCUS_SASH,
+                        defence_after_weather, seed_boost, FOCUS_SASH,
                         spreads_in_terrain, weather_move, weather_multiplier)
 from vgc.db import session
 from vgc.megas import Forme
@@ -134,7 +134,8 @@ def _threat_builds(regulation: str, filt: MetaFilter) -> dict:
 def incoming(regulation: str, team: Sequence[Member], formes: Sequence[Forme],
              filt: MetaFilter | None = None, top_n: int = 20,
              weather: str | None = None, atk_stage: int = 0,
-             def_stage: int = 0, terrain: str | None = None) -> list[Incoming]:
+             def_stage: int = 0, terrain: str | None = None,
+             screen: str | None = None) -> list[Incoming]:
     """The hardest hit each meta threat has on each of your Pokémon, worst first.
 
     `atk_stage` and `def_stage` are ordinary stat stages, which is how this models
@@ -184,15 +185,18 @@ def incoming(regulation: str, team: Sequence[Member], formes: Sequence[Forme],
             # A terrain seed on YOUR Pokémon is a stat change, so it stacks onto the
             # stage rather than entering the damage chain.
             defence = defence_after_item(
-                boosted(mine[dkey],
-                        def_stage + seed_boost(mine["item"], terrain, dkey)),
+                defence_after_weather(
+                    boosted(mine[dkey],
+                            def_stage + seed_boost(mine["item"], terrain, dkey)),
+                    weather, target.types, category),
                 mine["item"], category)
             def roll(attack: int) -> Result:
                 return Result(move_name, move_type, damage_rolls(
                     base_power=base_power, attack=attack, defense=defence,
                     type_mult=mult, stab=move_type in threat.types, spread=bool(spread) or spreads_in_terrain(terrain, move_id),
                     weather_mult=weather_multiplier(weather, move_type),
-                    final_mult=damage_multiplier(item, mine["item"], move_type, mult),
+                    final_mult=damage_multiplier(item, mine["item"], move_type, mult,
+                                                 screen, category),
                     base_power_mult=base_power_multiplier(
                         item, move_type, terrain, move_id)),
                     mine["hp"], mult, move_type in threat.types,
