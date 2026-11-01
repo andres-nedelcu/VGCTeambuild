@@ -96,8 +96,11 @@ def render_incoming_table(rows) -> None:
         "Your side is exact — species, nature, investment and item from your paste. "
         "Their side is the meta's common build, and the item and moves are what most "
         "people bring rather than what the player across from you brought. "
-        "**Not modelled:** abilities that scale damage, screens, terrain boosts, "
-        "critical hits, burn, Intimidate and stat stages."
+        "**Modelled:** weather, terrain, stat stages, and held items — including "
+        "resist berries, terrain seeds and Focus Sash. "
+        "**Not modelled:** abilities that scale damage, screens (Reflect, Light "
+        "Screen, Aurora Veil), critical hits, burn, multi-hit and fixed-damage "
+        "moves, and any weather beyond rain and sun."
     )
 
 

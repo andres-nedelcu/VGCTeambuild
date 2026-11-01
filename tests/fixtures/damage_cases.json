@@ -1,890 +1,1058 @@
 [
-  {
-    "name": "neutral physical, single target",
-    "attacker": {
-      "species": "Garchomp",
-      "evs": {
-        "atk": 32
-      },
-      "nature": "Adamant",
-      "moves": [
-        "Earthquake"
-      ]
-    },
-    "defender": {
-      "species": "Incineroar",
-      "evs": {
-        "hp": 32,
-        "def": 32
-      },
-      "nature": "Impish"
-    },
-    "move": "Earthquake",
-    "spread": false
+ {
+  "name": "neutral physical, single target",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Earthquake"
+   ]
   },
-  {
-    "name": "special attack, single target",
-    "attacker": {
-      "species": "Gardevoir",
-      "evs": {
-        "spa": 32
-      },
-      "nature": "Modest",
-      "moves": [
-        "Moonblast"
-      ]
-    },
-    "defender": {
-      "species": "Garchomp",
-      "evs": {
-        "hp": 32
-      },
-      "nature": "Careful"
-    },
-    "move": "Moonblast",
-    "spread": false
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
   },
-  {
-    "name": "spread move in doubles",
-    "attacker": {
-      "species": "Garchomp",
-      "evs": {
-        "atk": 32
-      },
-      "nature": "Adamant",
-      "moves": [
-        "Earthquake"
-      ]
-    },
-    "defender": {
-      "species": "Incineroar",
-      "evs": {
-        "hp": 32,
-        "def": 32
-      },
-      "nature": "Impish"
-    },
-    "move": "Earthquake",
-    "spread": true
+  "move": "Earthquake",
+  "spread": false
+ },
+ {
+  "name": "special attack, single target",
+  "attacker": {
+   "species": "Gardevoir",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "moves": [
+    "Moonblast"
+   ]
   },
-  {
-    "name": "Fire into Golisopod-Mega, no weather",
-    "attacker": {
-      "species": "Arcanine-Hisui",
-      "evs": {
-        "atk": 32
-      },
-      "nature": "Adamant",
-      "moves": [
-        "Flare Blitz"
-      ]
-    },
-    "defender": {
-      "species": "Golisopod-Mega",
-      "evs": {
-        "hp": 32,
-        "def": 32
-      },
-      "nature": "Impish"
-    },
-    "move": "Flare Blitz",
-    "spread": false
+  "defender": {
+   "species": "Garchomp",
+   "evs": {
+    "hp": 32
+   },
+   "nature": "Careful"
   },
-  {
-    "name": "Fire into Golisopod-Mega, in rain",
-    "attacker": {
-      "species": "Arcanine-Hisui",
-      "evs": {
-        "atk": 32
-      },
-      "nature": "Adamant",
-      "moves": [
-        "Flare Blitz"
-      ]
-    },
-    "defender": {
-      "species": "Golisopod-Mega",
-      "evs": {
-        "hp": 32,
-        "def": 32
-      },
-      "nature": "Impish"
-    },
-    "move": "Flare Blitz",
-    "spread": false,
-    "weather": "raindance"
+  "move": "Moonblast",
+  "spread": false
+ },
+ {
+  "name": "spread move in doubles",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Earthquake"
+   ]
   },
-  {
-    "name": "Choice Band physical",
-    "attacker": {
-      "species": "Garchomp",
-      "evs": {
-        "atk": 32
-      },
-      "nature": "Adamant",
-      "item": "Choice Band",
-      "moves": [
-        "Earthquake"
-      ]
-    },
-    "defender": {
-      "species": "Incineroar",
-      "evs": {
-        "hp": 32,
-        "def": 32
-      },
-      "nature": "Impish"
-    },
-    "move": "Earthquake",
-    "spread": false
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
   },
-  {
-    "name": "Life Orb special",
-    "attacker": {
-      "species": "Gardevoir",
-      "evs": {
-        "spa": 32
-      },
-      "nature": "Modest",
-      "item": "Life Orb",
-      "moves": [
-        "Moonblast"
-      ]
-    },
-    "defender": {
-      "species": "Garchomp",
-      "evs": {
-        "hp": 32
-      },
-      "nature": "Careful"
-    },
-    "move": "Moonblast",
-    "spread": false
+  "move": "Earthquake",
+  "spread": true
+ },
+ {
+  "name": "Fire into Golisopod-Mega, no weather",
+  "attacker": {
+   "species": "Arcanine-Hisui",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Flare Blitz"
+   ]
   },
-  {
-    "name": "immunity: Dragon into Fairy",
-    "attacker": {
-      "species": "Garchomp",
-      "evs": {
-        "atk": 32
-      },
-      "nature": "Adamant",
-      "moves": [
-        "Dragon Claw"
-      ]
-    },
-    "defender": {
-      "species": "Gardevoir-Mega",
-      "evs": {
-        "hp": 32,
-        "def": 32
-      },
-      "nature": "Bold"
-    },
-    "move": "Dragon Claw",
-    "spread": false
+  "defender": {
+   "species": "Golisopod-Mega",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
   },
-  {
-    "name": "resisted hit, halving path",
-    "attacker": {
-      "species": "Garchomp",
-      "evs": {
-        "atk": 32
-      },
-      "nature": "Adamant",
-      "moves": [
-        "Dragon Claw"
-      ]
-    },
-    "defender": {
-      "species": "Kingambit",
-      "evs": {
-        "hp": 32,
-        "def": 32
-      },
-      "nature": "Impish"
-    },
-    "move": "Dragon Claw",
-    "spread": false
+  "move": "Flare Blitz",
+  "spread": false
+ },
+ {
+  "name": "Fire into Golisopod-Mega, in rain",
+  "attacker": {
+   "species": "Arcanine-Hisui",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Flare Blitz"
+   ]
   },
-  {
-    "name": "4x STAB special into a frail target",
-    "attacker": {
-      "species": "Raichu-Mega-Y",
-      "evs": {
-        "hp": 2,
-        "spe": 32
-      },
-      "nature": "Timid",
-      "moves": [
-        "Zap Cannon"
-      ]
-    },
-    "defender": {
-      "species": "Pelipper",
-      "evs": {
-        "hp": 2,
-        "spa": 32,
-        "spe": 32
-      },
-      "nature": "Modest",
-      "item": "Focus Sash"
-    },
-    "move": "Zap Cannon",
-    "spread": false
+  "defender": {
+   "species": "Golisopod-Mega",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
   },
-  {
-    "name": "Intimidate: attacker at -1 Atk",
-    "attacker": {
-      "species": "Garchomp",
-      "evs": {
-        "atk": 32
-      },
-      "nature": "Adamant",
-      "moves": [
-        "Earthquake"
-      ],
-      "boosts": {
-        "atk": -1
-      }
-    },
-    "defender": {
-      "species": "Incineroar",
-      "evs": {
-        "hp": 32,
-        "def": 32
-      },
-      "nature": "Impish"
-    },
-    "move": "Earthquake",
-    "spread": false
+  "move": "Flare Blitz",
+  "spread": false,
+  "weather": "raindance"
+ },
+ {
+  "name": "Choice Band physical",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "item": "Choice Band",
+   "moves": [
+    "Earthquake"
+   ]
   },
-  {
-    "name": "Stamina: defender at +2 Def",
-    "attacker": {
-      "species": "Garchomp",
-      "evs": {
-        "atk": 32
-      },
-      "nature": "Adamant",
-      "moves": [
-        "Earthquake"
-      ]
-    },
-    "defender": {
-      "species": "Incineroar",
-      "evs": {
-        "hp": 32,
-        "def": 32
-      },
-      "nature": "Impish",
-      "boosts": {
-        "def": 2
-      }
-    },
-    "move": "Earthquake",
-    "spread": false
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
   },
-  {
-    "name": "Swords Dance: attacker at +2 Atk",
-    "attacker": {
-      "species": "Garchomp",
-      "evs": {
-        "atk": 32
-      },
-      "nature": "Adamant",
-      "moves": [
-        "Earthquake"
-      ],
-      "boosts": {
-        "atk": 2
-      }
-    },
-    "defender": {
-      "species": "Incineroar",
-      "evs": {
-        "hp": 32,
-        "def": 32
-      },
-      "nature": "Impish"
-    },
-    "move": "Earthquake",
-    "spread": false
+  "move": "Earthquake",
+  "spread": false
+ },
+ {
+  "name": "Life Orb special",
+  "attacker": {
+   "species": "Gardevoir",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "item": "Life Orb",
+   "moves": [
+    "Moonblast"
+   ]
   },
-  {
-    "name": "boost and item together: +1 Atk with Choice Band",
-    "attacker": {
-      "species": "Garchomp",
-      "evs": {
-        "atk": 32
-      },
-      "nature": "Adamant",
-      "moves": [
-        "Earthquake"
-      ],
-      "item": "Choice Band",
-      "boosts": {
-        "atk": 1
-      }
-    },
-    "defender": {
-      "species": "Incineroar",
-      "evs": {
-        "hp": 32,
-        "def": 32
-      },
-      "nature": "Impish"
-    },
-    "move": "Earthquake",
-    "spread": false
+  "defender": {
+   "species": "Garchomp",
+   "evs": {
+    "hp": 32
+   },
+   "nature": "Careful"
   },
-  {
-    "name": "Grass move, no terrain",
-    "attacker": {
-      "species": "Whimsicott",
-      "evs": {
-        "spa": 32
-      },
-      "nature": "Modest",
-      "ability": "Chlorophyll",
-      "moves": [
-        "Energy Ball"
-      ]
-    },
-    "defender": {
-      "species": "Incineroar",
-      "evs": {
-        "hp": 32,
-        "def": 32
-      },
-      "nature": "Impish"
-    },
-    "move": "Energy Ball",
-    "spread": false
+  "move": "Moonblast",
+  "spread": false
+ },
+ {
+  "name": "immunity: Dragon into Fairy",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Dragon Claw"
+   ]
   },
-  {
-    "name": "Grass move in Grassy Terrain",
-    "attacker": {
-      "species": "Whimsicott",
-      "ability": "Chlorophyll",
-      "evs": {
-        "spa": 32
-      },
-      "nature": "Modest",
-      "moves": [
-        "Energy Ball"
-      ]
-    },
-    "defender": {
-      "species": "Incineroar",
-      "evs": {
-        "hp": 32,
-        "def": 32
-      },
-      "nature": "Impish"
-    },
-    "move": "Energy Ball",
-    "spread": false,
-    "terrain": "grassyterrain"
+  "defender": {
+   "species": "Gardevoir-Mega",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Bold"
   },
-  {
-    "name": "Grassy Terrain halves Earthquake",
-    "attacker": {
-      "species": "Garchomp",
-      "evs": {
-        "atk": 32
-      },
-      "nature": "Adamant",
-      "moves": [
-        "Earthquake"
-      ]
-    },
-    "defender": {
-      "species": "Incineroar",
-      "evs": {
-        "hp": 32,
-        "def": 32
-      },
-      "nature": "Impish"
-    },
-    "move": "Earthquake",
-    "spread": false,
-    "terrain": "grassyterrain"
+  "move": "Dragon Claw",
+  "spread": false
+ },
+ {
+  "name": "resisted hit, halving path",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Dragon Claw"
+   ]
   },
-  {
-    "name": "Miracle Seed on a Grass move",
-    "attacker": {
-      "species": "Whimsicott",
-      "evs": {
-        "spa": 32
-      },
-      "nature": "Modest",
-      "ability": "Chlorophyll",
-      "moves": [
-        "Energy Ball"
-      ],
-      "item": "Miracle Seed"
-    },
-    "defender": {
-      "species": "Incineroar",
-      "evs": {
-        "hp": 32,
-        "def": 32
-      },
-      "nature": "Impish"
-    },
-    "move": "Energy Ball",
-    "spread": false
+  "defender": {
+   "species": "Kingambit",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
   },
-  {
-    "name": "Miracle Seed AND Grassy Terrain together",
-    "attacker": {
-      "species": "Whimsicott",
-      "ability": "Chlorophyll",
-      "item": "Miracle Seed",
-      "evs": {
-        "spa": 32
-      },
-      "nature": "Modest",
-      "moves": [
-        "Energy Ball"
-      ]
-    },
-    "defender": {
-      "species": "Incineroar",
-      "evs": {
-        "hp": 32,
-        "def": 32
-      },
-      "nature": "Impish"
-    },
-    "move": "Energy Ball",
-    "spread": false,
-    "terrain": "grassyterrain"
+  "move": "Dragon Claw",
+  "spread": false
+ },
+ {
+  "name": "4x STAB special into a frail target",
+  "attacker": {
+   "species": "Raichu-Mega-Y",
+   "evs": {
+    "hp": 2,
+    "spe": 32
+   },
+   "nature": "Timid",
+   "moves": [
+    "Zap Cannon"
+   ]
   },
-  {
-    "name": "Expanding Force, no terrain",
-    "attacker": {
-      "species": "Gardevoir",
-      "ability": "Synchronize",
-      "evs": {
-        "spa": 32
-      },
-      "nature": "Modest",
-      "moves": [
-        "Expanding Force"
-      ]
-    },
-    "defender": {
-      "species": "Rillaboom",
-      "ability": "Overgrow",
-      "evs": {
-        "hp": 32,
-        "def": 32
-      },
-      "nature": "Impish"
-    },
-    "move": "Expanding Force",
-    "spread": false
+  "defender": {
+   "species": "Pelipper",
+   "evs": {
+    "hp": 2,
+    "spa": 32,
+    "spe": 32
+   },
+   "nature": "Modest",
+   "item": "Focus Sash"
   },
-  {
-    "name": "Expanding Force in Psychic Terrain",
-    "attacker": {
-      "species": "Gardevoir",
-      "ability": "Synchronize",
-      "evs": {
-        "spa": 32
-      },
-      "nature": "Modest",
-      "moves": [
-        "Expanding Force"
-      ]
-    },
-    "defender": {
-      "species": "Rillaboom",
-      "ability": "Overgrow",
-      "evs": {
-        "hp": 32,
-        "def": 32
-      },
-      "nature": "Impish"
-    },
-    "move": "Expanding Force",
-    "spread": false,
-    "terrain": "psychicterrain"
+  "move": "Zap Cannon",
+  "spread": false
+ },
+ {
+  "name": "Intimidate: attacker at -1 Atk",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Earthquake"
+   ],
+   "boosts": {
+    "atk": -1
+   }
   },
-  {
-    "name": "plain Psychic move in Psychic Terrain",
-    "attacker": {
-      "species": "Gardevoir",
-      "ability": "Synchronize",
-      "evs": {
-        "spa": 32
-      },
-      "nature": "Modest",
-      "moves": [
-        "Psychic"
-      ]
-    },
-    "defender": {
-      "species": "Rillaboom",
-      "ability": "Overgrow",
-      "evs": {
-        "hp": 32,
-        "def": 32
-      },
-      "nature": "Impish"
-    },
-    "move": "Psychic",
-    "spread": false,
-    "terrain": "psychicterrain"
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
   },
-  {
-    "name": "Psyblade, no terrain",
-    "attacker": {
-      "species": "Metagross",
-      "ability": "Clear Body",
-      "evs": {
-        "atk": 32
-      },
-      "nature": "Adamant",
-      "moves": [
-        "Psyblade"
-      ]
-    },
-    "defender": {
-      "species": "Rillaboom",
-      "ability": "Overgrow",
-      "evs": {
-        "hp": 32,
-        "def": 32
-      },
-      "nature": "Impish"
-    },
-    "move": "Psyblade",
-    "spread": false
+  "move": "Earthquake",
+  "spread": false
+ },
+ {
+  "name": "Stamina: defender at +2 Def",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Earthquake"
+   ]
   },
-  {
-    "name": "Psyblade in Electric Terrain",
-    "attacker": {
-      "species": "Metagross",
-      "ability": "Clear Body",
-      "evs": {
-        "atk": 32
-      },
-      "nature": "Adamant",
-      "moves": [
-        "Psyblade"
-      ]
-    },
-    "defender": {
-      "species": "Rillaboom",
-      "ability": "Overgrow",
-      "evs": {
-        "hp": 32,
-        "def": 32
-      },
-      "nature": "Impish"
-    },
-    "move": "Psyblade",
-    "spread": false,
-    "terrain": "electricterrain"
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish",
+   "boosts": {
+    "def": 2
+   }
   },
-  {
-    "name": "Rising Voltage, no terrain",
-    "attacker": {
-      "species": "Raichu",
-      "ability": "Static",
-      "evs": {
-        "spa": 32
-      },
-      "nature": "Modest",
-      "moves": [
-        "Rising Voltage"
-      ]
-    },
-    "defender": {
-      "species": "Incineroar",
-      "evs": {
-        "hp": 32,
-        "spd": 32
-      },
-      "nature": "Careful"
-    },
-    "move": "Rising Voltage",
-    "spread": false
+  "move": "Earthquake",
+  "spread": false
+ },
+ {
+  "name": "Swords Dance: attacker at +2 Atk",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Earthquake"
+   ],
+   "boosts": {
+    "atk": 2
+   }
   },
-  {
-    "name": "Rising Voltage in Electric Terrain",
-    "attacker": {
-      "species": "Raichu",
-      "ability": "Static",
-      "evs": {
-        "spa": 32
-      },
-      "nature": "Modest",
-      "moves": [
-        "Rising Voltage"
-      ]
-    },
-    "defender": {
-      "species": "Incineroar",
-      "evs": {
-        "hp": 32,
-        "spd": 32
-      },
-      "nature": "Careful"
-    },
-    "move": "Rising Voltage",
-    "spread": false,
-    "terrain": "electricterrain"
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
   },
-  {
-    "name": "dex: Grassy Glide into Incineroar in Grassy Terrain",
-    "attacker": {
-      "species": "Rillaboom",
-      "ability": "Grassy Surge",
-      "item": "Miracle Seed",
-      "nature": "Adamant",
-      "evs": {
-        "hp": 32,
-        "atk": 32,
-        "spd": 2
-      },
-      "moves": [
-        "Grassy Glide"
-      ]
-    },
-    "defender": {
-      "species": "Incineroar",
-      "ability": "Blaze",
-      "item": "Sitrus Berry",
-      "nature": "Impish",
-      "evs": {
-        "hp": 32,
-        "def": 14,
-        "spd": 20
-      }
-    },
-    "move": "Grassy Glide",
-    "terrain": "grassyterrain",
-    "spread": false
+  "move": "Earthquake",
+  "spread": false
+ },
+ {
+  "name": "boost and item together: +1 Atk with Choice Band",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Earthquake"
+   ],
+   "item": "Choice Band",
+   "boosts": {
+    "atk": 1
+   }
   },
-  {
-    "name": "dex: Close Combat into Kingambit at -1 Atk",
-    "attacker": {
-      "species": "Sneasler",
-      "ability": "Unburden",
-      "nature": "Adamant",
-      "evs": {
-        "hp": 2,
-        "atk": 32,
-        "spe": 32
-      },
-      "moves": [
-        "Close Combat"
-      ],
-      "boosts": {
-        "atk": -1
-      }
-    },
-    "defender": {
-      "species": "Kingambit",
-      "ability": "Defiant",
-      "nature": "Adamant",
-      "evs": {
-        "hp": 32,
-        "atk": 32,
-        "spd": 2
-      }
-    },
-    "move": "Close Combat",
-    "spread": false
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
   },
-  {
-    "name": "dex: Choice Band Flare Blitz into Gholdengo",
-    "attacker": {
-      "species": "Arcanine-Hisui",
-      "ability": "Rock Head",
-      "item": "Choice Band",
-      "nature": "Adamant",
-      "evs": {
-        "hp": 31,
-        "atk": 32,
-        "spd": 3
-      },
-      "moves": [
-        "Flare Blitz"
-      ]
-    },
-    "defender": {
-      "species": "Gholdengo",
-      "ability": "Good as Gold",
-      "nature": "Timid",
-      "evs": {
-        "hp": 2,
-        "spa": 32,
-        "spe": 32
-      }
-    },
-    "move": "Flare Blitz",
-    "spread": false
+  "move": "Earthquake",
+  "spread": false
+ },
+ {
+  "name": "Grass move, no terrain",
+  "attacker": {
+   "species": "Whimsicott",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "ability": "Chlorophyll",
+   "moves": [
+    "Energy Ball"
+   ]
   },
-  {
-    "name": "dex: Expanding Force in Psychic Terrain, hitting both",
-    "attacker": {
-      "species": "Indeedee-F",
-      "ability": "Psychic Surge",
-      "nature": "Modest",
-      "evs": {
-        "hp": 2,
-        "spa": 32,
-        "spe": 32
-      },
-      "moves": [
-        "Expanding Force"
-      ]
-    },
-    "defender": {
-      "species": "Kingambit",
-      "ability": "Defiant",
-      "nature": "Adamant",
-      "evs": {
-        "hp": 32,
-        "atk": 32,
-        "spd": 2
-      }
-    },
-    "move": "Expanding Force",
-    "terrain": "psychicterrain",
-    "spread": true
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
   },
-  {
-    "name": "Weather Ball, no weather",
-    "attacker": {
-      "species": "Meganium",
-      "evs": {
-        "spa": 32
-      },
-      "nature": "Modest",
-      "ability": "Leaf Guard",
-      "moves": [
-        "Weather Ball"
-      ]
-    },
-    "defender": {
-      "species": "Charizard",
-      "evs": {
-        "hp": 32,
-        "spd": 32
-      },
-      "nature": "Calm",
-      "ability": "Blaze"
-    },
-    "move": "Weather Ball",
-    "spread": false
+  "move": "Energy Ball",
+  "spread": false
+ },
+ {
+  "name": "Grass move in Grassy Terrain",
+  "attacker": {
+   "species": "Whimsicott",
+   "ability": "Chlorophyll",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "moves": [
+    "Energy Ball"
+   ]
   },
-  {
-    "name": "Weather Ball in rain",
-    "attacker": {
-      "species": "Meganium",
-      "evs": {
-        "spa": 32
-      },
-      "nature": "Modest",
-      "ability": "Leaf Guard",
-      "moves": [
-        "Weather Ball"
-      ]
-    },
-    "defender": {
-      "species": "Charizard",
-      "evs": {
-        "hp": 32,
-        "spd": 32
-      },
-      "nature": "Calm",
-      "ability": "Blaze"
-    },
-    "move": "Weather Ball",
-    "spread": false,
-    "weather": "raindance"
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
   },
-  {
-    "name": "Weather Ball in sun",
-    "attacker": {
-      "species": "Meganium",
-      "evs": {
-        "spa": 32
-      },
-      "nature": "Modest",
-      "ability": "Leaf Guard",
-      "moves": [
-        "Weather Ball"
-      ]
-    },
-    "defender": {
-      "species": "Charizard",
-      "evs": {
-        "hp": 32,
-        "spd": 32
-      },
-      "nature": "Calm",
-      "ability": "Blaze"
-    },
-    "move": "Weather Ball",
-    "spread": false,
-    "weather": "sunnyday"
+  "move": "Energy Ball",
+  "spread": false,
+  "terrain": "grassyterrain"
+ },
+ {
+  "name": "Grassy Terrain halves Earthquake",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Earthquake"
+   ]
   },
-  {
-    "name": "Weather Ball off a Water attacker, no weather",
-    "attacker": {
-      "species": "Politoed",
-      "evs": {
-        "spa": 32
-      },
-      "nature": "Modest",
-      "ability": "Damp",
-      "moves": [
-        "Weather Ball"
-      ]
-    },
-    "defender": {
-      "species": "Garchomp",
-      "evs": {
-        "hp": 32,
-        "spd": 32
-      },
-      "nature": "Careful",
-      "ability": "Sand Veil"
-    },
-    "move": "Weather Ball",
-    "spread": false
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
   },
-  {
-    "name": "Weather Ball off a Water attacker, in rain",
-    "attacker": {
-      "species": "Politoed",
-      "evs": {
-        "spa": 32
-      },
-      "nature": "Modest",
-      "ability": "Damp",
-      "moves": [
-        "Weather Ball"
-      ]
-    },
-    "defender": {
-      "species": "Garchomp",
-      "evs": {
-        "hp": 32,
-        "spd": 32
-      },
-      "nature": "Careful",
-      "ability": "Sand Veil"
-    },
-    "move": "Weather Ball",
-    "spread": false,
-    "weather": "raindance"
-  }
+  "move": "Earthquake",
+  "spread": false,
+  "terrain": "grassyterrain"
+ },
+ {
+  "name": "Miracle Seed on a Grass move",
+  "attacker": {
+   "species": "Whimsicott",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "ability": "Chlorophyll",
+   "moves": [
+    "Energy Ball"
+   ],
+   "item": "Miracle Seed"
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Energy Ball",
+  "spread": false
+ },
+ {
+  "name": "Miracle Seed AND Grassy Terrain together",
+  "attacker": {
+   "species": "Whimsicott",
+   "ability": "Chlorophyll",
+   "item": "Miracle Seed",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "moves": [
+    "Energy Ball"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Energy Ball",
+  "spread": false,
+  "terrain": "grassyterrain"
+ },
+ {
+  "name": "Expanding Force, no terrain",
+  "attacker": {
+   "species": "Gardevoir",
+   "ability": "Synchronize",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "moves": [
+    "Expanding Force"
+   ]
+  },
+  "defender": {
+   "species": "Rillaboom",
+   "ability": "Overgrow",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Expanding Force",
+  "spread": false
+ },
+ {
+  "name": "Expanding Force in Psychic Terrain",
+  "attacker": {
+   "species": "Gardevoir",
+   "ability": "Synchronize",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "moves": [
+    "Expanding Force"
+   ]
+  },
+  "defender": {
+   "species": "Rillaboom",
+   "ability": "Overgrow",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Expanding Force",
+  "spread": false,
+  "terrain": "psychicterrain"
+ },
+ {
+  "name": "plain Psychic move in Psychic Terrain",
+  "attacker": {
+   "species": "Gardevoir",
+   "ability": "Synchronize",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "moves": [
+    "Psychic"
+   ]
+  },
+  "defender": {
+   "species": "Rillaboom",
+   "ability": "Overgrow",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Psychic",
+  "spread": false,
+  "terrain": "psychicterrain"
+ },
+ {
+  "name": "Psyblade, no terrain",
+  "attacker": {
+   "species": "Metagross",
+   "ability": "Clear Body",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Psyblade"
+   ]
+  },
+  "defender": {
+   "species": "Rillaboom",
+   "ability": "Overgrow",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Psyblade",
+  "spread": false
+ },
+ {
+  "name": "Psyblade in Electric Terrain",
+  "attacker": {
+   "species": "Metagross",
+   "ability": "Clear Body",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Psyblade"
+   ]
+  },
+  "defender": {
+   "species": "Rillaboom",
+   "ability": "Overgrow",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish"
+  },
+  "move": "Psyblade",
+  "spread": false,
+  "terrain": "electricterrain"
+ },
+ {
+  "name": "Rising Voltage, no terrain",
+  "attacker": {
+   "species": "Raichu",
+   "ability": "Static",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "moves": [
+    "Rising Voltage"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "spd": 32
+   },
+   "nature": "Careful"
+  },
+  "move": "Rising Voltage",
+  "spread": false
+ },
+ {
+  "name": "Rising Voltage in Electric Terrain",
+  "attacker": {
+   "species": "Raichu",
+   "ability": "Static",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "moves": [
+    "Rising Voltage"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "spd": 32
+   },
+   "nature": "Careful"
+  },
+  "move": "Rising Voltage",
+  "spread": false,
+  "terrain": "electricterrain"
+ },
+ {
+  "name": "dex: Grassy Glide into Incineroar in Grassy Terrain",
+  "attacker": {
+   "species": "Rillaboom",
+   "ability": "Grassy Surge",
+   "item": "Miracle Seed",
+   "nature": "Adamant",
+   "evs": {
+    "hp": 32,
+    "atk": 32,
+    "spd": 2
+   },
+   "moves": [
+    "Grassy Glide"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "ability": "Blaze",
+   "item": "Sitrus Berry",
+   "nature": "Impish",
+   "evs": {
+    "hp": 32,
+    "def": 14,
+    "spd": 20
+   }
+  },
+  "move": "Grassy Glide",
+  "terrain": "grassyterrain",
+  "spread": false
+ },
+ {
+  "name": "dex: Close Combat into Kingambit at -1 Atk",
+  "attacker": {
+   "species": "Sneasler",
+   "ability": "Unburden",
+   "nature": "Adamant",
+   "evs": {
+    "hp": 2,
+    "atk": 32,
+    "spe": 32
+   },
+   "moves": [
+    "Close Combat"
+   ],
+   "boosts": {
+    "atk": -1
+   }
+  },
+  "defender": {
+   "species": "Kingambit",
+   "ability": "Defiant",
+   "nature": "Adamant",
+   "evs": {
+    "hp": 32,
+    "atk": 32,
+    "spd": 2
+   }
+  },
+  "move": "Close Combat",
+  "spread": false
+ },
+ {
+  "name": "dex: Choice Band Flare Blitz into Gholdengo",
+  "attacker": {
+   "species": "Arcanine-Hisui",
+   "ability": "Rock Head",
+   "item": "Choice Band",
+   "nature": "Adamant",
+   "evs": {
+    "hp": 31,
+    "atk": 32,
+    "spd": 3
+   },
+   "moves": [
+    "Flare Blitz"
+   ]
+  },
+  "defender": {
+   "species": "Gholdengo",
+   "ability": "Good as Gold",
+   "nature": "Timid",
+   "evs": {
+    "hp": 2,
+    "spa": 32,
+    "spe": 32
+   }
+  },
+  "move": "Flare Blitz",
+  "spread": false
+ },
+ {
+  "name": "dex: Expanding Force in Psychic Terrain, hitting both",
+  "attacker": {
+   "species": "Indeedee-F",
+   "ability": "Psychic Surge",
+   "nature": "Modest",
+   "evs": {
+    "hp": 2,
+    "spa": 32,
+    "spe": 32
+   },
+   "moves": [
+    "Expanding Force"
+   ]
+  },
+  "defender": {
+   "species": "Kingambit",
+   "ability": "Defiant",
+   "nature": "Adamant",
+   "evs": {
+    "hp": 32,
+    "atk": 32,
+    "spd": 2
+   }
+  },
+  "move": "Expanding Force",
+  "terrain": "psychicterrain",
+  "spread": true
+ },
+ {
+  "name": "Weather Ball, no weather",
+  "attacker": {
+   "species": "Meganium",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "ability": "Leaf Guard",
+   "moves": [
+    "Weather Ball"
+   ]
+  },
+  "defender": {
+   "species": "Charizard",
+   "evs": {
+    "hp": 32,
+    "spd": 32
+   },
+   "nature": "Calm",
+   "ability": "Blaze"
+  },
+  "move": "Weather Ball",
+  "spread": false
+ },
+ {
+  "name": "Weather Ball in rain",
+  "attacker": {
+   "species": "Meganium",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "ability": "Leaf Guard",
+   "moves": [
+    "Weather Ball"
+   ]
+  },
+  "defender": {
+   "species": "Charizard",
+   "evs": {
+    "hp": 32,
+    "spd": 32
+   },
+   "nature": "Calm",
+   "ability": "Blaze"
+  },
+  "move": "Weather Ball",
+  "spread": false,
+  "weather": "raindance"
+ },
+ {
+  "name": "Weather Ball in sun",
+  "attacker": {
+   "species": "Meganium",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "ability": "Leaf Guard",
+   "moves": [
+    "Weather Ball"
+   ]
+  },
+  "defender": {
+   "species": "Charizard",
+   "evs": {
+    "hp": 32,
+    "spd": 32
+   },
+   "nature": "Calm",
+   "ability": "Blaze"
+  },
+  "move": "Weather Ball",
+  "spread": false,
+  "weather": "sunnyday"
+ },
+ {
+  "name": "Weather Ball off a Water attacker, no weather",
+  "attacker": {
+   "species": "Politoed",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "ability": "Damp",
+   "moves": [
+    "Weather Ball"
+   ]
+  },
+  "defender": {
+   "species": "Garchomp",
+   "evs": {
+    "hp": 32,
+    "spd": 32
+   },
+   "nature": "Careful",
+   "ability": "Sand Veil"
+  },
+  "move": "Weather Ball",
+  "spread": false
+ },
+ {
+  "name": "Weather Ball off a Water attacker, in rain",
+  "attacker": {
+   "species": "Politoed",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "ability": "Damp",
+   "moves": [
+    "Weather Ball"
+   ]
+  },
+  "defender": {
+   "species": "Garchomp",
+   "evs": {
+    "hp": 32,
+    "spd": 32
+   },
+   "nature": "Careful",
+   "ability": "Sand Veil"
+  },
+  "move": "Weather Ball",
+  "spread": false,
+  "weather": "raindance"
+ },
+ {
+  "name": "resist berry: Chople vs super effective Fighting",
+  "attacker": {
+   "species": "Sneasler",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Close Combat"
+   ]
+  },
+  "defender": {
+   "species": "Kingambit",
+   "evs": {
+    "hp": 32
+   },
+   "nature": "Adamant",
+   "item": "Chople Berry"
+  },
+  "move": "Close Combat",
+  "spread": false
+ },
+ {
+  "name": "resist berry: Chople holder, non-Fighting move does not trigger it",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Earthquake"
+   ]
+  },
+  "defender": {
+   "species": "Kingambit",
+   "evs": {
+    "hp": 32
+   },
+   "nature": "Adamant",
+   "item": "Chople Berry"
+  },
+  "move": "Earthquake",
+  "spread": false
+ },
+ {
+  "name": "resist berry AND Life Orb: both chain into one ModifyDamage",
+  "attacker": {
+   "species": "Sneasler",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Close Combat"
+   ],
+   "item": "Life Orb"
+  },
+  "defender": {
+   "species": "Kingambit",
+   "evs": {
+    "hp": 32
+   },
+   "nature": "Adamant",
+   "item": "Chople Berry"
+  },
+  "move": "Close Combat",
+  "spread": false
+ },
+ {
+  "name": "Chilan Berry halves a NEUTRAL Normal move",
+  "attacker": {
+   "species": "Ursaluna",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Facade"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish",
+   "item": "Chilan Berry"
+  },
+  "move": "Facade",
+  "spread": false
+ },
+ {
+  "name": "Grassy Seed: +1 Def in Grassy Terrain",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Earthquake"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish",
+   "item": "Grassy Seed"
+  },
+  "move": "Earthquake",
+  "terrain": "grassyterrain",
+  "spread": false
+ },
+ {
+  "name": "Psychic Seed: +1 SpD in Psychic Terrain",
+  "attacker": {
+   "species": "Gholdengo",
+   "evs": {
+    "spa": 32
+   },
+   "nature": "Modest",
+   "moves": [
+    "Make It Rain"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "spd": 32
+   },
+   "nature": "Careful",
+   "item": "Psychic Seed"
+  },
+  "move": "Make It Rain",
+  "terrain": "psychicterrain",
+  "spread": false
+ },
+ {
+  "name": "Grassy Seed does nothing outside its terrain",
+  "attacker": {
+   "species": "Garchomp",
+   "evs": {
+    "atk": 32
+   },
+   "nature": "Adamant",
+   "moves": [
+    "Earthquake"
+   ]
+  },
+  "defender": {
+   "species": "Incineroar",
+   "evs": {
+    "hp": 32,
+    "def": 32
+   },
+   "nature": "Impish",
+   "item": "Grassy Seed"
+  },
+  "move": "Earthquake",
+  "spread": false
+ }
 ]

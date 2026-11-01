@@ -125,6 +125,8 @@ def render_outgoing_table(rows) -> None:
     )
     st.caption(
         "Your side is exact — nature, investment, item and moves from your paste. "
-        "Theirs is the meta's common build. Same exclusions as everywhere: no crits, "
-        "no burn, no screens, no terrain; abilities go through the stage sliders."
+        "Theirs is the meta's common build, so their held item is the one most "
+        "people bring. Resist berries, terrain seeds and Focus Sash are modelled. "
+        "Same exclusions as everywhere: no crits, no burn, no screens, no sand or "
+        "snow; abilities that scale damage go through the stage sliders."
     )

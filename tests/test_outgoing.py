@@ -71,11 +71,33 @@ def test_both_certainty_levels_actually_occur(ctx):
 
 
 def test_hits_to_ko_agrees_with_the_result(ctx):
+    """Ceiling division, except where a Focus Sash breaks it on purpose.
+
+    The Sash is the one case where enough damage is not a KO: it triggers at full HP
+    and leaves 1, so a hit that outdamages the target still takes two. The exemption
+    is narrow and `test_a_sash_turns_a_ohko_into_a_two_hit_ko` pins the behaviour
+    rather than leaving this assertion merely relaxed.
+    """
     *_, rows = ctx
     for h in rows:
-        if h.hits_to_ko is not None:
-            assert h.hits_to_ko * h.likely.low >= h.likely.defender_hp
-            assert h.hits_to_ko == 1 or (h.hits_to_ko - 1) * h.likely.low < h.likely.defender_hp
+        if h.hits_to_ko is None:
+            continue
+        assert h.hits_to_ko * h.likely.low >= h.likely.defender_hp
+        if h.likely.defender_sash:
+            continue
+        assert h.hits_to_ko == 1 or (h.hits_to_ko - 1) * h.likely.low < h.likely.defender_hp
+
+
+def test_a_sash_turns_a_ohko_into_a_two_hit_ko(ctx):
+    """Focus Sash is 10.19% of held items, the most of anything in the format, and
+    the tool ignored it entirely until now."""
+    *_, rows = ctx
+    sashed = [h for h in rows if h.likely.defender_sash
+              and h.likely.low >= h.likely.defender_hp]
+    if not sashed:
+        pytest.skip("no threat in this meta slice holds a Focus Sash and dies to one hit")
+    for h in sashed:
+        assert h.hits_to_ko == 2, "enough damage, but the Sash survives it"
 
 
 def test_one_row_per_attacker_and_threat(ctx):

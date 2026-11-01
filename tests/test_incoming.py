@@ -177,7 +177,14 @@ def test_tier_matches_the_ko_verdict(ctx):
     buckets = against(rows, rows[0].target_slot)
     for h in buckets[OHKO]:
         assert h.worst.low >= h.worst.defender_hp
+        assert not h.worst.defender_sash, "a Sash holder cannot be in the OHKO bracket"
     for h in buckets[TWO]:
+        if h.worst.defender_sash:
+            # The Sash is precisely the case where one hit's worth of damage is not
+            # a one-hit KO, so this bracket is where a sashed OHKO belongs and
+            # `low < hp` must not be asserted of it.
+            assert h.worst.low >= h.worst.defender_hp or 2 * h.worst.low >= h.worst.defender_hp
+            continue
         assert h.worst.low < h.worst.defender_hp
         assert 2 * h.worst.low >= h.worst.defender_hp
 

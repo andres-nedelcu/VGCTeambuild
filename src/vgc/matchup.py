@@ -41,8 +41,9 @@ from dataclasses import dataclass, field, replace
 from functools import lru_cache
 from typing import Sequence
 
-from vgc.damage import (PHYSICAL, Result, attack_after_item, base_power_multiplier,
-                        boosted, damage_rolls, defence_after_item, final_multiplier,
+from vgc.damage import (FOCUS_SASH, PHYSICAL, Result, attack_after_item,
+                        base_power_multiplier, boosted, damage_multiplier,
+                        damage_rolls, defence_after_item, seed_boost,
                         spreads_in_terrain, weather_move, weather_multiplier)
 from vgc.db import session
 from vgc.megas import Forme
@@ -217,6 +218,10 @@ def versus(attacker: Build, defender: Build, *, weather: str | None = None,
         mult = effectiveness(move_type, defender.types, defender.ability_id)
         stab = move_type in attacker.types
 
+        # A terrain seed is a stat change, not a damage modifier, so it stacks onto
+        # the stage the caller passed rather than entering the chain.
+        seed = seed_boost(defender.item_id, terrain, dkey)
+
         def roll(attack_raw: int, defence_raw: int, hp: int) -> Result:
             # Stage first, item second: sim/pokemon.ts:583 boosts before
             # battle.modify(), so base -> stage -> item is the only correct order.
@@ -224,15 +229,17 @@ def versus(attacker: Build, defender: Build, *, weather: str | None = None,
                 base_power=base_power,
                 attack=attack_after_item(boosted(attack_raw, atk_stage),
                                          attacker.item_id, category),
-                defense=defence_after_item(boosted(defence_raw, def_stage),
+                defense=defence_after_item(boosted(defence_raw, def_stage + seed),
                                            defender.item_id, category),
                 type_mult=mult, stab=stab,
                 spread=is_spread or spreads_in_terrain(terrain, move_id),
                 weather_mult=weather_multiplier(weather, move_type),
-                final_mult=final_multiplier(attacker.item_id, mult),
+                final_mult=damage_multiplier(attacker.item_id, defender.item_id,
+                                             move_type, mult),
                 base_power_mult=base_power_multiplier(
                     attacker.item_id, move_type, terrain, move_id)),
-                hp, mult, stab)
+                hp, mult, stab,
+                defender_sash=defender.item_id == FOCUS_SASH)
 
         as_set = roll(attacker.stat(akey), defender.stat(dkey), defender.hp)
         if unknown == DEFENDER:

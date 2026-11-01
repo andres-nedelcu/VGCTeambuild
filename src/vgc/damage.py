@@ -35,11 +35,19 @@ is computed: the move's own `onModifyType` / `onModifyMove` callbacks (:430-431)
 then the attacker's ability's (:438). That is where Weather Ball picks up its type
 and its doubled power, so `weather_move` runs ahead of everything here.
 
+HELD ITEMS, both sides. The attacker's are the stat and damage modifiers below; the
+defender's are the eighteen resist berries (an `onSourceModifyDamage` that halves a
+matching super-effective hit), the four terrain seeds (a one-stage defensive boost,
+so a stat change rather than a damage one) and Focus Sash, which touches neither and
+lives in `Result`'s verdict. The two sides' damage modifiers are both ModifyDamage
+handlers and therefore CHAIN -- see `chain` and `damage_multiplier`.
+
 NOT MODELLED, deliberately, and stated wherever a number is shown: abilities that
-scale damage (Adaptability, Thick Fat, Multiscale, Guts and the rest), screens,
-terrain move boosts, critical hits, burn, and Intimidate. Abilities that change type
-effectiveness *are* handled, because they arrive through vgc.typechart.effectiveness
-before this module sees them.
+scale damage (Adaptability, Thick Fat, Multiscale, Guts and the rest), screens
+(Reflect, Light Screen, Aurora Veil), critical hits, burn, multi-hit and fixed-damage
+moves, and any weather beyond rain and sun -- sand and snow are absent, which matters
+for a Snow Warning Mega. Abilities that change type effectiveness *are* handled,
+because they arrive through vgc.typechart.effectiveness before this module sees them.
 """
 
 from __future__ import annotations
@@ -220,6 +228,11 @@ class Result:
     type_mult: float
     stab: bool
     assumptions: tuple[str, ...] = ()
+    # Focus Sash does NOT change the damage — `onDamage` at data/items.ts:2272 returns
+    # `target.hp - 1` only when the target is at full HP and the hit would kill. So it
+    # belongs here, in the verdict, and not anywhere in the chain above. It is the
+    # most-held item in the format at 10.19%, and the tool used to ignore it entirely.
+    defender_sash: bool = False
 
     @property
     def low(self) -> int:
@@ -237,19 +250,30 @@ class Result:
     def high_pct(self) -> float:
         return 100.0 * self.high / self.defender_hp if self.defender_hp else 0.0
 
+    def _sashed(self, hits: int | None) -> int | None:
+        """A Sash only ever converts a one-hit KO into two.
+
+        It triggers at full HP and leaves 1 HP, so the first hit cannot kill. If the
+        hit was not a OHKO anyway the Sash never fires, and the count is unchanged —
+        the holder is no longer at full HP by the time the second hit lands.
+        """
+        if not self.defender_sash or hits is None:
+            return hits
+        return 2 if hits == 1 else hits
+
     @property
     def guaranteed_hits(self) -> int | None:
         """Hits to KO on the worst roll every time. None if it cannot KO at all."""
         if self.low <= 0:
             return None
-        return -(-self.defender_hp // self.low)
+        return self._sashed(-(-self.defender_hp // self.low))
 
     @property
     def possible_hits(self) -> int | None:
         """Hits to KO if every roll is the best. None if it cannot KO at all."""
         if self.high <= 0:
             return None
-        return -(-self.defender_hp // self.high)
+        return self._sashed(-(-self.defender_hp // self.high))
 
     def verdict(self) -> str:
         """The phrasing damage calculators use: guaranteed, or possible-but-not-certain."""
@@ -336,8 +360,88 @@ def defence_after_item(stat: int, item_id: str | None, category: str) -> int:
 
 
 def final_multiplier(item_id: str | None, type_mult: float) -> float:
-    """Multipliers applied after the minimum-damage check."""
+    """The ATTACKER's multipliers, applied after the minimum-damage check."""
     item_id = item_id or ""
     if item_id == "expertbelt":
         return EXPERT_BELT if type_mult > 1 else 1.0
     return FINAL_ITEMS.get(item_id, 1.0)
+
+
+# Resist berries. Every one is an `onSourceModifyDamage` handler that chainModifies
+# 0.5 when the move's type matches and `typeMod > 0` (data/items.ts). They are the
+# defender's side of the same ModifyDamage event the attacker's Life Orb fires on,
+# which is why they have to chain with it rather than being applied separately.
+#
+# CHILAN BERRY IS THE EXCEPTION and the reason this table carries a flag rather than
+# just a type: it halves Normal-type damage with no effectiveness condition at all.
+# The other seventeen require the hit to be super effective.
+RESIST_BERRIES: dict[str, tuple[str, bool]] = {
+    "babiriberry": ("Steel", True), "chartiberry": ("Rock", True),
+    "chilanberry": ("Normal", False), "chopleberry": ("Fighting", True),
+    "cobaberry": ("Flying", True), "colburberry": ("Dark", True),
+    "habanberry": ("Dragon", True), "kasibberry": ("Ghost", True),
+    "kebiaberry": ("Poison", True), "occaberry": ("Fire", True),
+    "passhoberry": ("Water", True), "payapaberry": ("Psychic", True),
+    "rindoberry": ("Grass", True), "roseliberry": ("Fairy", True),
+    "shucaberry": ("Ground", True), "tangaberry": ("Bug", True),
+    "wacanberry": ("Electric", True), "yacheberry": ("Ice", True),
+}
+BERRY_REDUCTION = 0.5
+
+# Terrain seeds: consumed on entry in the matching terrain for a one-stage boost
+# (data/items.ts, `boosts`). A stat change, not a damage modifier, so it enters where
+# the stat stages do — before the item modifier, per sim/pokemon.ts:583.
+# Misty is listed for completeness; this project models only the three terrains in
+# TERRAIN_TYPE, so misty never fires.
+SEEDS: dict[str, tuple[str, str]] = {
+    "grassyseed": (GRASSY, "def"), "electricseed": (ELECTRIC_T, "def"),
+    "psychicseed": (PSYCHIC_T, "spd"), "mistyseed": ("misty", "spd"),
+}
+
+FOCUS_SASH = "focussash"
+
+
+def resist_berry_multiplier(item_id: str | None, move_type: str,
+                            type_mult: float) -> float:
+    """The DEFENDER's berry, 0.5 or 1.0."""
+    entry = RESIST_BERRIES.get(item_id or "")
+    if entry is None:
+        return 1.0
+    berry_type, needs_super_effective = entry
+    if move_type != berry_type:
+        return 1.0
+    if needs_super_effective and type_mult <= 1:
+        return 1.0
+    return BERRY_REDUCTION
+
+
+def seed_boost(item_id: str | None, terrain: str | None, stat: str) -> int:
+    """Extra defensive stages from a terrain seed: 1 or 0."""
+    entry = SEEDS.get(item_id or "")
+    if entry is None or terrain is None:
+        return 0
+    seed_terrain, seed_stat = entry
+    return 1 if seed_terrain == terrain and seed_stat == stat else 0
+
+
+def chain(modifier: float, numerator: float, denominator: int = 1) -> float:
+    """Accumulate a modifier the way sim/battle.ts:2321 does.
+
+    `runEvent` collects every handler's `chainModify` into one `event.modifier` and
+    applies it ONCE at battle.ts:932. So an attacker's Life Orb and a defender's
+    Chople Berry are not two sequential `modify()` calls — they compose here, with a
+    rounding step between them, and the result is handed to a single `modify()`.
+    Multiplying the two as plain floats agrees on most pairs and is not the same
+    operation, which is exactly the class of error that only shows on one roll in
+    sixteen.
+    """
+    previous = trunc(modifier * 4096)
+    nxt = trunc(numerator * 4096 / denominator)
+    return ((previous * nxt + 2048) >> 12) / 4096
+
+
+def damage_multiplier(attacker_item: str | None, defender_item: str | None,
+                      move_type: str, type_mult: float) -> float:
+    """Everything the ModifyDamage event applies, from both sides, chained once."""
+    modifier = chain(1.0, final_multiplier(attacker_item, type_mult))
+    return chain(modifier, resist_berry_multiplier(defender_item, move_type, type_mult))

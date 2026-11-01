@@ -20,7 +20,9 @@ import pytest
 
 from vgc import REPO_ROOT
 from vgc.damage import (attack_after_item, base_power_multiplier, boosted,
-                        damage_rolls, defence_after_item, final_multiplier,
+                        damage_rolls, defence_after_item, damage_multiplier,
+                        seed_boost, RESIST_BERRIES, Result, chain,
+                        resist_berry_multiplier,
                         weather_move, weather_multiplier)
 from vgc.db import session
 from vgc.ids import to_id
@@ -80,17 +82,27 @@ def _inputs(case, dex):
     def_stage = (case["defender"].get("boosts") or {}).get(
         "def" if category == "Physical" else "spd", 0)
 
+    terrain = TERRAIN.get(case.get("terrain"))
+    dkey = "def" if category == "Physical" else "spd"
+
     return dict(
         base_power=base_power,
         attack=attack_after_item(boosted(raw_atk, atk_stage), atk_item, category),
-        defense=defence_after_item(boosted(raw_def, def_stage), def_item, category),
+        # A terrain seed is a stat change, so it rides with the stage, before the
+        # item modifier -- not in the ModifyDamage chain below.
+        defense=defence_after_item(
+            boosted(raw_def, def_stage + seed_boost(def_item, terrain, dkey)),
+            def_item, category),
         type_mult=type_mult,
         stab=move_type in atk_types,
         spread=bool(case.get("spread")),
         weather_mult=weather_multiplier(weather, move_type),
-        final_mult=final_multiplier(atk_item, type_mult),
+        # Both sides' ModifyDamage handlers accumulate into ONE modifier
+        # (battle.ts:932), so the attacker's item and the defender's berry chain
+        # here rather than being applied one after the other.
+        final_mult=damage_multiplier(atk_item, def_item, move_type, type_mult),
         base_power_mult=base_power_multiplier(
-            atk_item, move_type, TERRAIN.get(case.get("terrain")), move_id),
+            atk_item, move_type, terrain, move_id),
     )
 
 
@@ -112,6 +124,9 @@ def test_the_reference_covers_the_paths_that_matter(reference):
     assert "immunity" in names
     assert "resisted" in names
     assert any(c["attacker"].get("item") for c in reference)
+    assert any(c["defender"].get("item") for c in reference), "no defender-item case"
+    assert any(c.get("terrain") and c["defender"].get("item") for c in reference), \
+        "no terrain-seed case"
     assert any(c["rolls"][0] != c["rolls"][-1] for c in reference), "no case rolls"
 
 
@@ -289,3 +304,74 @@ def test_weather_move_leaves_every_other_move_alone():
     for weather in (None, "rain", "sun"):
         assert weather_move("hydropump", "Water", 110, weather) == ("Water", 110)
         assert weather_move("hypervoice", "Normal", 90, weather) == ("Normal", 90)
+
+
+# --- defender items: resist berries, terrain seeds, Focus Sash -------------------
+
+def test_a_resist_berry_halves_a_super_effective_hit(reference):
+    """Chople against 4x Fighting. Taken from the simulator, not from arithmetic."""
+    hit = next(c for c in reference
+               if c["name"] == "resist berry: Chople vs super effective Fighting")
+    bare = next(c for c in reference
+                if c["name"] == "close combat into kingambit, no item") \
+        if any(c["name"] == "close combat into kingambit, no item" for c in reference) \
+        else None
+    assert hit["rolls"][0] > 0
+    if bare:
+        assert hit["rolls"][0] * 2 in (bare["rolls"][0], bare["rolls"][0] + 1)
+
+
+def test_a_berry_does_nothing_against_the_wrong_type(reference):
+    name = "resist berry: Chople holder, non-Fighting move does not trigger it"
+    case = next(c for c in reference if c["name"] == name)
+    assert resist_berry_multiplier("chopleberry", "Ground", 2.0) == 1.0
+    assert case["rolls"][0] > 0
+
+
+def test_chilan_is_the_berry_that_ignores_effectiveness():
+    """Seventeen berries require typeMod > 0; Chilan does not (data/items.ts)."""
+    assert resist_berry_multiplier("chilanberry", "Normal", 1.0) == 0.5
+    assert resist_berry_multiplier("chopleberry", "Fighting", 1.0) == 1.0
+    assert resist_berry_multiplier("chopleberry", "Fighting", 2.0) == 0.5
+    needs_se = [b for b, (_t, se) in RESIST_BERRIES.items() if se]
+    assert len(RESIST_BERRIES) == 18 and len(needs_se) == 17
+
+
+def test_the_two_sides_chain_rather_than_multiply():
+    """Life Orb and a resist berry are both ModifyDamage handlers, so they
+    accumulate into one modifier applied once (battle.ts:932), with a rounding step
+    between them. `chain` reproduces sim/battle.ts:2321 exactly."""
+    both = damage_multiplier("lifeorb", "chopleberry", "Fighting", 2.0)
+    assert both == chain(chain(1.0, 1.3), 0.5)
+    # Only the attacker's, and only the defender's, for comparison.
+    assert damage_multiplier("lifeorb", None, "Fighting", 2.0) == chain(1.0, 1.3)
+    assert damage_multiplier(None, "chopleberry", "Fighting", 2.0) == chain(1.0, 0.5)
+
+
+def test_a_seed_only_boosts_inside_its_own_terrain():
+    assert seed_boost("grassyseed", "grassy", "def") == 1
+    assert seed_boost("grassyseed", "psychic", "def") == 0
+    assert seed_boost("grassyseed", None, "def") == 0
+    assert seed_boost("grassyseed", "grassy", "spd") == 0, "Grassy Seed boosts Def"
+    assert seed_boost("psychicseed", "psychic", "spd") == 1
+    assert seed_boost("psychicseed", "psychic", "def") == 0, "Psychic Seed boosts SpD"
+
+
+def test_focus_sash_changes_the_verdict_and_not_the_damage():
+    """data/items.ts:2272 returns target.hp - 1 on a full-HP lethal hit. It never
+    touches the damage chain, so the rolls are identical and only the count moves."""
+    rolls = (200,) * 16
+    bare = Result("Test", "Normal", rolls, 150, 1.0, False)
+    sash = Result("Test", "Normal", rolls, 150, 1.0, False, defender_sash=True)
+    assert bare.rolls == sash.rolls
+    assert bare.guaranteed_hits == 1 and sash.guaranteed_hits == 2
+    assert bare.possible_hits == 1 and sash.possible_hits == 2
+
+
+def test_a_sash_does_not_change_a_hit_that_was_never_a_ohko():
+    """It triggers at full HP only, so a 2HKO stays a 2HKO — the holder is not at
+    full HP when the second hit lands."""
+    rolls = (80,) * 16
+    bare = Result("Test", "Normal", rolls, 150, 1.0, False)
+    sash = Result("Test", "Normal", rolls, 150, 1.0, False, defender_sash=True)
+    assert bare.guaranteed_hits == sash.guaranteed_hits == 2

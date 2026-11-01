@@ -28,7 +28,8 @@ from dataclasses import dataclass
 from typing import Sequence
 
 from vgc.damage import (PHYSICAL, Result, attack_after_item, base_power_multiplier,
-                        boosted, damage_rolls, defence_after_item, final_multiplier,
+                        boosted, damage_rolls, defence_after_item, damage_multiplier,
+                        seed_boost, FOCUS_SASH,
                         spreads_in_terrain, weather_move, weather_multiplier)
 from vgc.db import session
 from vgc.megas import Forme
@@ -190,14 +191,18 @@ def outgoing(regulation: str, team: Sequence[Member], formes: Sequence[Forme],
                     return Result(name, move_type, damage_rolls(
                         base_power=base_power,
                         attack=attack,
-                        defense=defence_after_item(boosted(defence, def_stage),
-                                                   their_item, category),
+                        defense=defence_after_item(
+                            boosted(defence, def_stage
+                                    + seed_boost(their_item, terrain, dkey)),
+                            their_item, category),
                         type_mult=mult, stab=stab, spread=bool(spread) or spreads_in_terrain(terrain, move_id),
                         weather_mult=weather_multiplier(weather, move_type),
-                        final_mult=final_multiplier(member.item_id, mult),
+                        final_mult=damage_multiplier(member.item_id, their_item,
+                                                     move_type, mult),
                         base_power_mult=base_power_multiplier(
                             member.item_id, move_type, terrain, move_id)),
-                        hp, mult, stab)
+                        hp, mult, stab,
+                        defender_sash=their_item == FOCUS_SASH)
 
                 out.append(Outgoing(
                     move_id=move_id, attacker_slot=forme.slot, attacker_name=forme.display_name,

@@ -2111,5 +2111,418 @@
       "atk": 85,
       "spa": 156
     }
+  },
+  {
+    "name": "resist berry: Chople vs super effective Fighting",
+    "attacker": {
+      "species": "Sneasler",
+      "evs": {
+        "atk": 32
+      },
+      "nature": "Adamant",
+      "moves": [
+        "Close Combat"
+      ]
+    },
+    "defender": {
+      "species": "Kingambit",
+      "evs": {
+        "hp": 32
+      },
+      "nature": "Adamant",
+      "item": "Chople Berry"
+    },
+    "move": "Close Combat",
+    "spread": false,
+    "rolls": [
+      194,
+      198,
+      198,
+      200,
+      204,
+      206,
+      210,
+      210,
+      212,
+      216,
+      218,
+      218,
+      222,
+      224,
+      228,
+      230
+    ],
+    "defender_hp": 207,
+    "defender_stats": {
+      "def": 140,
+      "spd": 105
+    },
+    "defender_stats_raw": {
+      "def": 140,
+      "spd": 105
+    },
+    "attacker_stats": {
+      "atk": 200,
+      "spa": 54
+    },
+    "attacker_stats_raw": {
+      "atk": 200,
+      "spa": 54
+    }
+  },
+  {
+    "name": "resist berry: Chople holder, non-Fighting move does not trigger it",
+    "attacker": {
+      "species": "Garchomp",
+      "evs": {
+        "atk": 32
+      },
+      "nature": "Adamant",
+      "moves": [
+        "Earthquake"
+      ]
+    },
+    "defender": {
+      "species": "Kingambit",
+      "evs": {
+        "hp": 32
+      },
+      "nature": "Adamant",
+      "item": "Chople Berry"
+    },
+    "move": "Earthquake",
+    "spread": false,
+    "rolls": [
+      162,
+      164,
+      164,
+      168,
+      168,
+      170,
+      174,
+      174,
+      176,
+      180,
+      180,
+      182,
+      186,
+      186,
+      188,
+      192
+    ],
+    "defender_hp": 207,
+    "defender_stats": {
+      "def": 140,
+      "spd": 105
+    },
+    "defender_stats_raw": {
+      "def": 140,
+      "spd": 105
+    },
+    "attacker_stats": {
+      "atk": 200,
+      "spa": 90
+    },
+    "attacker_stats_raw": {
+      "atk": 200,
+      "spa": 90
+    }
+  },
+  {
+    "name": "resist berry AND Life Orb: both chain into one ModifyDamage",
+    "attacker": {
+      "species": "Sneasler",
+      "evs": {
+        "atk": 32
+      },
+      "nature": "Adamant",
+      "moves": [
+        "Close Combat"
+      ],
+      "item": "Life Orb"
+    },
+    "defender": {
+      "species": "Kingambit",
+      "evs": {
+        "hp": 32
+      },
+      "nature": "Adamant",
+      "item": "Chople Berry"
+    },
+    "move": "Close Combat",
+    "spread": false,
+    "rolls": [
+      252,
+      257,
+      257,
+      260,
+      265,
+      268,
+      273,
+      273,
+      276,
+      281,
+      283,
+      283,
+      289,
+      291,
+      296,
+      299
+    ],
+    "defender_hp": 207,
+    "defender_stats": {
+      "def": 140,
+      "spd": 105
+    },
+    "defender_stats_raw": {
+      "def": 140,
+      "spd": 105
+    },
+    "attacker_stats": {
+      "atk": 200,
+      "spa": 54
+    },
+    "attacker_stats_raw": {
+      "atk": 200,
+      "spa": 54
+    }
+  },
+  {
+    "name": "Chilan Berry halves a NEUTRAL Normal move",
+    "attacker": {
+      "species": "Ursaluna",
+      "evs": {
+        "atk": 32
+      },
+      "nature": "Adamant",
+      "moves": [
+        "Facade"
+      ]
+    },
+    "defender": {
+      "species": "Incineroar",
+      "evs": {
+        "hp": 32,
+        "def": 32
+      },
+      "nature": "Impish",
+      "item": "Chilan Berry"
+    },
+    "move": "Facade",
+    "spread": false,
+    "rolls": [
+      27,
+      27,
+      27,
+      27,
+      28,
+      28,
+      29,
+      29,
+      29,
+      30,
+      30,
+      30,
+      30,
+      31,
+      31,
+      32
+    ],
+    "defender_hp": 202,
+    "defender_stats": {
+      "def": 156,
+      "spd": 110
+    },
+    "defender_stats_raw": {
+      "def": 156,
+      "spd": 110
+    },
+    "attacker_stats": {
+      "atk": 211,
+      "spa": 58
+    },
+    "attacker_stats_raw": {
+      "atk": 211,
+      "spa": 58
+    }
+  },
+  {
+    "name": "Grassy Seed: +1 Def in Grassy Terrain",
+    "attacker": {
+      "species": "Garchomp",
+      "evs": {
+        "atk": 32
+      },
+      "nature": "Adamant",
+      "moves": [
+        "Earthquake"
+      ]
+    },
+    "defender": {
+      "species": "Incineroar",
+      "evs": {
+        "hp": 32,
+        "def": 32
+      },
+      "nature": "Impish",
+      "item": "Grassy Seed"
+    },
+    "move": "Earthquake",
+    "terrain": "grassyterrain",
+    "spread": false,
+    "rolls": [
+      50,
+      50,
+      50,
+      50,
+      50,
+      54,
+      54,
+      54,
+      54,
+      54,
+      56,
+      56,
+      56,
+      56,
+      56,
+      60
+    ],
+    "defender_hp": 202,
+    "defender_stats": {
+      "def": 156,
+      "spd": 110
+    },
+    "defender_stats_raw": {
+      "def": 156,
+      "spd": 110
+    },
+    "attacker_stats": {
+      "atk": 200,
+      "spa": 90
+    },
+    "attacker_stats_raw": {
+      "atk": 200,
+      "spa": 90
+    }
+  },
+  {
+    "name": "Psychic Seed: +1 SpD in Psychic Terrain",
+    "attacker": {
+      "species": "Gholdengo",
+      "evs": {
+        "spa": 32
+      },
+      "nature": "Modest",
+      "moves": [
+        "Make It Rain"
+      ]
+    },
+    "defender": {
+      "species": "Incineroar",
+      "evs": {
+        "hp": 32,
+        "spd": 32
+      },
+      "nature": "Careful",
+      "item": "Psychic Seed"
+    },
+    "move": "Make It Rain",
+    "terrain": "psychicterrain",
+    "spread": false,
+    "rolls": [
+      29,
+      30,
+      30,
+      30,
+      30,
+      31,
+      31,
+      32,
+      32,
+      33,
+      33,
+      33,
+      33,
+      34,
+      34,
+      35
+    ],
+    "defender_hp": 202,
+    "defender_stats": {
+      "def": 110,
+      "spd": 156
+    },
+    "defender_stats_raw": {
+      "def": 110,
+      "spd": 156
+    },
+    "attacker_stats": {
+      "atk": 72,
+      "spa": 203
+    },
+    "attacker_stats_raw": {
+      "atk": 72,
+      "spa": 203
+    }
+  },
+  {
+    "name": "Grassy Seed does nothing outside its terrain",
+    "attacker": {
+      "species": "Garchomp",
+      "evs": {
+        "atk": 32
+      },
+      "nature": "Adamant",
+      "moves": [
+        "Earthquake"
+      ]
+    },
+    "defender": {
+      "species": "Incineroar",
+      "evs": {
+        "hp": 32,
+        "def": 32
+      },
+      "nature": "Impish",
+      "item": "Grassy Seed"
+    },
+    "move": "Earthquake",
+    "spread": false,
+    "rolls": [
+      146,
+      146,
+      150,
+      152,
+      152,
+      156,
+      156,
+      158,
+      158,
+      162,
+      164,
+      164,
+      168,
+      168,
+      170,
+      174
+    ],
+    "defender_hp": 202,
+    "defender_stats": {
+      "def": 156,
+      "spd": 110
+    },
+    "defender_stats_raw": {
+      "def": 156,
+      "spd": 110
+    },
+    "attacker_stats": {
+      "atk": 200,
+      "spa": 90
+    },
+    "attacker_stats_raw": {
+      "atk": 200,
+      "spa": 90
+    }
   }
 ]

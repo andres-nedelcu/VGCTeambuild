@@ -27,7 +27,8 @@ from dataclasses import dataclass
 from typing import Sequence
 
 from vgc.damage import (Result, attack_after_item, base_power_multiplier, boosted,
-                        damage_rolls, defence_after_item, final_multiplier,
+                        damage_rolls, defence_after_item, damage_multiplier,
+                        seed_boost, FOCUS_SASH,
                         spreads_in_terrain, weather_move, weather_multiplier)
 from vgc.db import session
 from vgc.megas import Forme
@@ -179,19 +180,23 @@ def incoming(regulation: str, team: Sequence[Member], formes: Sequence[Forme],
         for slot, mine in bulk.items():
             target = by_slot[slot]
             mult = effectiveness(move_type, target.types, target.ability_id)
+            dkey = "def" if category == "Physical" else "spd"
+            # A terrain seed on YOUR Pokémon is a stat change, so it stacks onto the
+            # stage rather than entering the damage chain.
             defence = defence_after_item(
-                boosted(mine["def"] if category == "Physical" else mine["spd"],
-                        def_stage),
+                boosted(mine[dkey],
+                        def_stage + seed_boost(mine["item"], terrain, dkey)),
                 mine["item"], category)
             def roll(attack: int) -> Result:
                 return Result(move_name, move_type, damage_rolls(
                     base_power=base_power, attack=attack, defense=defence,
                     type_mult=mult, stab=move_type in threat.types, spread=bool(spread) or spreads_in_terrain(terrain, move_id),
                     weather_mult=weather_multiplier(weather, move_type),
-                    final_mult=final_multiplier(item, mult),
+                    final_mult=damage_multiplier(item, mine["item"], move_type, mult),
                     base_power_mult=base_power_multiplier(
                         item, move_type, terrain, move_id)),
-                    mine["hp"], mult, move_type in threat.types)
+                    mine["hp"], mult, move_type in threat.types,
+                    defender_sash=mine["item"] == FOCUS_SASH)
 
             out.append(Incoming(
                 threat=threat, target_slot=slot, target_name=target.display_name,
