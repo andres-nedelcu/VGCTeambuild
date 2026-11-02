@@ -3,7 +3,7 @@
 **Stack:** Python · DuckDB · Streamlit · Plotly (unchanged)
 **Format:** Pokémon Champions VGC Doubles (current: Regulation M-C)
 **Status:** scoping. Nothing in here is built yet.
-**Last updated:** 1 November 2026 (§4 built)
+**Last updated:** 2 November 2026 (§4, §5.1, §7.2 and most of §7.3 built)
 
 > **Read this first if you are a new session picking up 2.0 work.**
 > `PROJECT_OUTLINE.md` describes v1 and is still accurate about the data layer.
@@ -343,18 +343,28 @@ Effect on Team Mogbla against the recent top 20, worst case: **Sneasler 9 OHKOs 
 in `dim_item` and does not yet mark the ones the engine ignores. Per Principle 1
 that has to become visible.
 
-### 7.3 Other missing inputs — **OPEN** (which, and in what order)
+### 7.3 Other missing inputs — screens and weather **BUILT** (1 Nov 2026)
 
-- **Screens** — Reflect, Light Screen, **Aurora Veil**. Entirely unmodelled.
-  Light Clay at 1.47% usage proves they are being run. The `def_stage` slider is
-  offered as an approximation and is not the same thing.
-- **Weather: snow and sand.** Only rain and sun exist today. Snow matters
-  immediately — Mega Froslass has Snow Warning, so the tool cannot currently
-  model the weather one of Andres's own Megas sets, nor snow's Ice-type Defense
-  boost, nor the Aurora Veil that depends on it.
+- **Screens — done.** Reflect, Light Screen and Aurora Veil, at **2732/4096 in
+  doubles**, not the 0.5 of singles. They are `onAnyModifyDamage` handlers, so
+  they chain with Life Orb and the resist berries. A control sits in the Damage
+  tab and its label follows the direction, because the screen always protects
+  whoever is defending.
+- **Snow and sand — done**, and they enter differently from rain and sun: those
+  scale the move, these scale a defensive stat (Ice Def, Rock SpD) ahead of every
+  other stat modifier. All four weathers retype Weather Ball.
+
+  Verified in the app on Team Mogbla: with snow up, Volcarona's Overheat into
+  Froslass reads 229-269%; adding Aurora Veil takes it to 152-180%, and the
+  team's guaranteed KOs fall from 34 of 120 to 11. That closes the gap that
+  mattered most — Mega Froslass sets Snow Warning and runs Aurora Veil, and the
+  tool could model neither.
+
+**Still OPEN here (which, and in what order):**
 - **Abilities that scale damage** — Adaptability, Huge Power, Thick Fat,
   Multiscale, Filter, Tinted Lens, Guts, Technician. Note Adaptability needs
-  `stab` to become a multiplier rather than a bool.
+  `stab` to become a multiplier rather than a bool. This is now the largest
+  remaining gap in the engine.
 - **Multi-hit moves** (Rock Blast, Icicle Spear, Dragon Darts), **fixed-damage
   moves** (Seismic Toss, Night Shade), **critical hits**, **burn**, **Helping
   Hand**.
@@ -438,7 +448,9 @@ needs Andres rather than hunting for it:
 - Whether a recommender returns in any form (§5.4)
 - The speed landscape's final design, after prototyping (§5.3)
 - The meta snapshot's shape: surface, export, or scheduled artifact (§6)
-- Which damage mechanics land, and in what order (§7.3)
+- Which of the *remaining* damage mechanics land, and in what order (§7.3) —
+  screens and weather are done; abilities, multi-hit, fixed-damage, crits and
+  burn are not
 - Whether the inverse solve is a 2.0 feature or the thing after it (§7.4)
 - Sidebar beyond team management — flagged by Andres for reopened discussion
   (§5.6)
